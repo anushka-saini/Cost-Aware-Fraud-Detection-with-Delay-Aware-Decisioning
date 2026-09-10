@@ -1,0 +1,16 @@
+fraud_env/
+
+__pycache__/
+*.pyc
+
+data/raw/*
+data/processed/*
+
+models/*.pkl
+models/*.joblib
+models/*.json
+
+.ipynb_checkpoints/
+
+.env
+.DS_Store
