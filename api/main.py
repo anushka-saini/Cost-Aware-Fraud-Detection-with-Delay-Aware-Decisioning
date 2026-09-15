@@ -1,3 +1,7 @@
+# Fraud Detection API
+# Loads the trained model, scores incoming transactions,
+# and converts the fraud probability into an ALLOW / REVIEW / BLOCK decision.
+
 from fastapi import FastAPI
 from pydantic import BaseModel
 import joblib
