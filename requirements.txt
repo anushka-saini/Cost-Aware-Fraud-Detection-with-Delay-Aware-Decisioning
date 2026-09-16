@@ -12,3 +12,6 @@ pydantic
 joblib
 jupyter
 ipykernel
+streamlit
+plotly
+requests
