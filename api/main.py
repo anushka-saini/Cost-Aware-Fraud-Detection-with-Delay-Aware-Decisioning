@@ -9,7 +9,7 @@ import pandas as pd
 
 app = FastAPI(title="Fraud Detection API")
 
-model = joblib.load(r"C:\Users\Anushka\OneDrive\Desktop\fraud-detection-project\models\fraud_model.pkl")
+model = joblib.load("fraud_model.pkl")
 
 T_REVIEW = 0.0001
 T_BLOCK = 0.90
