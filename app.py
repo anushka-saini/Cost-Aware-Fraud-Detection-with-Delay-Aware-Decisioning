@@ -24,6 +24,107 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------------------------
+# Preset scenarios — pulled directly from the actual held-out dataset,
+# verified against the trained model's real predictions. Using genuine
+# transactions here (not hand-built synthetic ones) avoids the instability
+# seen when testing artificial out-of-distribution feature combinations.
+# ---------------------------------------------------------------------------
+PRESETS = {
+    "✅ Legit transaction": {
+        "amount": 76431.17,
+        "type": "CASH_OUT",
+        "origin_balance_error": -76431.17,
+        "destination_balance_error": 0.0,
+        "destination_balance_is_zero": False,
+        "destination_is_first_transaction": False,
+        "destination_transactions_last_24h": 1.0,
+        "destination_transactions_last_7d": 11.0,
+        "destination_avg_previous_amount": 391891.78,
+        "destination_amount_deviation": -315460.61,
+        "total_transactions": 33528,
+        "total_transaction_amount": 4693535568.26,
+        "avg_transaction_amount": 139988.53,
+    },
+    "⛔ Fraud — low amount": {
+        "amount": 48266.80,
+        "type": "TRANSFER",
+        "origin_balance_error": 0.0,
+        "destination_balance_error": 48266.80,
+        "destination_balance_is_zero": True,
+        "destination_is_first_transaction": True,
+        "destination_transactions_last_24h": 0.0,
+        "destination_transactions_last_7d": 0.0,
+        "destination_avg_previous_amount": 0.0,
+        "destination_amount_deviation": 48266.80,
+        "total_transactions": 40218,
+        "total_transaction_amount": 6596385476.64,
+        "avg_transaction_amount": 164015.75,
+    },
+    "⛔ Fraud — mid amount": {
+        "amount": 500003.56,
+        "type": "CASH_OUT",
+        "origin_balance_error": 0.0,
+        "destination_balance_error": 0.0,
+        "destination_balance_is_zero": False,
+        "destination_is_first_transaction": False,
+        "destination_transactions_last_24h": 0.0,
+        "destination_transactions_last_7d": 2.0,
+        "destination_avg_previous_amount": 47108.30,
+        "destination_amount_deviation": 452895.27,
+        # This row came from an unusually quiet hour in the real data —
+        # total_transactions=10 is a big outlier vs. the ~31,900 median.
+        # That system-level context matters to the model, so it's carried
+        # here explicitly rather than falling back to a "normal hour" default.
+        "total_transactions": 10,
+        "total_transaction_amount": 23250735.88,
+        "avg_transaction_amount": 2325073.588,
+    },
+    "⛔ Fraud — high amount": {
+        "amount": 4129482.96,
+        "type": "CASH_OUT",
+        "origin_balance_error": 0.0,
+        "destination_balance_error": 0.0,
+        "destination_balance_is_zero": False,
+        "destination_is_first_transaction": False,
+        "destination_transactions_last_24h": 1.0,
+        "destination_transactions_last_7d": 9.0,
+        "destination_avg_previous_amount": 222913.55,
+        "destination_amount_deviation": 3906569.41,
+        "total_transactions": 26927,
+        "total_transaction_amount": 5172213957.19,
+        "avg_transaction_amount": 192082.81,
+    },
+}
+
+DEFAULTS = {
+    "amount": 5000.0,
+    "type": "CASH_OUT",
+    "origin_balance_error": 0.0,
+    "destination_balance_error": 0.0,
+    "destination_balance_is_zero": False,
+    "destination_is_first_transaction": False,
+    "destination_transactions_last_24h": 0.0,
+    "destination_transactions_last_7d": 0.0,
+    "destination_avg_previous_amount": 0.0,
+    "destination_amount_deviation": 0.0,
+    # System-level features — not shown in the form, but carried through so
+    # presets can override them with real values. Manual entries use the API's
+    # own median defaults by simply not sending these keys at all.
+    "total_transactions": None,
+    "total_transaction_amount": None,
+    "avg_transaction_amount": None,
+}
+
+# Initialize session state with defaults on first load
+if "form_values" not in st.session_state:
+    st.session_state.form_values = DEFAULTS.copy()
+
+
+def apply_preset(preset_name):
+    st.session_state.form_values = PRESETS[preset_name].copy()
+
+
+# ---------------------------------------------------------------------------
 # Styling
 # ---------------------------------------------------------------------------
 st.markdown("""
@@ -87,45 +188,70 @@ st.markdown(
 )
 
 # ---------------------------------------------------------------------------
+# Preset buttons — real, verified transactions for a safe live demo
+# ---------------------------------------------------------------------------
+st.markdown("#### Quick Scenarios")
+st.caption("Real transactions from the held-out evaluation set — verified against the model.")
+
+preset_cols = st.columns(4)
+for i, name in enumerate(PRESETS.keys()):
+    with preset_cols[i]:
+        if st.button(name, use_container_width=True):
+            apply_preset(name)
+            st.rerun()
+
+st.markdown("---")
+
+# ---------------------------------------------------------------------------
 # Input form
 # ---------------------------------------------------------------------------
+fv = st.session_state.form_values
+
 with st.form("txn_form"):
     st.markdown("#### Transaction Details")
 
     col1, col2 = st.columns(2)
     with col1:
-        amount = st.number_input("Amount", min_value=0.0, value=5000.0, step=100.0)
+        amount = st.number_input("Amount", min_value=0.0, value=float(fv["amount"]), step=100.0)
         txn_type = st.selectbox(
             "Transaction Type",
             ["CASH_OUT", "CASH_IN", "DEBIT", "PAYMENT", "TRANSFER"],
+            index=["CASH_OUT", "CASH_IN", "DEBIT", "PAYMENT", "TRANSFER"].index(fv["type"]),
         )
         origin_balance_error = st.number_input(
-            "Origin Balance Error", value=0.0, step=1.0,
+            "Origin Balance Error", value=float(fv["origin_balance_error"]), step=1.0,
             help="Discrepancy between expected and actual sender balance after the transaction."
         )
         destination_balance_error = st.number_input(
-            "Destination Balance Error", value=0.0, step=1.0,
+            "Destination Balance Error", value=float(fv["destination_balance_error"]), step=1.0,
             help="Discrepancy between expected and actual recipient balance after the transaction."
         )
 
     with col2:
-        destination_balance_is_zero = st.checkbox("Destination balance is zero")
-        destination_is_first_transaction = st.checkbox("First transaction to this destination")
+        destination_balance_is_zero = st.checkbox(
+            "Destination balance is zero", value=bool(fv["destination_balance_is_zero"])
+        )
+        destination_is_first_transaction = st.checkbox(
+            "First transaction to this destination", value=bool(fv["destination_is_first_transaction"])
+        )
         destination_transactions_last_24h = st.number_input(
-            "Destination Txns (Last 24h)", min_value=0.0, value=0.0, step=1.0
+            "Destination Txns (Last 24h)", min_value=0.0,
+            value=float(fv["destination_transactions_last_24h"]), step=1.0
         )
         destination_transactions_last_7d = st.number_input(
-            "Destination Txns (Last 7d)", min_value=0.0, value=0.0, step=1.0
+            "Destination Txns (Last 7d)", min_value=0.0,
+            value=float(fv["destination_transactions_last_7d"]), step=1.0
         )
 
     col3, col4 = st.columns(2)
     with col3:
         destination_avg_previous_amount = st.number_input(
-            "Destination Avg Previous Amount", min_value=0.0, value=0.0, step=100.0
+            "Destination Avg Previous Amount", min_value=0.0,
+            value=float(fv["destination_avg_previous_amount"]), step=100.0
         )
     with col4:
         destination_amount_deviation = st.number_input(
-            "Destination Amount Deviation", value=0.0, step=1.0,
+            "Destination Amount Deviation", value=float(fv["destination_amount_deviation"]), step=1.0,
             help="How far this amount deviates from the destination's historical pattern."
         )
 
@@ -155,6 +281,13 @@ if submitted:
         "destination_is_first_transaction": int(destination_is_first_transaction),
         **type_flags,
     }
+
+    # Carry through real system-level values from a preset, if set.
+    # Manual entries leave these out entirely so the API falls back to
+    # its own median defaults.
+    for sys_field in ("total_transactions", "total_transaction_amount", "avg_transaction_amount"):
+        if fv.get(sys_field) is not None:
+            payload[sys_field] = fv[sys_field]
 
     try:
         response = requests.post(API_URL, json=payload, timeout=5)
