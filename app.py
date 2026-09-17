@@ -11,11 +11,25 @@ Run this AFTER the FastAPI backend is already running:
 import streamlit as st
 import requests
 import plotly.graph_objects as go
+import pandas as pd
+import random
 
 # ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
 API_URL = "http://localhost:8000/score"
+DEMO_SAMPLE_PATH = "demo_sample.csv"
+
+
+@st.cache_data
+def load_demo_sample():
+    try:
+        return pd.read_csv(DEMO_SAMPLE_PATH)
+    except FileNotFoundError:
+        return None
+
+
+demo_df = load_demo_sample()
 
 st.set_page_config(
     page_title="Cost-Aware Fraud Detection",
@@ -118,10 +132,39 @@ DEFAULTS = {
 # Initialize session state with defaults on first load
 if "form_values" not in st.session_state:
     st.session_state.form_values = DEFAULTS.copy()
+if "ground_truth" not in st.session_state:
+    st.session_state.ground_truth = None  # None = unknown (manual entry), else 0/1
 
 
 def apply_preset(preset_name):
     st.session_state.form_values = PRESETS[preset_name].copy()
+    st.session_state.ground_truth = 1 if "Fraud" in preset_name else 0
+
+
+def apply_random_row():
+    if demo_df is None or len(demo_df) == 0:
+        return
+    row = demo_df.sample(1).iloc[0]
+    type_col = next((c for c in ["type_CASH_IN", "type_CASH_OUT", "type_DEBIT",
+                                   "type_PAYMENT", "type_TRANSFER"] if row.get(c)), "type_CASH_OUT")
+    txn_type = type_col.replace("type_", "")
+
+    st.session_state.form_values = {
+        "amount": float(row["amount"]),
+        "type": txn_type,
+        "origin_balance_error": float(row["origin_balance_error"]),
+        "destination_balance_error": float(row["destination_balance_error"]),
+        "destination_balance_is_zero": bool(row["destination_balance_is_zero"]),
+        "destination_is_first_transaction": bool(row["destination_is_first_transaction"]),
+        "destination_transactions_last_24h": float(row["destination_transactions_last_24h"]),
+        "destination_transactions_last_7d": float(row["destination_transactions_last_7d"]),
+        "destination_avg_previous_amount": float(row["destination_avg_previous_amount"]),
+        "destination_amount_deviation": float(row["destination_amount_deviation"]),
+        "total_transactions": float(row["total_transactions"]),
+        "total_transaction_amount": float(row["total_transaction_amount"]),
+        "avg_transaction_amount": float(row["avg_transaction_amount"]),
+    }
+    st.session_state.ground_truth = int(row["actual_fraud"])
 
 
 # ---------------------------------------------------------------------------
@@ -193,12 +236,28 @@ st.markdown(
 st.markdown("#### Quick Scenarios")
 st.caption("Real transactions from the held-out evaluation set — verified against the model.")
 
-preset_cols = st.columns(4)
+preset_cols = st.columns(5)
 for i, name in enumerate(PRESETS.keys()):
     with preset_cols[i]:
         if st.button(name, use_container_width=True):
             apply_preset(name)
             st.rerun()
+
+with preset_cols[4]:
+    random_disabled = demo_df is None
+    if st.button("🎲 Random Real Transaction", use_container_width=True, disabled=random_disabled):
+        apply_random_row()
+        st.rerun()
+
+if demo_df is None:
+    st.warning(
+        f"`{DEMO_SAMPLE_PATH}` not found — the Random Transaction button is disabled. "
+        "Export a sample from the notebook and place it next to app.py to enable it."
+    )
+
+if st.session_state.ground_truth is not None:
+    truth_label = "🚨 ACTUAL: FRAUD" if st.session_state.ground_truth == 1 else "✅ ACTUAL: LEGITIMATE"
+    st.info(f"**Ground truth for this transaction:** {truth_label}  (from real held-out data — not shown to the model)")
 
 st.markdown("---")
 
