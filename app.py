@@ -18,6 +18,7 @@ import random
 # Config
 # ---------------------------------------------------------------------------
 API_URL = "http://localhost:8000/score"
+CONFIRM_URL = "http://localhost:8000/confirm-decision"
 DEMO_SAMPLE_PATH = "demo_sample.csv"
 
 
@@ -134,6 +135,10 @@ if "form_values" not in st.session_state:
     st.session_state.form_values = DEFAULTS.copy()
 if "ground_truth" not in st.session_state:
     st.session_state.ground_truth = None  # None = unknown (manual entry), else 0/1
+if "last_result" not in st.session_state:
+    st.session_state.last_result = None       # the most recent /score response
+if "decision_made" not in st.session_state:
+    st.session_state.decision_made = None     # None = awaiting user choice, True/False after they pick
 
 
 def apply_preset(preset_name):
@@ -351,55 +356,9 @@ if submitted:
     try:
         response = requests.post(API_URL, json=payload, timeout=5)
         response.raise_for_status()
-        result = response.json()
-
-        prob = result["fraud_probability"]
-        tier = result["tier"]
-        t_review = result["thresholds_used"]["t_review"]
-        t_block = result["thresholds_used"]["t_block"]
-
-        css_class = {"ALLOW": "allow", "REVIEW": "review", "BLOCK": "block"}[tier]
-        icon = {"ALLOW": "✅", "REVIEW": "⚠️", "BLOCK": "⛔"}[tier]
-
-        st.markdown(f"""
-        <div class="decision-banner {css_class}">
-            <p class="decision-label">{icon} {tier}</p>
-            <p class="decision-sub">Fraud probability: {prob:.4%}</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-        # Gauge chart
-        fig = go.Figure(go.Indicator(
-            mode="gauge+number",
-            value=prob * 100,
-            number={"suffix": "%", "font": {"size": 36}},
-            title={"text": "Fraud Probability", "font": {"size": 16}},
-            gauge={
-                "axis": {"range": [0, 100], "tickwidth": 1},
-                "bar": {"color": "#60a5fa", "thickness": 0.3},
-                "steps": [
-                    {"range": [0, t_review * 100], "color": "#12291f"},
-                    {"range": [t_review * 100, t_block * 100], "color": "#2b2408"},
-                    {"range": [t_block * 100, 100], "color": "#2b0d0d"},
-                ],
-                "threshold": {
-                    "line": {"color": "white", "width": 3},
-                    "thickness": 0.85,
-                    "value": prob * 100,
-                },
-            },
-        ))
-        fig.update_layout(
-            height=280,
-            margin=dict(l=20, r=20, t=50, b=10),
-            paper_bgcolor="rgba(0,0,0,0)",
-            font={"color": "#fafafa"},
-        )
-        st.plotly_chart(fig, use_container_width=True)
-
-        with st.expander("Raw API response"):
-            st.json(result)
-
+        # A fresh score means a fresh decision cycle — clear any prior pending choice.
+        st.session_state.last_result = response.json()
+        st.session_state.decision_made = None
     except requests.exceptions.ConnectionError:
         st.error(
             "Could not reach the API. Make sure the FastAPI backend is running:\n\n"
@@ -407,6 +366,111 @@ if submitted:
         )
     except requests.exceptions.RequestException as e:
         st.error(f"API request failed: {e}")
+
+# ---------------------------------------------------------------------------
+# Render the most recent result (persists across reruns triggered by the
+# Cancel / Proceed Anyway buttons below, which are outside the form).
+# ---------------------------------------------------------------------------
+result = st.session_state.last_result
+if result is not None:
+    prob = result["fraud_probability"]
+    tier = result["tier"]
+    reasons = result.get("reasons", [])
+    t_review = result["thresholds_used"]["t_review"]
+    t_block = result["thresholds_used"]["t_block"]
+
+    css_class = {"ALLOW": "allow", "REVIEW": "review", "BLOCK": "block"}[tier]
+    icon = {"ALLOW": "✅", "REVIEW": "⚠️", "BLOCK": "⛔"}[tier]
+
+    st.markdown(f"""
+    <div class="decision-banner {css_class}">
+        <p class="decision-label">{icon} {tier}</p>
+        <p class="decision-sub">Fraud probability: {prob:.4%}</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    if st.session_state.ground_truth is not None:
+        was_fraud = st.session_state.ground_truth == 1
+        model_flagged = tier in ("REVIEW", "BLOCK")
+        correct = (was_fraud and model_flagged) or (not was_fraud and tier == "ALLOW")
+        if correct:
+            st.success("✅ Prediction matches ground truth.")
+        else:
+            st.error("⚠️ Prediction did NOT match ground truth — model missed this one.")
+
+    # --- Pre-transaction confirmation flow ---
+    # Mirrors how real payment authorization works: the system advises,
+    # the user makes the final call, and that choice gets logged for
+    # future monitoring and retraining — not silently discarded.
+    if tier in ("REVIEW", "BLOCK") and st.session_state.decision_made is None:
+        if reasons:
+            st.markdown("**Why this was flagged:**")
+            for r in reasons:
+                st.markdown(f"- {r.capitalize()}")
+        else:
+            st.markdown("*No specific risk factors stood out individually — the combination triggered this score.*")
+
+        st.markdown("##### This transaction has not gone through yet. What would you like to do?")
+        c1, c2 = st.columns(2)
+        with c1:
+            if st.button("🚫 Cancel Transaction", use_container_width=True):
+                try:
+                    requests.post(CONFIRM_URL, json={
+                        "assessment_id": result["assessment_id"], "user_proceeded": False,
+                    }, timeout=5)
+                except requests.exceptions.RequestException:
+                    pass  # logging failure shouldn't block the user's choice from registering locally
+                st.session_state.decision_made = False
+                st.rerun()
+        with c2:
+            if st.button("✅ Proceed Anyway", use_container_width=True):
+                try:
+                    requests.post(CONFIRM_URL, json={
+                        "assessment_id": result["assessment_id"], "user_proceeded": True,
+                    }, timeout=5)
+                except requests.exceptions.RequestException:
+                    pass
+                st.session_state.decision_made = True
+                st.rerun()
+
+    elif st.session_state.decision_made is True:
+        st.success("You chose to **proceed anyway**. This decision has been logged.")
+    elif st.session_state.decision_made is False:
+        st.info("Transaction **cancelled**. This decision has been logged.")
+    elif tier == "ALLOW":
+        st.caption("No review needed — transaction proceeds automatically.")
+
+    # Gauge chart
+    fig = go.Figure(go.Indicator(
+        mode="gauge+number",
+        value=prob * 100,
+        number={"suffix": "%", "font": {"size": 36}},
+        title={"text": "Fraud Probability", "font": {"size": 16}},
+        gauge={
+            "axis": {"range": [0, 100], "tickwidth": 1},
+            "bar": {"color": "#60a5fa", "thickness": 0.3},
+            "steps": [
+                {"range": [0, t_review * 100], "color": "#12291f"},
+                {"range": [t_review * 100, t_block * 100], "color": "#2b2408"},
+                {"range": [t_block * 100, 100], "color": "#2b0d0d"},
+            ],
+            "threshold": {
+                "line": {"color": "white", "width": 3},
+                "thickness": 0.85,
+                "value": prob * 100,
+            },
+        },
+    ))
+    fig.update_layout(
+        height=280,
+        margin=dict(l=20, r=20, t=50, b=10),
+        paper_bgcolor="rgba(0,0,0,0)",
+        font={"color": "#fafafa"},
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+    with st.expander("Raw API response"):
+        st.json(result)
 
 st.markdown("---")
 st.caption("Cost-aware, delay-aware fraud decisioning · PaySim dataset · LightGBM")
