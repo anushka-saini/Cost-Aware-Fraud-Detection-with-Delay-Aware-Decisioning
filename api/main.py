@@ -16,11 +16,11 @@ from datetime import datetime, timezone
 
 app = FastAPI(title="Fraud Detection API")
 
-model = joblib.load("fraud_model.pkl")
+model = joblib.load("rf_model.pkl")
 explainer = shap.TreeExplainer(model)
 
-T_REVIEW = 0.0001
-T_BLOCK = 0.90
+T_REVIEW = 0.32
+T_BLOCK = 0.85
 
 DEFAULT_TOTAL_TRANSACTIONS = 31900
 DEFAULT_TOTAL_TRANSACTION_AMOUNT = 5233469000
