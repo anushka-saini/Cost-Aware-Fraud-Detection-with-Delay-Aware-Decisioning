@@ -1,30 +1,31 @@
 # Fraud Detection API
-# Loads the trained model, scores incoming transactions,
-# and converts the fraud probability into an ALLOW / REVIEW / BLOCK decision.
+# Loads the trained model, scores incoming transactions, converts the fraud
+# probability into an ALLOW / REVIEW / BLOCK decision, explains WHY using
+# per-transaction SHAP values, and logs the user's final decision when they
+# override a REVIEW/BLOCK recommendation (a real feedback-loop pattern used
+# by production fraud systems for monitoring and future retraining).
 
 from fastapi import FastAPI
 from pydantic import BaseModel
 import joblib
 import pandas as pd
+import shap
+import csv
+import os
+from datetime import datetime, timezone
 
 app = FastAPI(title="Fraud Detection API")
 
 model = joblib.load("fraud_model.pkl")
+explainer = shap.TreeExplainer(model)
 
 T_REVIEW = 0.0001
 T_BLOCK = 0.90
 
-# TODO: replace these three with the actual mean/median values from your
-# training data — run this in a notebook against X_train (days 5-7):
-#   X_train[["total_transactions", "total_transaction_amount", "avg_transaction_amount"]].describe()
-# These are step-level (hourly) system-wide aggregates, not per-transaction —
-# a live API can't know "total transactions this hour" for an in-progress hour,
-# so we use a fixed typical value as a stand-in. State this assumption if asked.
-DEFAULT_TOTAL_TRANSACTIONS = 1000        # <-- placeholder, replace with real mean
-DEFAULT_TOTAL_TRANSACTION_AMOUNT = 5_000_000  # <-- placeholder, replace with real mean
-DEFAULT_AVG_TRANSACTION_AMOUNT = 5000     # <-- placeholder, replace with real mean
+DEFAULT_TOTAL_TRANSACTIONS = 31900
+DEFAULT_TOTAL_TRANSACTION_AMOUNT = 5233469000
+DEFAULT_AVG_TRANSACTION_AMOUNT = 164058.6
 
-# Must match training's feature_columns EXACTLY — see 01_data_audit.ipynb cell 25
 FEATURE_COLUMNS = [
     'amount', 'destination_transactions_last_24h', 'destination_transactions_last_7d',
     'destination_avg_previous_amount', 'destination_amount_deviation',
@@ -33,6 +34,30 @@ FEATURE_COLUMNS = [
     'avg_transaction_amount', 'type_CASH_IN', 'type_CASH_OUT', 'type_DEBIT',
     'type_PAYMENT', 'type_TRANSFER'
 ]
+
+# Human-readable explanations for each feature, shown to the end user instead
+# of raw column names. Keep these short — they appear directly in the UI.
+FEATURE_EXPLANATIONS = {
+    'amount': "the transaction amount",
+    'destination_transactions_last_24h': "how often this recipient has received money recently",
+    'destination_transactions_last_7d': "this recipient's weekly transaction activity",
+    'destination_avg_previous_amount': "how this amount compares to what this recipient usually receives",
+    'destination_amount_deviation': "this amount being unusual for this recipient's history",
+    'destination_is_first_transaction': "this being the first transaction ever to this recipient",
+    'origin_balance_error': "a mismatch in your account's balance after this transaction",
+    'destination_balance_error': "a mismatch in the recipient's balance after this transaction",
+    'destination_balance_is_zero': "the recipient's account balance being zero",
+    'total_transactions': "overall system transaction volume at this time",
+    'total_transaction_amount': "overall system transaction value at this time",
+    'avg_transaction_amount': "typical transaction size across the system right now",
+    'type_CASH_IN': "this being a cash-in transaction",
+    'type_CASH_OUT': "this being a cash-out transaction",
+    'type_DEBIT': "this being a debit transaction",
+    'type_PAYMENT': "this being a payment",
+    'type_TRANSFER': "this being a transfer",
+}
+
+DECISION_LOG_PATH = "decision_log.csv"
 
 
 class Transaction(BaseModel):
@@ -45,8 +70,6 @@ class Transaction(BaseModel):
     destination_avg_previous_amount: float = 0
     destination_amount_deviation: float = 0
     destination_is_first_transaction: int = 0
-    # System-level features — optional, default to typical training-data values
-    # since a live caller usually won't know current system-wide throughput.
     total_transactions: float = DEFAULT_TOTAL_TRANSACTIONS
     total_transaction_amount: float = DEFAULT_TOTAL_TRANSACTION_AMOUNT
     avg_transaction_amount: float = DEFAULT_AVG_TRANSACTION_AMOUNT
@@ -55,6 +78,37 @@ class Transaction(BaseModel):
     type_DEBIT: bool = False
     type_PAYMENT: bool = False
     type_TRANSFER: bool = False
+
+
+class DecisionLogEntry(BaseModel):
+    assessment_id: str          # pass back the id returned by /score
+    user_proceeded: bool        # True = user clicked "Proceed Anyway", False = "Cancel"
+
+
+# In-memory store mapping assessment_id -> the original assessment, so /confirm
+# can log the full context without the client having to resend every field.
+# NOTE: this resets if the API restarts — fine for a demo, not for production.
+# (a production deployment would persist this in a database keyed by a real
+# transaction ID, not in process memory)
+_pending_assessments = {}
+
+
+def explain_prediction(row_df):
+    """Return the top 3 factors pushing this specific prediction toward fraud,
+    as human-readable strings, using this one transaction's own SHAP values."""
+    shap_values = explainer.shap_values(row_df)
+    # TreeExplainer on a binary LightGBM classifier returns values for the
+    # positive (fraud) class directly for a single-output model.
+    values = shap_values[0] if isinstance(shap_values, list) else shap_values[0]
+
+    contributions = list(zip(FEATURE_COLUMNS, values))
+    # Only features pushing TOWARD fraud (positive SHAP value) are useful
+    # as "reasons this was flagged" — negative ones reduced the risk score.
+    risk_factors = [(f, v) for f, v in contributions if v > 0]
+    risk_factors.sort(key=lambda x: x[1], reverse=True)
+
+    top_reasons = [FEATURE_EXPLANATIONS.get(f, f) for f, _ in risk_factors[:3]]
+    return top_reasons
 
 
 @app.post("/score")
@@ -71,11 +125,53 @@ def score_transaction(txn: Transaction):
     else:
         tier = "ALLOW"
 
-    return {
+    reasons = explain_prediction(row) if tier != "ALLOW" else []
+
+    assessment_id = f"a{int(datetime.now(timezone.utc).timestamp() * 1000)}"
+    _pending_assessments[assessment_id] = {
+        "txn": txn.dict(),
         "fraud_probability": float(prob),
         "tier": tier,
-        "thresholds_used": {"t_review": T_REVIEW, "t_block": T_BLOCK}
     }
+
+    return {
+        "assessment_id": assessment_id,
+        "fraud_probability": float(prob),
+        "tier": tier,
+        "reasons": reasons,
+        "thresholds_used": {"t_review": T_REVIEW, "t_block": T_BLOCK},
+    }
+
+
+@app.post("/confirm-decision")
+def confirm_decision(entry: DecisionLogEntry):
+    """Logs what the user actually chose to do after seeing the ALLOW/REVIEW/BLOCK
+    recommendation. This is the real feedback-loop data a production system would
+    use to monitor how often users override warnings, and to retrain on confirmed
+    outcomes over time."""
+    assessment = _pending_assessments.get(entry.assessment_id)
+    if assessment is None:
+        return {"error": "Unknown or expired assessment_id"}
+
+    log_exists = os.path.isfile(DECISION_LOG_PATH)
+    with open(DECISION_LOG_PATH, "a", newline="") as f:
+        writer = csv.writer(f)
+        if not log_exists:
+            writer.writerow([
+                "timestamp", "assessment_id", "tier", "fraud_probability",
+                "user_proceeded", "amount",
+            ])
+        writer.writerow([
+            datetime.now(timezone.utc).isoformat(),
+            entry.assessment_id,
+            assessment["tier"],
+            assessment["fraud_probability"],
+            entry.user_proceeded,
+            assessment["txn"]["amount"],
+        ])
+
+    del _pending_assessments[entry.assessment_id]
+    return {"status": "logged"}
 
 
 @app.get("/health")
