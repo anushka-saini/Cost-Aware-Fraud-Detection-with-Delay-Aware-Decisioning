@@ -1,0 +1,456 @@
+{
+  "_note": "Every figure in this file is transcribed from a saved notebook cell output. Each block names its source. Edit a value here only when the notebook output it came from changes.",
+  "pr_auc_progression": {
+    "status": "available",
+    "split": "eval_1 (days 8-10)",
+    "model": "LightGBM baseline",
+    "source": "notebooks/03_delay_aware_validation.ipynb (cell 47 and the corrected-baseline cells that follow); README.md, section 'Four issues found'",
+    "stages": [
+      {
+        "stage": "1. Original",
+        "pr_auc": 0.8327,
+        "state": "Leaky step-level features, misaligned destination-history features, NaN-contaminated counts"
+      },
+      {
+        "stage": "2. Leakage fix attempted",
+        "pr_auc": 0.4999,
+        "state": "Destination-history features still misaligned"
+      },
+      {
+        "stage": "3. Alignment fixed",
+        "pr_auc": 0.6575,
+        "state": "24h / 7d count features still NaN-contaminated"
+      },
+      {
+        "stage": "4. NaN fill restored",
+        "pr_auc": 0.6684,
+        "state": "Fully corrected"
+      }
+    ]
+  },
+  "period_pr_auc": {
+    "status": "available",
+    "model": "LightGBM (trained on days 5-7)",
+    "source": "notebooks/02_modeling.ipynb, cell 13 (200 bootstrap resamples, 95% CI)",
+    "periods": [
+      {
+        "period": "eval_1",
+        "days": "8-10",
+        "pr_auc": 0.7113,
+        "ci_low": 0.6772,
+        "ci_high": 0.7378
+      },
+      {
+        "period": "eval_2",
+        "days": "11-13",
+        "pr_auc": 0.7252,
+        "ci_low": 0.6936,
+        "ci_high": 0.7664
+      },
+      {
+        "period": "held_out",
+        "days": "14-16",
+        "pr_auc": 0.7198,
+        "ci_low": 0.6877,
+        "ci_high": 0.7492
+      }
+    ]
+  },
+  "drift_psi": {
+    "status": "available",
+    "reference": "train (days 5-7)",
+    "source": "notebooks/02_modeling.ipynb, cell 17",
+    "periods": [
+      "eval_1",
+      "eval_2",
+      "held_out"
+    ],
+    "period_days": {
+      "eval_1": "8-10",
+      "eval_2": "11-13",
+      "held_out": "14-16"
+    },
+    "thresholds": {
+      "moderate": 0.1,
+      "large": 0.25
+    },
+    "highlighted_features": [
+      "destination_transactions_last_24h",
+      "destination_transactions_last_7d"
+    ],
+    "transaction_level": [
+      {
+        "feature": "destination_transactions_last_7d",
+        "eval_1": 0.1758,
+        "eval_2": 0.163878,
+        "held_out": 0.535257
+      },
+      {
+        "feature": "destination_transactions_last_24h",
+        "eval_1": 0.068194,
+        "eval_2": 0.261831,
+        "held_out": 0.40789
+      },
+      {
+        "feature": "destination_balance_error",
+        "eval_1": 0.007333,
+        "eval_2": 0.010338,
+        "held_out": 0.011964
+      },
+      {
+        "feature": "destination_amount_deviation",
+        "eval_1": 0.007542,
+        "eval_2": 0.007206,
+        "held_out": 0.006092
+      },
+      {
+        "feature": "amount",
+        "eval_1": 0.008717,
+        "eval_2": 0.006135,
+        "held_out": 0.005999
+      },
+      {
+        "feature": "destination_avg_previous_amount",
+        "eval_1": 0.002503,
+        "eval_2": 0.003528,
+        "held_out": 0.004166
+      },
+      {
+        "feature": "origin_balance_error",
+        "eval_1": 0.004368,
+        "eval_2": 0.005203,
+        "held_out": 0.003693
+      }
+    ],
+    "system_level": [
+      {
+        "feature": "total_transactions",
+        "eval_1": 0.51944,
+        "eval_2": 1.06126,
+        "held_out": 2.31011
+      },
+      {
+        "feature": "avg_transaction_amount",
+        "eval_1": 1.815109,
+        "eval_2": 2.305847,
+        "held_out": 1.652682
+      },
+      {
+        "feature": "total_transaction_amount",
+        "eval_1": 1.733372,
+        "eval_2": 3.633631,
+        "held_out": 0.263274
+      }
+    ],
+    "score_psi": {
+      "source": "notebooks/02_modeling.ipynb, cell 20",
+      "eval_1": 0.0273,
+      "eval_2": 0.0674,
+      "held_out": 0.0177
+    },
+    "shap_rank_correlation": {
+      "source": "notebooks/02_modeling.ipynb, cell 24",
+      "spearman_train_vs_held_out": 0.9902
+    }
+  },
+  "amount_stratified_recall": {
+    "status": "available",
+    "split": "held_out (days 14-16)",
+    "quartile_basis": "Quartiles of fraud transaction amounts",
+    "models": [
+      {
+        "model": "LightGBM",
+        "t_review": 0.0001,
+        "t_block": 0.9,
+        "source": "notebooks/02_modeling.ipynb, cell 30",
+        "quartiles": [
+          {
+            "quartile": "Q1",
+            "range": "0 - 127,091",
+            "n_fraud": 200,
+            "recall_at_review": 0.975,
+            "recall_at_block": 0.635
+          },
+          {
+            "quartile": "Q2",
+            "range": "127,091 - 441,423",
+            "n_fraud": 206,
+            "recall_at_review": 0.927184,
+            "recall_at_block": 0.65534
+          },
+          {
+            "quartile": "Q3",
+            "range": "441,423 - 1,517,771",
+            "n_fraud": 190,
+            "recall_at_review": 0.968421,
+            "recall_at_block": 0.847368
+          },
+          {
+            "quartile": "Q4",
+            "range": "1,517,771 - 10,000,001",
+            "n_fraud": 225,
+            "recall_at_review": 0.968889,
+            "recall_at_block": 0.96
+          }
+        ]
+      },
+      {
+        "model": "Random Forest",
+        "t_review": 0.32,
+        "t_block": 0.85,
+        "source": "notebooks/05_model_enhancement.ipynb, cell 21 (block recall at 0.85) and cell 30 (0 of 822 held-out fraud cases score below 0.32, so review recall is 1.0 in every quartile)",
+        "quartiles": [
+          {
+            "quartile": "Q1",
+            "range": "0 - 127,091",
+            "n_fraud": 200,
+            "recall_at_review": 1.0,
+            "recall_at_block": 0.5
+          },
+          {
+            "quartile": "Q2",
+            "range": "127,091 - 441,423",
+            "n_fraud": 206,
+            "recall_at_review": 1.0,
+            "recall_at_block": 0.640777
+          },
+          {
+            "quartile": "Q3",
+            "range": "441,423 - 1,517,771",
+            "n_fraud": 190,
+            "recall_at_review": 1.0,
+            "recall_at_block": 0.836842
+          },
+          {
+            "quartile": "Q4",
+            "range": "1,517,771 - 10,000,001",
+            "n_fraud": 225,
+            "recall_at_review": 1.0,
+            "recall_at_block": 0.995556
+          }
+        ]
+      },
+      {
+        "model": "MLP",
+        "t_review": 0.000631,
+        "t_block": 0.95,
+        "source": "notebooks/07_mlp_comparison.ipynb; reports/07_mlp_results.json",
+        "quartiles": [
+          {
+            "quartile": "Q1",
+            "range": "0 - 127,091",
+            "n_fraud": 200,
+            "recall_at_review": 0.995,
+            "recall_at_block": 0.635
+          },
+          {
+            "quartile": "Q2",
+            "range": "127,091 - 441,423",
+            "n_fraud": 206,
+            "recall_at_review": 1.0,
+            "recall_at_block": 0.640777
+          },
+          {
+            "quartile": "Q3",
+            "range": "441,423 - 1,517,771",
+            "n_fraud": 190,
+            "recall_at_review": 1.0,
+            "recall_at_block": 0.826316
+          },
+          {
+            "quartile": "Q4",
+            "range": "1,517,771 - 10,000,001",
+            "n_fraud": 225,
+            "recall_at_review": 1.0,
+            "recall_at_block": 1.0
+          }
+        ]
+      }
+    ]
+  },
+  "model_comparison": {
+    "status": "ongoing",
+    "split": "held_out (days 14-16)",
+    "ci_method": "95% interval from 200 bootstrap resamples of the held-out set",
+    "source": "notebooks/05_model_enhancement.ipynb, cells 1, 11 and 13; notebooks/07_mlp_comparison.ipynb; reports/07_mlp_results.json (MLP)",
+    "models": [
+      {
+        "model": "LightGBM",
+        "config": "scale_pos_weight=20, max_depth=5",
+        "pr_auc": 0.7198,
+        "ci_low": 0.6877,
+        "ci_high": 0.7492
+      },
+      {
+        "model": "Random Forest",
+        "config": "class_weight={0: 1, 1: 500}, max_depth=5",
+        "pr_auc": 0.8335,
+        "ci_low": 0.8085,
+        "ci_high": 0.8546
+      },
+      {
+        "model": "MLP",
+        "config": "hidden layers (64, 32, 16), dropout 0.2, pos_weight=20",
+        "pr_auc": 0.8485,
+        "ci_low": 0.8217,
+        "ci_high": 0.872
+      }
+    ]
+  },
+  "blind_spot": {
+    "status": "available",
+    "model": "LightGBM",
+    "definition": "Real fraud scored below 0.001",
+    "demo_sample": {
+      "missed": 4,
+      "fraud_cases": 100,
+      "source": "notebooks/02_modeling.ipynb, cell 38"
+    },
+    "held_out": {
+      "missed": 37,
+      "fraud_cases": 822,
+      "source": "notebooks/05_model_enhancement.ipynb, cell 24"
+    }
+  },
+  "drift_stress_test": {
+    "status": "available",
+    "model": "LightGBM",
+    "split": "held_out (days 14-16)",
+    "features_shifted": [
+      "origin_balance_error",
+      "destination_balance_error"
+    ],
+    "baseline_pr_auc": 0.7198,
+    "multiplicative": {
+      "factor": 1.5,
+      "pr_auc": 0.715,
+      "source": "notebooks/05_model_enhancement.ipynb, cell 42"
+    },
+    "additive": {
+      "source": "notebooks/05_model_enhancement.ipynb, cell 45",
+      "shifts": [
+        {
+          "shift": 500,
+          "pr_auc": 0.5375
+        },
+        {
+          "shift": 1000,
+          "pr_auc": 0.5375
+        },
+        {
+          "shift": 2500,
+          "pr_auc": 0.5354
+        },
+        {
+          "shift": 5000,
+          "pr_auc": 0.5269
+        },
+        {
+          "shift": 10000,
+          "pr_auc": 0.5127
+        }
+      ]
+    }
+  },
+  "cross_dataset": {
+    "status": "available",
+    "dataset": "ULB / Kaggle credit card fraud",
+    "dataset_detail": "284,807 transactions, 492 fraud (0.173%), 29 features (V1-V28, Amount)",
+    "split": "held-out: second half of day 2 (92,576 rows, 115 fraud)",
+    "ci_method": "95% interval from 200 bootstrap resamples of the held-out period",
+    "source": "notebooks/06_cross_dataset_validation.ipynb; reports/06_cross_dataset_results.json",
+    "models": [
+      {
+        "model": "LightGBM",
+        "config": "scale_pos_weight=5, derived on the validation period",
+        "pr_auc": 0.6818,
+        "ci_low": 0.5947,
+        "ci_high": 0.7662
+      },
+      {
+        "model": "LightGBM, PaySim weight",
+        "config": "scale_pos_weight=20, reused from PaySim unchanged",
+        "pr_auc": 0.6343,
+        "ci_low": 0.5549,
+        "ci_high": 0.7202
+      },
+      {
+        "model": "Logistic regression",
+        "config": "baseline, class_weight=balanced",
+        "pr_auc": 0.7365,
+        "ci_low": 0.657,
+        "ci_high": 0.8148
+      },
+      {
+        "model": "MLP",
+        "config": "hidden layers (64, 32, 16), dropout 0.2, pos_weight=50, chosen on the validation period",
+        "pr_auc": 0.7972,
+        "ci_low": 0.7312,
+        "ci_high": 0.8613
+      }
+    ],
+    "findings": [
+      "LightGBM did not outperform the logistic regression baseline on this dataset (0.6818 against 0.7365; the confidence intervals overlap).",
+      "The MLP, retrained on this dataset, has the highest point estimate (0.7972). Its confidence interval overlaps those of the baseline and of LightGBM, so it cannot be separated from either.",
+      "The tree settings chosen for PaySim did not prevent overfitting here: training PR-AUC 1.0000 against 0.6818 held out.",
+      "The class-weight sweep was unstable. The derived weight (5) differs from PaySim's (20), but the held-out difference between them is within the overlap of their confidence intervals.",
+      "Using the dataset's true imbalance ratio (514) as the weight gave a held-out PR-AUC of 0.0385.",
+      "The held-out period has 115 fraud cases, so the intervals are wide. PR-AUC depends on the fraud base rate, so these figures are not directly comparable with the PaySim figures."
+    ]
+  },
+  "mlp_comparison": {
+    "status": "available",
+    "split": "held_out (days 14-16)",
+    "source": "notebooks/07_mlp_comparison.ipynb; reports/07_mlp_results.json",
+    "cost_basis": "Missed fraud costs its amount, a wrongly blocked legitimate transaction costs 5, any transaction sent to review costs 1. Thresholds were swept on the held-out set for all three models.",
+    "seed_variance": {
+      "n_seeds": 5,
+      "mean": 0.8501,
+      "std": 0.0014,
+      "min": 0.8485,
+      "max": 0.8526
+    },
+    "train_pr_auc": 0.8711,
+    "operating_points": [
+      {
+        "model": "LightGBM",
+        "t_review": 0.0001,
+        "t_block": 0.9,
+        "total_cost": 46455419,
+        "fraud_missed": 34,
+        "legit_reviewed_pct": 0.042746,
+        "legit_blocked": 186,
+        "block_precision": 0.7745,
+        "block_recall": 0.7774
+      },
+      {
+        "model": "Random Forest",
+        "t_review": 0.32,
+        "t_block": 0.85,
+        "total_cost": 47547,
+        "fraud_missed": 0,
+        "legit_reviewed_pct": 0.039295,
+        "legit_blocked": 23,
+        "block_precision": 0.9639,
+        "block_recall": 0.7482
+      },
+      {
+        "model": "MLP",
+        "t_review": 0.000631,
+        "t_block": 0.95,
+        "total_cost": 48551,
+        "fraud_missed": 1,
+        "legit_reviewed_pct": 0.040145,
+        "legit_blocked": 12,
+        "block_precision": 0.9816,
+        "block_recall": 0.7798
+      }
+    ],
+    "blind_spot": {
+      "lgb_misses": 37,
+      "mlp_flags": 37,
+      "mlp_blocks": 14,
+      "rf_flags": 37
+    }
+  }
+}

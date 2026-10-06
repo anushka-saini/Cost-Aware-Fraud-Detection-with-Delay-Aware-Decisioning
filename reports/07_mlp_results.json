@@ -1,0 +1,365 @@
+{
+  "split": "held_out (days 14-16)",
+  "n_held_out": 1202642,
+  "n_fraud_held_out": 822,
+  "mlp_config": {
+    "hidden_layers": [
+      64,
+      32,
+      16
+    ],
+    "dropout": 0.2,
+    "learning_rate": 0.001,
+    "weight_decay": 1e-05,
+    "batch_size": 4096,
+    "max_epochs": 30,
+    "early_stopping_patience": 5,
+    "validation_split": "eval_1 (days 8-10)"
+  },
+  "pos_weight_sweep": [
+    {
+      "pos_weight": 1,
+      "best_epoch": 24,
+      "validation_pr_auc": 0.8271235463820745,
+      "held_out_pr_auc": 0.8486149499782796
+    },
+    {
+      "pos_weight": 5,
+      "best_epoch": 23,
+      "validation_pr_auc": 0.8321424343683943,
+      "held_out_pr_auc": 0.8491951282477683
+    },
+    {
+      "pos_weight": 20,
+      "best_epoch": 17,
+      "validation_pr_auc": 0.8335906495586078,
+      "held_out_pr_auc": 0.8484618554634822
+    },
+    {
+      "pos_weight": 50,
+      "best_epoch": 23,
+      "validation_pr_auc": 0.8323024920477852,
+      "held_out_pr_auc": 0.8477000631571334
+    },
+    {
+      "pos_weight": 100,
+      "best_epoch": 22,
+      "validation_pr_auc": 0.8315051023540916,
+      "held_out_pr_auc": 0.8511577691219945
+    },
+    {
+      "pos_weight": 500,
+      "best_epoch": 23,
+      "validation_pr_auc": 0.8295841977103423,
+      "held_out_pr_auc": 0.8475322091987367
+    }
+  ],
+  "chosen_pos_weight": 20,
+  "pr_auc": {
+    "LightGBM": 0.7198157452658036,
+    "Random Forest": 0.8334768346472244,
+    "MLP": 0.8484618554634822
+  },
+  "ci": {
+    "LightGBM": [
+      0.687746278574669,
+      0.7491993596307972
+    ],
+    "Random Forest": [
+      0.8085043795935523,
+      0.8546482203566858
+    ],
+    "MLP": [
+      0.821731528021384,
+      0.8720117851530772
+    ]
+  },
+  "mlp_train_pr_auc": 0.8711357914677437,
+  "mlp_seed_variance": {
+    "seeds": [
+      42,
+      1,
+      2,
+      3,
+      4
+    ],
+    "held_out_pr_auc": [
+      0.8484618554634822,
+      0.8490616265688141,
+      0.8498407479597769,
+      0.8504945162274093,
+      0.8525860537065734
+    ],
+    "mean": 0.8500889599852112,
+    "std": 0.001425794178799978
+  },
+  "threshold_sweeps": {
+    "block_step1": [
+      {
+        "t_block": 0.5,
+        "cost": 54737.8
+      },
+      {
+        "t_block": 0.6,
+        "cost": 54613.8
+      },
+      {
+        "t_block": 0.7,
+        "cost": 54494.8
+      },
+      {
+        "t_block": 0.75,
+        "cost": 54449.8
+      },
+      {
+        "t_block": 0.8,
+        "cost": 54416.8
+      },
+      {
+        "t_block": 0.85,
+        "cost": 54342.8
+      },
+      {
+        "t_block": 0.9,
+        "cost": 54303.8
+      },
+      {
+        "t_block": 0.95,
+        "cost": 54252.8
+      }
+    ],
+    "review_coarse": [
+      {
+        "t_review": 0.0001,
+        "cost": 54252.8,
+        "legit_to_review": 53949,
+        "fraud_missed": 1
+      },
+      {
+        "t_review": 0.001,
+        "cost": 49987.31,
+        "legit_to_review": 46900,
+        "fraud_missed": 2
+      },
+      {
+        "t_review": 0.01,
+        "cost": 2438480.6100000003,
+        "legit_to_review": 28532,
+        "fraud_missed": 25
+      },
+      {
+        "t_review": 0.05,
+        "cost": 9692900.92,
+        "legit_to_review": 7239,
+        "fraud_missed": 84
+      },
+      {
+        "t_review": 0.1,
+        "cost": 16175395.19,
+        "legit_to_review": 2166,
+        "fraud_missed": 114
+      },
+      {
+        "t_review": 0.2,
+        "cost": 23096589.62,
+        "legit_to_review": 549,
+        "fraud_missed": 133
+      },
+      {
+        "t_review": 0.3,
+        "cost": 24311506.449999996,
+        "legit_to_review": 299,
+        "fraud_missed": 137
+      },
+      {
+        "t_review": 0.4,
+        "cost": 26651822.89,
+        "legit_to_review": 188,
+        "fraud_missed": 146
+      },
+      {
+        "t_review": 0.5,
+        "cost": 28104149.9,
+        "legit_to_review": 129,
+        "fraud_missed": 150
+      }
+    ],
+    "review_narrow": [
+      {
+        "t_review": 0.0001,
+        "cost": 54252.8,
+        "legit_flagged": 0.04488941771646336,
+        "fraud_missed": 1
+      },
+      {
+        "t_review": 0.000158,
+        "cost": 52403.8,
+        "legit_flagged": 0.043350917774708356,
+        "fraud_missed": 1
+      },
+      {
+        "t_review": 0.000251,
+        "cost": 50937.8,
+        "legit_flagged": 0.04213110116323576,
+        "fraud_missed": 1
+      },
+      {
+        "t_review": 0.000398,
+        "cost": 49674.8,
+        "legit_flagged": 0.04108019503752642,
+        "fraud_missed": 1
+      },
+      {
+        "t_review": 0.000631,
+        "cost": 48550.8,
+        "legit_flagged": 0.040144946830640196,
+        "fraud_missed": 1
+      },
+      {
+        "t_review": 0.001,
+        "cost": 49987.31,
+        "legit_flagged": 0.03902414671082192,
+        "fraud_missed": 2
+      },
+      {
+        "t_review": 0.001585,
+        "cost": 117960.45,
+        "legit_flagged": 0.037234361218818124,
+        "fraud_missed": 3
+      },
+      {
+        "t_review": 0.002512,
+        "cost": 386895.63,
+        "legit_flagged": 0.03449601437819307,
+        "fraud_missed": 5
+      },
+      {
+        "t_review": 0.003981,
+        "cost": 579482.3899999999,
+        "legit_flagged": 0.03101213160040605,
+        "fraud_missed": 9
+      },
+      {
+        "t_review": 0.00631,
+        "cost": 1925117.9399999997,
+        "legit_flagged": 0.027341032766970096,
+        "fraud_missed": 15
+      },
+      {
+        "t_review": 0.01,
+        "cost": 2438480.6100000003,
+        "legit_flagged": 0.023740659999001514,
+        "fraud_missed": 25
+      }
+    ],
+    "block_final": [
+      {
+        "t_block": 0.5,
+        "cost": 49035.8
+      },
+      {
+        "t_block": 0.6,
+        "cost": 48911.8
+      },
+      {
+        "t_block": 0.7,
+        "cost": 48792.8
+      },
+      {
+        "t_block": 0.75,
+        "cost": 48747.8
+      },
+      {
+        "t_block": 0.8,
+        "cost": 48714.8
+      },
+      {
+        "t_block": 0.85,
+        "cost": 48640.8
+      },
+      {
+        "t_block": 0.9,
+        "cost": 48601.8
+      },
+      {
+        "t_block": 0.95,
+        "cost": 48550.8
+      }
+    ]
+  },
+  "operating_points": {
+    "LightGBM": {
+      "t_review": 0.0001,
+      "t_block": 0.9,
+      "total_cost": 46455418.519999996,
+      "fraud_missed": 34,
+      "amount_missed": 46402966.519999996,
+      "legit_reviewed": 51373,
+      "legit_reviewed_pct": 0.042746001897122694,
+      "legit_blocked": 186,
+      "block_precision": 0.7745454545454545,
+      "block_recall": 0.7773722627737226,
+      "block_f1": 0.7759562841530054
+    },
+    "Random Forest": {
+      "t_review": 0.32,
+      "t_block": 0.85,
+      "total_cost": 47547.0,
+      "fraud_missed": 0,
+      "amount_missed": 0.0,
+      "legit_reviewed": 47225,
+      "legit_reviewed_pct": 0.03929456990231482,
+      "legit_blocked": 23,
+      "block_precision": 0.9639498432601881,
+      "block_recall": 0.7481751824817519,
+      "block_f1": 0.8424657534246576
+    },
+    "MLP": {
+      "t_review": 0.000631,
+      "t_block": 0.95,
+      "total_cost": 48550.8,
+      "fraud_missed": 1,
+      "amount_missed": 63.8,
+      "legit_reviewed": 48247,
+      "legit_reviewed_pct": 0.040144946830640196,
+      "legit_blocked": 12,
+      "block_precision": 0.9816232771822359,
+      "block_recall": 0.7798053527980535,
+      "block_f1": 0.8691525423728813
+    }
+  },
+  "mlp_amount_recall": [
+    {
+      "quartile": "Q1 (lowest)",
+      "n_fraud": 200,
+      "recall_at_review": 0.9950000047683716,
+      "recall_at_block": 0.6349999904632568
+    },
+    {
+      "quartile": "Q2",
+      "n_fraud": 206,
+      "recall_at_review": 1.0,
+      "recall_at_block": 0.6407766938209534
+    },
+    {
+      "quartile": "Q3",
+      "n_fraud": 190,
+      "recall_at_review": 1.0,
+      "recall_at_block": 0.8263157606124878
+    },
+    {
+      "quartile": "Q4 (highest)",
+      "n_fraud": 225,
+      "recall_at_review": 1.0,
+      "recall_at_block": 1.0
+    }
+  ],
+  "blind_spot": {
+    "lgb_misses": 37,
+    "mlp_flags": 37,
+    "mlp_blocks": 14,
+    "rf_flags": 37
+  },
+  "n_bootstrap": 200,
+  "seed": 42
+}

@@ -100,6 +100,10 @@ def explain_prediction(row_df):
     # TreeExplainer on a binary LightGBM classifier returns values for the
     # positive (fraud) class directly for a single-output model.
     values = shap_values[0] if isinstance(shap_values, list) else shap_values[0]
+    # A Random Forest returns one column per class, shape (n_features, 2) —
+    # keep only the positive (fraud) class column.
+    if getattr(values, "ndim", 1) == 2:
+        values = values[:, 1]
 
     contributions = list(zip(FEATURE_COLUMNS, values))
     # Only features pushing TOWARD fraud (positive SHAP value) are useful
@@ -177,3 +181,18 @@ def confirm_decision(entry: DecisionLogEntry):
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+# Read-only endpoints for the analytics dashboard (dashboard/). Kept in a
+# separate module so the scoring and logging endpoints above stay as they are.
+from dashboard_routes import build_router
+
+app.include_router(build_router(
+    model=model,
+    explainer=explainer,
+    transaction_model=Transaction,
+    feature_columns=FEATURE_COLUMNS,
+    feature_explanations=FEATURE_EXPLANATIONS,
+    decision_log_path=DECISION_LOG_PATH,
+    thresholds={"t_review": T_REVIEW, "t_block": T_BLOCK},
+))

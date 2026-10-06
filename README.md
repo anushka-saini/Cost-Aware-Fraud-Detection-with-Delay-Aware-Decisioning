@@ -26,6 +26,32 @@ This repo includes a working FastAPI scoring service and a Streamlit demo app wi
 | False-block rate, 5,000-transaction random sample | 0 legitimate transactions wrongly blocked (out of ~4,993 legitimate transactions in that sample) |
 | False-review rate, same sample | ~4% of legitimate transactions flagged for human review, never auto-blocked |
 
+### Later results (notebooks 05-07)
+
+The table above describes the original LightGBM baseline. Later work added the following. The model comparison is ongoing and these figures may change.
+
+**Deployed model.** The API (`api/main.py`) currently serves the Random Forest from `05_model_enhancement.ipynb`, with thresholds `t_review = 0.32` and `t_block = 0.85`, not the LightGBM model.
+
+**Model comparison on the PaySim held-out set (days 14-16, 822 fraud).** 95% CIs from 200 bootstrap resamples.
+
+| Model | Held-out PR-AUC | 95% CI | Total cost at its own thresholds |
+|---|---|---|---|
+| LightGBM | 0.7198 | [0.6877, 0.7492] | 46,455,419 |
+| Random Forest | 0.8335 | [0.8085, 0.8546] | 47,547 |
+| MLP (3 hidden layers, dropout) | 0.8485 | [0.8217, 0.8720] | 48,551 |
+
+The MLP did not underperform the tree models, contrary to the expectation from the literature. Its CI overlaps Random Forest's and does not overlap LightGBM's. Random Forest has the lowest total cost. See `reports/07_mlp_summary.md`.
+
+**Cross-dataset validation (ULB credit card fraud, held-out period with 115 fraud).** The same methodology was applied to a second dataset; models were retrained there.
+
+| Model | Held-out PR-AUC | 95% CI |
+|---|---|---|
+| LightGBM (`scale_pos_weight=5`, derived on validation) | 0.6818 | [0.5947, 0.7662] |
+| Logistic regression baseline | 0.7365 | [0.6570, 0.8148] |
+| MLP | 0.7972 | [0.7312, 0.8613] |
+
+The methodology transferred only partly: LightGBM did not outperform the logistic regression baseline on this dataset, and it overfit (training PR-AUC 1.0000). The CIs of all three models overlap. See `reports/06_cross_dataset_summary.md`.
+
 **Drift:** two destination-transaction-velocity features show real, escalating distributional drift across the dense evaluation window (PSI up to 0.54). Overall model PR-AUC remains statistically stable across all evaluation periods (overlapping 95% CIs) — SHAP confirms the model places low importance on the drifting features, which is why the drift doesn't propagate to a performance drop.
 
 **Label delay:** a 2-day label delay (the window ultimately supported by available data density, after starting from a longer initial target) showed no statistically distinguishable effect on PR-AUC once training-seed variance was accounted for. A single-seed sweep looked non-monotonic; averaging across 5 seeds showed this was training variance, not a real delay effect.
@@ -71,15 +97,23 @@ Standard PR-AUC and recall numbers can hide amount-dependent or pattern-dependen
 ```
 ├── api/
 │   ├── main.py              FastAPI scoring service (17-feature aligned)
+│   ├── dashboard_routes.py  read-only endpoints for the React dashboard
+│   ├── validation_metrics.json  notebook figures shown on the dashboard
 │   ├── Dockerfile           containerized deployment config (not yet validated end-to-end)
-│   └── fraud_model.pkl      deployed model artifact
+│   ├── rf_model.pkl         deployed model artifact (Random Forest)
+│   └── fraud_model.pkl      original LightGBM model
+├── dashboard/               React analytics dashboard (see "Running it")
 ├── models/
 │   └── fraud_model.pkl      canonical trained model
 ├── notebooks/
 │   ├── 01_data_audit.ipynb              initial exploration, feature engineering
 │   ├── 02_modeling.ipynb                baseline model, drift analysis, held-out validation
 │   ├── 03_delay_aware_validation.ipynb  original delay analysis + the bug-discovery process (historical record — see note below)
-│   └── 04_delay_aware_corrected.ipynb   delay analysis, cost-thresholding, SHAP — rerun on fully corrected data
+│   ├── 04_delay_aware_corrected.ipynb   delay analysis, cost-thresholding, SHAP — rerun on fully corrected data
+│   ├── 05_model_enhancement.ipynb       LightGBM vs Random Forest comparison (ongoing)
+│   ├── 06_cross_dataset_validation.ipynb  same methodology applied to the ULB credit card dataset
+│   └── 07_mlp_comparison.ipynb          MLP vs LightGBM vs Random Forest on the PaySim held-out set (needs PyTorch)
+├── reports/                 result files (JSON) and report summaries (Markdown) written by notebooks 06 and 07
 ├── data/
 │   ├── raw/                 original PaySim data
 │   └── processed/           engineered feature parquet
@@ -119,6 +153,35 @@ streamlit run app.py
 Requires the API running separately (above) at `localhost:8000`. Includes four verified preset scenarios (one legitimate, three fraud across amount tiers) plus a **Random Real Transaction** button that pulls a genuine held-out example each click and shows whether the model's prediction matched the true label — a live validation moment rather than a scripted demo. Note: given the ~4% blind spot documented above, an occasional miss during a live random draw is expected and explainable, not a bug.
 
 **Limitation worth noting:** several features (destination transaction counts, average previous amount, amount deviation) are historical aggregates computed from a destination account's transaction history. The API accepts them as direct input; a production deployment would need a feature store or database lookup to populate them from live transaction history at request time. That piece is out of scope for this project.
+
+### Analytics dashboard (React)
+A separate dashboard in `dashboard/` with three views: **Live Scoring** (calls `/score`, plots per-feature SHAP contributions), **Model Validation** (charts of the figures recorded in the notebooks) and **Decision Log** (override rate, volume and tier breakdown from `api/decision_log.csv`). It runs alongside the Streamlit app and does not replace it.
+
+Requires Node.js 18 or later, and the API running first.
+
+```bash
+# Terminal 1: API (restart it if it was already running, so it picks up the dashboard endpoints)
+cd api
+python -m uvicorn main:app --host 0.0.0.0 --port 8000
+
+# Terminal 2: dashboard
+cd dashboard
+npm install        # first run only
+npm run dev
+```
+Open `http://localhost:5173`. The dashboard reaches the API through a dev-server proxy (`/api` → `http://127.0.0.1:8000`), so no CORS setup is needed. To point it at a different address, set `FRAUD_API_URL` before `npm run dev`.
+
+The dashboard uses five read-only endpoints defined in `api/dashboard_routes.py`:
+
+| Endpoint | Returns |
+|---|---|
+| `GET /model-info` | Class, parameters and thresholds of the model the API has loaded |
+| `POST /explain` | Signed SHAP contribution of every feature for one transaction (not logged) |
+| `GET /decision-log` | Rows of `api/decision_log.csv` |
+| `GET /validation-metrics` | Contents of `api/validation_metrics.json` |
+| `GET /demo-sample/random` | One random row of `demo_sample.csv` with its label |
+
+**Where the validation figures come from:** every number on the Model Validation page is stored in `api/validation_metrics.json`, transcribed from a saved notebook output, with the notebook and cell recorded next to it. If a notebook is re-run and a figure changes, edit that file; no dashboard code changes are needed. The cross-dataset and MLP figures are copied from `reports/06_cross_dataset_results.json` and `reports/07_mlp_results.json`, which the notebooks write. A block whose `status` is not `available` or `ongoing` is shown as "Pending" instead of a chart. The LightGBM vs Random Forest comparison has `status: "ongoing"` and is labelled as an ongoing investigation in the UI.
 
 ---
 

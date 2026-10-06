@@ -231,7 +231,7 @@ st.markdown("""
 
 st.markdown('<p class="title-text">🛡️ Cost-Aware Fraud Detection</p>', unsafe_allow_html=True)
 st.markdown(
-    '<p class="subtitle-text">Delay-aware decisioning on PaySim transactions — LightGBM, cost-optimized thresholds</p>',
+    '<p class="subtitle-text">Delay-aware decisioning on PaySim transactions — Random Forest, cost-optimized thresholds</p>',
     unsafe_allow_html=True,
 )
 
@@ -473,4 +473,4 @@ if result is not None:
         st.json(result)
 
 st.markdown("---")
-st.caption("Cost-aware, delay-aware fraud decisioning · PaySim dataset · LightGBM")
+st.caption("Cost-aware, delay-aware fraud decisioning · PaySim dataset · Random Forest")
