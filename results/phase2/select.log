@@ -1,0 +1,43 @@
+train    1,311,225 rows   778 fraud
+eval_1   1,228,723 rows   799 fraud
+eval_2   1,176,235 rows   786 fraud
+
+[logreg]
+  logreg class_weight=balanced: eval_1 PR-AUC mean 0.5867 (std 0.0000) over seeds [42, 1, 2]
+  -> chosen on eval_1: class_weight = balanced
+  -> ensemble on eval_2: calibration=isotonic, review>=8.913e-06, block>=0.85, cost 623,148, fraud allowed 2
+  done in 317s
+
+[lightgbm]
+  lightgbm scale_pos_weight=1: eval_1 PR-AUC mean 0.8430 (std 0.0026) over seeds [42, 1, 2]
+  lightgbm scale_pos_weight=5: eval_1 PR-AUC mean 0.8340 (std 0.0023) over seeds [42, 1, 2]
+  lightgbm scale_pos_weight=10: eval_1 PR-AUC mean 0.8137 (std 0.0072) over seeds [42, 1, 2]
+  lightgbm scale_pos_weight=20: eval_1 PR-AUC mean 0.7483 (std 0.0091) over seeds [42, 1, 2]
+  lightgbm scale_pos_weight=50: eval_1 PR-AUC mean 0.3022 (std 0.0249) over seeds [42, 1, 2]
+  lightgbm scale_pos_weight=100: eval_1 PR-AUC mean 0.1465 (std 0.0433) over seeds [42, 1, 2]
+  lightgbm scale_pos_weight=200: eval_1 PR-AUC mean 0.1285 (std 0.0446) over seeds [42, 1, 2]
+  lightgbm scale_pos_weight=500: eval_1 PR-AUC mean 0.0880 (std 0.0060) over seeds [42, 1, 2]
+  -> chosen on eval_1: scale_pos_weight = 1
+  -> ensemble on eval_2: calibration=platt, review>=0.0001461, block>=0.775, cost 33,839, fraud allowed 0
+  done in 185s
+
+[random_forest]
+  random_forest fraud class weight=20: eval_1 PR-AUC mean 0.7889 (std 0.0038) over seeds [42, 1, 2]
+  random_forest fraud class weight=50: eval_1 PR-AUC mean 0.8011 (std 0.0010) over seeds [42, 1, 2]
+  random_forest fraud class weight=100: eval_1 PR-AUC mean 0.8059 (std 0.0024) over seeds [42, 1, 2]
+  random_forest fraud class weight=200: eval_1 PR-AUC mean 0.7971 (std 0.0030) over seeds [42, 1, 2]
+  random_forest fraud class weight=500: eval_1 PR-AUC mean 0.7877 (std 0.0057) over seeds [42, 1, 2]
+  random_forest fraud class weight=1000: eval_1 PR-AUC mean 0.7724 (std 0.0107) over seeds [42, 1, 2]
+  -> chosen on eval_1: fraud class weight = 100
+  -> ensemble on eval_2: calibration=isotonic, review>=1e-07, block>=0.67, cost 48,119, fraud allowed 0
+  done in 1544s
+
+[mlp]
+  mlp pos_weight=1: eval_1 PR-AUC mean 0.8217 (std 0.0018) over seeds [42, 1, 2]
+  mlp pos_weight=5: eval_1 PR-AUC mean 0.8193 (std 0.0016) over seeds [42, 1, 2]
+  mlp pos_weight=20: eval_1 PR-AUC mean 0.8213 (std 0.0026) over seeds [42, 1, 2]
+  mlp pos_weight=100: eval_1 PR-AUC mean 0.8158 (std 0.0033) over seeds [42, 1, 2]
+  mlp pos_weight=500: eval_1 PR-AUC mean 0.8120 (std 0.0042) over seeds [42, 1, 2]
+  -> chosen on eval_1: pos_weight = 1
+  -> ensemble on eval_2: calibration=platt, review>=1.996e-05, block>=0.83, cost 59,945, fraud allowed 2
+  done in 1372s
