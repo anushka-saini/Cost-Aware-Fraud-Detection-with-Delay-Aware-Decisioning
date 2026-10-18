@@ -1,0 +1,19 @@
+[autoencoder] training without labels
+  seed 42: epoch 40, eval_1 loss 0.07386, eval_1 PR-AUC 0.1508, eval_2 PR-AUC 0.1354 [44s]
+  seed 1: epoch 40, eval_1 loss 0.06642, eval_1 PR-AUC 0.0472, eval_2 PR-AUC 0.0312 [48s]
+  seed 2: epoch 39, eval_1 loss 0.05112, eval_1 PR-AUC 0.0356, eval_2 PR-AUC 0.0289 [148s]
+  seed 3: epoch 38, eval_1 loss 0.04549, eval_1 PR-AUC 0.1605, eval_2 PR-AUC 0.1317 [545s]
+  seed 4: epoch 40, eval_1 loss 0.07070, eval_1 PR-AUC 0.0532, eval_2 PR-AUC 0.0434 [617s]
+  seed 42 alone: eval_1 PR-AUC 0.1508 (base rate 0.00065), fraud in top 1% = 0.658
+
+[hybrid] LightGBM on leak-free features + anomaly score
+  lightgbm scale_pos_weight=1: eval_1 PR-AUC mean 0.8307 (std 0.0020) over seeds [42, 1, 2]
+  lightgbm scale_pos_weight=5: eval_1 PR-AUC mean 0.8026 (std 0.0062) over seeds [42, 1, 2]
+  lightgbm scale_pos_weight=10: eval_1 PR-AUC mean 0.7663 (std 0.0237) over seeds [42, 1, 2]
+  lightgbm scale_pos_weight=20: eval_1 PR-AUC mean 0.7273 (std 0.0234) over seeds [42, 1, 2]
+  lightgbm scale_pos_weight=50: eval_1 PR-AUC mean 0.3392 (std 0.1145) over seeds [42, 1, 2]
+  lightgbm scale_pos_weight=100: eval_1 PR-AUC mean 0.1744 (std 0.0197) over seeds [42, 1, 2]
+  lightgbm scale_pos_weight=200: eval_1 PR-AUC mean 0.1101 (std 0.0051) over seeds [42, 1, 2]
+  lightgbm scale_pos_weight=500: eval_1 PR-AUC mean 0.0656 (std 0.0083) over seeds [42, 1, 2]
+  -> chosen on eval_1: scale_pos_weight = 1
+  -> ensemble on eval_2: calibration=platt, review>=0.00016, block>=0.675, cost 564,776, fraud allowed 2

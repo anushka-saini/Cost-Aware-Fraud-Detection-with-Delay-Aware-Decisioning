@@ -1,0 +1,4 @@
+[autoencoder] held-out PR-AUC 0.2091 [0.1779, 0.2430]; 5 seeds 0.1273 +/- 0.0730
+[hybrid] ensemble PR-AUC 0.8590 [0.8338, 0.8808], cost 698,581, fraud allowed 2, legit reviewed 2.98%
+[hybrid - supervised] PR-AUC difference -0.0043 [-0.0093, +0.0015], significant: False
+[blind spot] of the 41 frauds the supervised model scores lowest, 15 are in the top 5% most anomalous (median anomaly percentile 0.931)

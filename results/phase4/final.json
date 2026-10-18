@@ -1,0 +1,2557 @@
+{
+  "split": "held_out (days 14-16)",
+  "n_rows": 1202642,
+  "n_fraud": 822,
+  "autoencoder": {
+    "seed_42": {
+      "pr_auc": 0.2090986292065268,
+      "ci_low": 0.17791426055688064,
+      "ci_high": 0.24302537470443572,
+      "n_bootstrap": 200,
+      "precision_at_1pct": {
+        "k": 0.01,
+        "precision": 0.04864460335938799,
+        "max_possible": 0.0683519042075503
+      },
+      "precision_at_0.1pct": {
+        "k": 0.001,
+        "precision": 0.2593516209476309,
+        "max_possible": 0.683291770573566
+      },
+      "share_of_fraud_in_top_1pct": 0.7116788321167883,
+      "share_of_fraud_in_top_5pct": 0.9233576642335767
+    },
+    "seeds": {
+      "values": [
+        0.2090986292065268,
+        0.06079199239823109,
+        0.06178332940021275,
+        0.22316269374024345,
+        0.08172519836055112
+      ],
+      "mean": 0.12731236862115305,
+      "std": 0.07303900707485242
+    },
+    "five_seed_mean_score": {
+      "pr_auc": 0.14532788097134516,
+      "ci_low": 0.12477808148505017,
+      "ci_high": 0.17005423480892062,
+      "n_bootstrap": 200,
+      "precision_at_1pct": {
+        "k": 0.01,
+        "precision": 0.04199234990853151,
+        "max_possible": 0.0683519042075503
+      },
+      "precision_at_0.1pct": {
+        "k": 0.001,
+        "precision": 0.2227763923524522,
+        "max_possible": 0.683291770573566
+      },
+      "share_of_fraud_in_top_1pct": 0.6143552311435523,
+      "share_of_fraud_in_top_5pct": 0.8759124087591241
+    },
+    "base_rate": 0.0006834951714641597
+  },
+  "hybrid": {
+    "family": "lightgbm",
+    "label": "Hybrid: LightGBM + anomaly score",
+    "weight_name": "scale_pos_weight",
+    "weight": 1,
+    "seeds": {
+      "42": {
+        "pr_auc": 0.8536586831557074,
+        "ci_low": 0.8285873224184362,
+        "ci_high": 0.8755162668778994,
+        "n_bootstrap": 200,
+        "calibration_held_out": {
+          "brier": 0.00014858309336521482,
+          "ece": 1.13751804563225e-05,
+          "mean_predicted": 0.0006867725621323383,
+          "base_rate": 0.0006834951714641597
+        },
+        "calibration_method": "platt",
+        "operating_points": {
+          "robust": {
+            "t_review": 8.701389518510142e-05,
+            "t_block": 0.72,
+            "total_cost": 1822455.33,
+            "fraud_allowed": 6,
+            "fraud_allowed_amount": 1779344.33,
+            "fraud_reviewed": 186,
+            "fraud_blocked": 630,
+            "legit_reviewed": 42885,
+            "legit_reviewed_pct": 0.03568338020668652,
+            "legit_blocked": 8,
+            "block_precision": 0.987460815047022,
+            "block_recall": 0.7664233576642335,
+            "block_f1": 0.8630136986301369,
+            "n_fraud": 822,
+            "n_legit": 1201820,
+            "eval_2_total_cost": 752546.75,
+            "robustness": [
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": -0.05,
+                "t_review": 0.0,
+                "t_block": 0.72,
+                "total_cost": 1202044.0,
+                "fraud_allowed": 0,
+                "legit_reviewed_pct": 0.9999933434291325,
+                "legit_blocked": 8,
+                "cost_change": -620411.3300000001
+              },
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": -0.02,
+                "t_review": 0.0,
+                "t_block": 0.72,
+                "total_cost": 1202044.0,
+                "fraud_allowed": 0,
+                "legit_reviewed_pct": 0.9999933434291325,
+                "legit_blocked": 8,
+                "cost_change": -620411.3300000001
+              },
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": 0.02,
+                "t_review": 0.0200870138951851,
+                "t_block": 0.72,
+                "total_cost": 16098324.67,
+                "fraud_allowed": 117,
+                "legit_reviewed_pct": 0.001064219267444376,
+                "legit_blocked": 8,
+                "cost_change": 14275869.34
+              },
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": 0.05,
+                "t_review": 0.050087013895185106,
+                "t_block": 0.72,
+                "total_cost": 19738814.61,
+                "fraud_allowed": 132,
+                "legit_reviewed_pct": 0.00030703433126424924,
+                "legit_blocked": 8,
+                "cost_change": 17916359.28
+              },
+              {
+                "moved": "t_review",
+                "kind": "odds_factor",
+                "amount": 0.5,
+                "t_review": 4.350884052939544e-05,
+                "t_block": 0.72,
+                "total_cost": 1835646.33,
+                "fraud_allowed": 6,
+                "legit_reviewed_pct": 0.04665923349586461,
+                "legit_blocked": 8,
+                "cost_change": 13191.0
+              },
+              {
+                "moved": "t_review",
+                "kind": "odds_factor",
+                "amount": 2.0,
+                "t_review": 0.00017401264885181478,
+                "t_block": 0.72,
+                "total_cost": 1815439.33,
+                "fraud_allowed": 6,
+                "legit_reviewed_pct": 0.02984556755587359,
+                "legit_blocked": 8,
+                "cost_change": -7016.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": -0.05,
+                "t_review": 8.701389518510142e-05,
+                "t_block": 0.6699999999999999,
+                "total_cost": 1822460.33,
+                "fraud_allowed": 6,
+                "legit_reviewed_pct": 0.035680883992611205,
+                "legit_blocked": 11,
+                "cost_change": 5.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": -0.02,
+                "t_review": 8.701389518510142e-05,
+                "t_block": 0.7,
+                "total_cost": 1822461.33,
+                "fraud_allowed": 6,
+                "legit_reviewed_pct": 0.035681716063969644,
+                "legit_blocked": 10,
+                "cost_change": 6.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": 0.02,
+                "t_review": 8.701389518510142e-05,
+                "t_block": 0.74,
+                "total_cost": 1822457.33,
+                "fraud_allowed": 6,
+                "legit_reviewed_pct": 0.03568338020668652,
+                "legit_blocked": 8,
+                "cost_change": 2.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": 0.05,
+                "t_review": 8.701389518510142e-05,
+                "t_block": 0.77,
+                "total_cost": 1822451.33,
+                "fraud_allowed": 6,
+                "legit_reviewed_pct": 0.03568587642076185,
+                "legit_blocked": 5,
+                "cost_change": -4.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "odds_factor",
+                "amount": 0.5,
+                "t_review": 8.701389518510142e-05,
+                "t_block": 0.5625,
+                "total_cost": 1822462.33,
+                "fraud_allowed": 6,
+                "legit_reviewed_pct": 0.03567838777853589,
+                "legit_blocked": 14,
+                "cost_change": 7.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "odds_factor",
+                "amount": 2.0,
+                "t_review": 8.701389518510142e-05,
+                "t_block": 0.8372093023255813,
+                "total_cost": 1822450.33,
+                "fraud_allowed": 6,
+                "legit_reviewed_pct": 0.035687540563478726,
+                "legit_blocked": 3,
+                "cost_change": -5.0
+              }
+            ],
+            "recall_by_amount_quartile": [
+              {
+                "quartile": "Q1",
+                "n_fraud": 200,
+                "recall_at_review": 1.0,
+                "recall_at_block": 0.585
+              },
+              {
+                "quartile": "Q2",
+                "n_fraud": 206,
+                "recall_at_review": 0.970873786407767,
+                "recall_at_block": 0.5922330097087378
+              },
+              {
+                "quartile": "Q3",
+                "n_fraud": 190,
+                "recall_at_review": 1.0,
+                "recall_at_block": 0.8894736842105263
+              },
+              {
+                "quartile": "Q4",
+                "n_fraud": 225,
+                "recall_at_review": 1.0,
+                "recall_at_block": 0.9866666666666667
+              }
+            ]
+          },
+          "plain": {
+            "t_review": 0.00017105139602428734,
+            "t_block": 0.655,
+            "total_cost": 1815565.33,
+            "fraud_allowed": 6,
+            "fraud_allowed_amount": 1779344.33,
+            "fraud_reviewed": 179,
+            "fraud_blocked": 637,
+            "legit_reviewed": 35987,
+            "legit_reviewed_pct": 0.029943751976169476,
+            "legit_blocked": 11,
+            "block_precision": 0.9830246913580247,
+            "block_recall": 0.7749391727493917,
+            "block_f1": 0.8666666666666667,
+            "n_fraud": 822,
+            "n_legit": 1201820,
+            "eval_2_total_cost": 745066.75,
+            "robustness": [
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": -0.05,
+                "t_review": 0.0,
+                "t_block": 0.655,
+                "total_cost": 1202049.0,
+                "fraud_allowed": 0,
+                "legit_reviewed_pct": 0.9999908472150572,
+                "legit_blocked": 11,
+                "cost_change": -613516.3300000001
+              },
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": -0.02,
+                "t_review": 0.0,
+                "t_block": 0.655,
+                "total_cost": 1202049.0,
+                "fraud_allowed": 0,
+                "legit_reviewed_pct": 0.9999908472150572,
+                "legit_blocked": 11,
+                "cost_change": -613516.3300000001
+              },
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": 0.02,
+                "t_review": 0.02017105139602429,
+                "t_block": 0.655,
+                "total_cost": 16098325.67,
+                "fraud_allowed": 117,
+                "legit_reviewed_pct": 0.001058394767935298,
+                "legit_blocked": 11,
+                "cost_change": 14282760.34
+              },
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": 0.05,
+                "t_review": 0.05017105139602429,
+                "t_block": 0.655,
+                "total_cost": 19738819.61,
+                "fraud_allowed": 132,
+                "legit_reviewed_pct": 0.00030453811718893014,
+                "legit_blocked": 11,
+                "cost_change": 17923254.28
+              },
+              {
+                "moved": "t_review",
+                "kind": "odds_factor",
+                "amount": 0.5,
+                "t_review": 8.553301328280775e-05,
+                "t_block": 0.655,
+                "total_cost": 1822776.33,
+                "fraud_allowed": 6,
+                "legit_reviewed_pct": 0.03594381854187815,
+                "legit_blocked": 11,
+                "cost_change": 7211.0
+              },
+              {
+                "moved": "t_review",
+                "kind": "odds_factor",
+                "amount": 2.0,
+                "t_review": 0.00034204428489614103,
+                "t_block": 0.655,
+                "total_cost": 2150084.9,
+                "fraud_allowed": 8,
+                "legit_reviewed_pct": 0.02577424239902814,
+                "legit_blocked": 11,
+                "cost_change": 334519.56999999983
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": -0.05,
+                "t_review": 0.00017105139602428734,
+                "t_block": 0.605,
+                "total_cost": 1815574.33,
+                "fraud_allowed": 6,
+                "legit_reviewed_pct": 0.02994125576209416,
+                "legit_blocked": 14,
+                "cost_change": 9.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": -0.02,
+                "t_review": 0.00017105139602428734,
+                "t_block": 0.635,
+                "total_cost": 1815573.33,
+                "fraud_allowed": 6,
+                "legit_reviewed_pct": 0.029942087833452598,
+                "legit_blocked": 13,
+                "cost_change": 8.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": 0.02,
+                "t_review": 0.00017105139602428734,
+                "t_block": 0.675,
+                "total_cost": 1815565.33,
+                "fraud_allowed": 6,
+                "legit_reviewed_pct": 0.029943751976169476,
+                "legit_blocked": 11,
+                "cost_change": 0.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": 0.05,
+                "t_review": 0.00017105139602428734,
+                "t_block": 0.7050000000000001,
+                "total_cost": 1815562.33,
+                "fraud_allowed": 6,
+                "legit_reviewed_pct": 0.029945416118886355,
+                "legit_blocked": 9,
+                "cost_change": -3.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "odds_factor",
+                "amount": 0.5,
+                "t_review": 0.00017105139602428734,
+                "t_block": 0.48698884758364314,
+                "total_cost": 1815573.33,
+                "fraud_allowed": 6,
+                "legit_reviewed_pct": 0.029938759548018837,
+                "legit_blocked": 17,
+                "cost_change": 8.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "odds_factor",
+                "amount": 2.0,
+                "t_review": 0.00017105139602428734,
+                "t_block": 0.7915407854984894,
+                "total_cost": 1815557.33,
+                "fraud_allowed": 6,
+                "legit_reviewed_pct": 0.029948744404320115,
+                "legit_blocked": 5,
+                "cost_change": -8.0
+              }
+            ],
+            "recall_by_amount_quartile": [
+              {
+                "quartile": "Q1",
+                "n_fraud": 200,
+                "recall_at_review": 1.0,
+                "recall_at_block": 0.59
+              },
+              {
+                "quartile": "Q2",
+                "n_fraud": 206,
+                "recall_at_review": 0.970873786407767,
+                "recall_at_block": 0.616504854368932
+              },
+              {
+                "quartile": "Q3",
+                "n_fraud": 190,
+                "recall_at_review": 1.0,
+                "recall_at_block": 0.8947368421052632
+              },
+              {
+                "quartile": "Q4",
+                "n_fraud": 225,
+                "recall_at_review": 1.0,
+                "recall_at_block": 0.9866666666666667
+              }
+            ]
+          }
+        },
+        "blind_spot": {
+          "definition": "real fraud with raw score < 0.001",
+          "n": 34,
+          "amount": 4054466.57,
+          "n_allowed_at_deployed_threshold": 6
+        }
+      },
+      "1": {
+        "pr_auc": 0.853351031273054,
+        "ci_low": 0.828860054573875,
+        "ci_high": 0.8748558946909665,
+        "n_bootstrap": 200,
+        "calibration_held_out": {
+          "brier": 0.00015879960734632703,
+          "ece": 8.241363223450121e-06,
+          "mean_predicted": 0.0006860943459513231,
+          "base_rate": 0.0006834951714641597
+        },
+        "calibration_method": "platt",
+        "operating_points": {
+          "robust": {
+            "t_review": 1.9237332296088966e-05,
+            "t_block": 0.77,
+            "total_cost": 1077073.5,
+            "fraud_allowed": 3,
+            "fraud_allowed_amount": 922310.5,
+            "fraud_reviewed": 200,
+            "fraud_blocked": 619,
+            "legit_reviewed": 154488,
+            "legit_reviewed_pct": 0.12854504002263234,
+            "legit_blocked": 15,
+            "block_precision": 0.9763406940063092,
+            "block_recall": 0.7530413625304136,
+            "block_f1": 0.8502747252747254,
+            "n_fraud": 822,
+            "n_legit": 1201820,
+            "eval_2_total_cost": 679568.72,
+            "robustness": [
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": -0.05,
+                "t_review": 0.0,
+                "t_block": 0.77,
+                "total_cost": 1202083.0,
+                "fraud_allowed": 0,
+                "legit_reviewed_pct": 0.9999875189296235,
+                "legit_blocked": 15,
+                "cost_change": 125009.5
+              },
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": -0.02,
+                "t_review": 0.0,
+                "t_block": 0.77,
+                "total_cost": 1202083.0,
+                "fraud_allowed": 0,
+                "legit_reviewed_pct": 0.9999875189296235,
+                "legit_blocked": 15,
+                "cost_change": 125009.5
+              },
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": 0.02,
+                "t_review": 0.02001923733229609,
+                "t_block": 0.77,
+                "total_cost": 15050655.42,
+                "fraud_allowed": 113,
+                "legit_reviewed_pct": 0.0009660348471484915,
+                "legit_blocked": 15,
+                "cost_change": 13973581.92
+              },
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": 0.05,
+                "t_review": 0.050019237332296095,
+                "t_block": 0.77,
+                "total_cost": 20251166.589999996,
+                "fraud_allowed": 131,
+                "legit_reviewed_pct": 0.0002562779783994275,
+                "legit_blocked": 15,
+                "cost_change": 19174093.089999996
+              },
+              {
+                "moved": "t_review",
+                "kind": "odds_factor",
+                "amount": 0.5,
+                "t_review": 9.618758667672867e-06,
+                "t_block": 0.77,
+                "total_cost": 1246218.5,
+                "fraud_allowed": 3,
+                "legit_reviewed_pct": 0.26928574994591536,
+                "legit_blocked": 15,
+                "cost_change": 169145.0
+              },
+              {
+                "moved": "t_review",
+                "kind": "odds_factor",
+                "amount": 2.0,
+                "t_review": 3.8473924456508424e-05,
+                "t_block": 0.77,
+                "total_cost": 1307321.17,
+                "fraud_allowed": 4,
+                "legit_reviewed_pct": 0.05891065217753075,
+                "legit_blocked": 15,
+                "cost_change": 230247.66999999993
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": -0.05,
+                "t_review": 1.9237332296088966e-05,
+                "t_block": 0.72,
+                "total_cost": 1077075.5,
+                "fraud_allowed": 3,
+                "legit_reviewed_pct": 0.12854337587991546,
+                "legit_blocked": 17,
+                "cost_change": 2.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": -0.02,
+                "t_review": 1.9237332296088966e-05,
+                "t_block": 0.75,
+                "total_cost": 1077074.5,
+                "fraud_allowed": 3,
+                "legit_reviewed_pct": 0.12854420795127391,
+                "legit_blocked": 16,
+                "cost_change": 1.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": 0.02,
+                "t_review": 1.9237332296088966e-05,
+                "t_block": 0.79,
+                "total_cost": 1077075.5,
+                "fraud_allowed": 3,
+                "legit_reviewed_pct": 0.12854504002263234,
+                "legit_blocked": 15,
+                "cost_change": 2.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": 0.05,
+                "t_review": 1.9237332296088966e-05,
+                "t_block": 0.8200000000000001,
+                "total_cost": 1077077.5,
+                "fraud_allowed": 3,
+                "legit_reviewed_pct": 0.1285458720939908,
+                "legit_blocked": 14,
+                "cost_change": 4.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "odds_factor",
+                "amount": 0.5,
+                "t_review": 1.9237332296088966e-05,
+                "t_block": 0.6260162601626017,
+                "total_cost": 1077092.5,
+                "fraud_allowed": 3,
+                "legit_reviewed_pct": 0.12853755138040637,
+                "legit_blocked": 24,
+                "cost_change": 19.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "odds_factor",
+                "amount": 2.0,
+                "t_review": 1.9237332296088966e-05,
+                "t_block": 0.8700564971751412,
+                "total_cost": 1077089.5,
+                "fraud_allowed": 3,
+                "legit_reviewed_pct": 0.1285458720939908,
+                "legit_blocked": 14,
+                "cost_change": 16.0
+              }
+            ],
+            "recall_by_amount_quartile": [
+              {
+                "quartile": "Q1",
+                "n_fraud": 200,
+                "recall_at_review": 1.0,
+                "recall_at_block": 0.545
+              },
+              {
+                "quartile": "Q2",
+                "n_fraud": 206,
+                "recall_at_review": 0.9854368932038835,
+                "recall_at_block": 0.5922330097087378
+              },
+              {
+                "quartile": "Q3",
+                "n_fraud": 190,
+                "recall_at_review": 1.0,
+                "recall_at_block": 0.8789473684210526
+              },
+              {
+                "quartile": "Q4",
+                "n_fraud": 225,
+                "recall_at_review": 1.0,
+                "recall_at_block": 0.9822222222222222
+              }
+            ]
+          },
+          "plain": {
+            "t_review": 3.3491391609082905e-05,
+            "t_block": 0.775,
+            "total_cost": 1000416.5,
+            "fraud_allowed": 3,
+            "fraud_allowed_amount": 922310.5,
+            "fraud_reviewed": 201,
+            "fraud_blocked": 618,
+            "legit_reviewed": 77830,
+            "legit_reviewed_pct": 0.06476011382736184,
+            "legit_blocked": 15,
+            "block_precision": 0.976303317535545,
+            "block_recall": 0.7518248175182481,
+            "block_f1": 0.8494845360824742,
+            "n_fraud": 822,
+            "n_legit": 1201820,
+            "eval_2_total_cost": 604771.72,
+            "robustness": [
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": -0.05,
+                "t_review": 0.0,
+                "t_block": 0.775,
+                "total_cost": 1202084.0,
+                "fraud_allowed": 0,
+                "legit_reviewed_pct": 0.9999875189296235,
+                "legit_blocked": 15,
+                "cost_change": 201667.5
+              },
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": -0.02,
+                "t_review": 0.0,
+                "t_block": 0.775,
+                "total_cost": 1202084.0,
+                "fraud_allowed": 0,
+                "legit_reviewed_pct": 0.9999875189296235,
+                "legit_blocked": 15,
+                "cost_change": 201667.5
+              },
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": 0.02,
+                "t_review": 0.020033491391609082,
+                "t_block": 0.775,
+                "total_cost": 15050655.42,
+                "fraud_allowed": 113,
+                "legit_reviewed_pct": 0.0009652027757900517,
+                "legit_blocked": 15,
+                "cost_change": 14050238.92
+              },
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": 0.05,
+                "t_review": 0.050033491391609085,
+                "t_block": 0.775,
+                "total_cost": 20251167.589999996,
+                "fraud_allowed": 131,
+                "legit_reviewed_pct": 0.0002562779783994275,
+                "legit_blocked": 15,
+                "cost_change": 19250751.089999996
+              },
+              {
+                "moved": "t_review",
+                "kind": "odds_factor",
+                "amount": 0.5,
+                "t_review": 1.6745976227565308e-05,
+                "t_block": 0.775,
+                "total_cost": 1110344.5,
+                "fraud_allowed": 3,
+                "legit_reviewed_pct": 0.15622805411792115,
+                "legit_blocked": 15,
+                "cost_change": 109928.0
+              },
+              {
+                "moved": "t_review",
+                "kind": "odds_factor",
+                "amount": 2.0,
+                "t_review": 6.698053994667227e-05,
+                "t_block": 0.775,
+                "total_cost": 1284656.17,
+                "fraud_allowed": 4,
+                "legit_reviewed_pct": 0.04005092276713651,
+                "legit_blocked": 15,
+                "cost_change": 284239.6699999999
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": -0.05,
+                "t_review": 3.3491391609082905e-05,
+                "t_block": 0.725,
+                "total_cost": 1000420.5,
+                "fraud_allowed": 3,
+                "legit_reviewed_pct": 0.06475844968464496,
+                "legit_blocked": 17,
+                "cost_change": 4.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": -0.02,
+                "t_review": 3.3491391609082905e-05,
+                "t_block": 0.755,
+                "total_cost": 1000417.5,
+                "fraud_allowed": 3,
+                "legit_reviewed_pct": 0.0647592817560034,
+                "legit_blocked": 16,
+                "cost_change": 1.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": 0.02,
+                "t_review": 3.3491391609082905e-05,
+                "t_block": 0.795,
+                "total_cost": 1000415.5,
+                "fraud_allowed": 3,
+                "legit_reviewed_pct": 0.06476094589872028,
+                "legit_blocked": 14,
+                "cost_change": -1.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": 0.05,
+                "t_review": 3.3491391609082905e-05,
+                "t_block": 0.8250000000000001,
+                "total_cost": 1000421.5,
+                "fraud_allowed": 3,
+                "legit_reviewed_pct": 0.06476094589872028,
+                "legit_blocked": 14,
+                "cost_change": 5.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "odds_factor",
+                "amount": 0.5,
+                "t_review": 3.3491391609082905e-05,
+                "t_block": 0.6326530612244899,
+                "total_cost": 1000431.5,
+                "fraud_allowed": 3,
+                "legit_reviewed_pct": 0.06475345725649431,
+                "legit_blocked": 23,
+                "cost_change": 15.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "odds_factor",
+                "amount": 2.0,
+                "t_review": 3.3491391609082905e-05,
+                "t_block": 0.8732394366197184,
+                "total_cost": 1000431.5,
+                "fraud_allowed": 3,
+                "legit_reviewed_pct": 0.06476094589872028,
+                "legit_blocked": 14,
+                "cost_change": 15.0
+              }
+            ],
+            "recall_by_amount_quartile": [
+              {
+                "quartile": "Q1",
+                "n_fraud": 200,
+                "recall_at_review": 1.0,
+                "recall_at_block": 0.545
+              },
+              {
+                "quartile": "Q2",
+                "n_fraud": 206,
+                "recall_at_review": 0.9854368932038835,
+                "recall_at_block": 0.5922330097087378
+              },
+              {
+                "quartile": "Q3",
+                "n_fraud": 190,
+                "recall_at_review": 1.0,
+                "recall_at_block": 0.8736842105263158
+              },
+              {
+                "quartile": "Q4",
+                "n_fraud": 225,
+                "recall_at_review": 1.0,
+                "recall_at_block": 0.9822222222222222
+              }
+            ]
+          }
+        },
+        "blind_spot": {
+          "definition": "real fraud with raw score < 0.001",
+          "n": 35,
+          "amount": 3359629.1300000004,
+          "n_allowed_at_deployed_threshold": 3
+        }
+      },
+      "2": {
+        "pr_auc": 0.8498115338182548,
+        "ci_low": 0.8248411878353307,
+        "ci_high": 0.8727912784630713,
+        "n_bootstrap": 200,
+        "calibration_held_out": {
+          "brier": 0.00015991819064825843,
+          "ece": 3.739792919488798e-05,
+          "mean_predicted": 0.0007165463880150024,
+          "base_rate": 0.0006834951714641597
+        },
+        "calibration_method": "platt",
+        "operating_points": {
+          "robust": {
+            "t_review": 3.486815160709377e-06,
+            "t_block": 0.74,
+            "total_cost": 1620642.5,
+            "fraud_allowed": 3,
+            "fraud_allowed_amount": 922310.5,
+            "fraud_reviewed": 195,
+            "fraud_blocked": 624,
+            "legit_reviewed": 698042,
+            "legit_reviewed_pct": 0.5808207551879649,
+            "legit_blocked": 19,
+            "block_precision": 0.9704510108864697,
+            "block_recall": 0.7591240875912408,
+            "block_f1": 0.851877133105802,
+            "n_fraud": 822,
+            "n_legit": 1201820,
+            "eval_2_total_cost": 678620.0,
+            "robustness": [
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": -0.05,
+                "t_review": 0.0,
+                "t_block": 0.74,
+                "total_cost": 1202094.0,
+                "fraud_allowed": 0,
+                "legit_reviewed_pct": 0.9999841906441896,
+                "legit_blocked": 19,
+                "cost_change": -418548.5
+              },
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": -0.02,
+                "t_review": 0.0,
+                "t_block": 0.74,
+                "total_cost": 1202094.0,
+                "fraud_allowed": 0,
+                "legit_reviewed_pct": 0.9999841906441896,
+                "legit_blocked": 19,
+                "cost_change": -418548.5
+              },
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": 0.02,
+                "t_review": 0.02000348681516071,
+                "t_block": 0.74,
+                "total_cost": 16696980.76,
+                "fraud_allowed": 116,
+                "legit_reviewed_pct": 0.001227305253698557,
+                "legit_blocked": 19,
+                "cost_change": 15076338.26
+              },
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": 0.05,
+                "t_review": 0.05000348681516071,
+                "t_block": 0.74,
+                "total_cost": 40830252.31,
+                "fraud_allowed": 137,
+                "legit_reviewed_pct": 0.00028623254730325673,
+                "legit_blocked": 19,
+                "cost_change": 39209609.81
+              },
+              {
+                "moved": "t_review",
+                "kind": "odds_factor",
+                "amount": 0.5,
+                "t_review": 1.743410619829979e-06,
+                "t_block": 0.74,
+                "total_cost": 1705000.1099999999,
+                "fraud_allowed": 2,
+                "legit_reviewed_pct": 0.8672005791216655,
+                "legit_blocked": 19,
+                "cost_change": 84357.60999999987
+              },
+              {
+                "moved": "t_review",
+                "kind": "odds_factor",
+                "amount": 2.0,
+                "t_review": 6.973606005743609e-06,
+                "t_block": 0.74,
+                "total_cost": 1460265.5,
+                "fraud_allowed": 3,
+                "legit_reviewed_pct": 0.4473756469354812,
+                "legit_blocked": 19,
+                "cost_change": -160377.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": -0.05,
+                "t_review": 3.486815160709377e-06,
+                "t_block": 0.69,
+                "total_cost": 1620643.5,
+                "fraud_allowed": 3,
+                "legit_reviewed_pct": 0.5808190910452481,
+                "legit_blocked": 21,
+                "cost_change": 1.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": -0.02,
+                "t_review": 3.486815160709377e-06,
+                "t_block": 0.72,
+                "total_cost": 1620639.5,
+                "fraud_allowed": 3,
+                "legit_reviewed_pct": 0.5808207551879649,
+                "legit_blocked": 19,
+                "cost_change": -3.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": 0.02,
+                "t_review": 3.486815160709377e-06,
+                "t_block": 0.76,
+                "total_cost": 1620645.5,
+                "fraud_allowed": 3,
+                "legit_reviewed_pct": 0.5808207551879649,
+                "legit_blocked": 19,
+                "cost_change": 3.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": 0.05,
+                "t_review": 3.486815160709377e-06,
+                "t_block": 0.79,
+                "total_cost": 1620646.5,
+                "fraud_allowed": 3,
+                "legit_reviewed_pct": 0.5808215872593233,
+                "legit_blocked": 18,
+                "cost_change": 4.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "odds_factor",
+                "amount": 0.5,
+                "t_review": 3.486815160709377e-06,
+                "t_block": 0.5873015873015873,
+                "total_cost": 1620645.5,
+                "fraud_allowed": 3,
+                "legit_reviewed_pct": 0.5808165948311728,
+                "legit_blocked": 24,
+                "cost_change": 3.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "odds_factor",
+                "amount": 2.0,
+                "t_review": 3.486815160709377e-06,
+                "t_block": 0.8505747126436781,
+                "total_cost": 1620643.5,
+                "fraud_allowed": 3,
+                "legit_reviewed_pct": 0.5808249155447571,
+                "legit_blocked": 14,
+                "cost_change": 1.0
+              }
+            ],
+            "recall_by_amount_quartile": [
+              {
+                "quartile": "Q1",
+                "n_fraud": 200,
+                "recall_at_review": 1.0,
+                "recall_at_block": 0.57
+              },
+              {
+                "quartile": "Q2",
+                "n_fraud": 206,
+                "recall_at_review": 0.9854368932038835,
+                "recall_at_block": 0.6019417475728155
+              },
+              {
+                "quartile": "Q3",
+                "n_fraud": 190,
+                "recall_at_review": 1.0,
+                "recall_at_block": 0.868421052631579
+              },
+              {
+                "quartile": "Q4",
+                "n_fraud": 225,
+                "recall_at_review": 1.0,
+                "recall_at_block": 0.9822222222222222
+              }
+            ]
+          },
+          "plain": {
+            "t_review": 4.9451474081667345e-06,
+            "t_block": 0.63,
+            "total_cost": 1532967.5,
+            "fraud_allowed": 3,
+            "fraud_allowed_amount": 922310.5,
+            "fraud_reviewed": 180,
+            "fraud_blocked": 639,
+            "legit_reviewed": 610357,
+            "legit_reviewed_pct": 0.5078605781231799,
+            "legit_blocked": 24,
+            "block_precision": 0.9638009049773756,
+            "block_recall": 0.7773722627737226,
+            "block_f1": 0.8606060606060606,
+            "n_fraud": 822,
+            "n_legit": 1201820,
+            "eval_2_total_cost": 593703.0,
+            "robustness": [
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": -0.05,
+                "t_review": 0.0,
+                "t_block": 0.63,
+                "total_cost": 1202099.0,
+                "fraud_allowed": 0,
+                "legit_reviewed_pct": 0.9999800302873975,
+                "legit_blocked": 24,
+                "cost_change": -330868.5
+              },
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": -0.02,
+                "t_review": 0.0,
+                "t_block": 0.63,
+                "total_cost": 1202099.0,
+                "fraud_allowed": 0,
+                "legit_reviewed_pct": 0.9999800302873975,
+                "legit_blocked": 24,
+                "cost_change": -330868.5
+              },
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": 0.02,
+                "t_review": 0.02000494514740817,
+                "t_block": 0.63,
+                "total_cost": 16696985.76,
+                "fraud_allowed": 116,
+                "legit_reviewed_pct": 0.0012231448969063587,
+                "legit_blocked": 24,
+                "cost_change": 15164018.26
+              },
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": 0.05,
+                "t_review": 0.05000494514740817,
+                "t_block": 0.63,
+                "total_cost": 40830257.31,
+                "fraud_allowed": 137,
+                "legit_reviewed_pct": 0.00028207219051105823,
+                "legit_blocked": 24,
+                "cost_change": 39297289.81
+              },
+              {
+                "moved": "t_review",
+                "kind": "odds_factor",
+                "amount": 0.5,
+                "t_review": 2.4725798177192057e-06,
+                "t_block": 0.63,
+                "total_cost": 1834187.5,
+                "fraud_allowed": 3,
+                "legit_reviewed_pct": 0.7584971127123862,
+                "legit_blocked": 24,
+                "cost_change": 301220.0
+              },
+              {
+                "moved": "t_review",
+                "kind": "odds_factor",
+                "amount": 2.0,
+                "t_review": 9.890245907609552e-06,
+                "t_block": 0.63,
+                "total_cost": 1375880.5,
+                "fraud_allowed": 3,
+                "legit_reviewed_pct": 0.3771529846399627,
+                "legit_blocked": 24,
+                "cost_change": -157087.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": -0.05,
+                "t_review": 4.9451474081667345e-06,
+                "t_block": 0.58,
+                "total_cost": 1532965.5,
+                "fraud_allowed": 3,
+                "legit_reviewed_pct": 0.5078605781231799,
+                "legit_blocked": 24,
+                "cost_change": -2.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": -0.02,
+                "t_review": 4.9451474081667345e-06,
+                "t_block": 0.61,
+                "total_cost": 1532967.5,
+                "fraud_allowed": 3,
+                "legit_reviewed_pct": 0.5078605781231799,
+                "legit_blocked": 24,
+                "cost_change": 0.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": 0.02,
+                "t_review": 4.9451474081667345e-06,
+                "t_block": 0.65,
+                "total_cost": 1532959.5,
+                "fraud_allowed": 3,
+                "legit_reviewed_pct": 0.5078622422658967,
+                "legit_blocked": 22,
+                "cost_change": -8.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": 0.05,
+                "t_review": 4.9451474081667345e-06,
+                "t_block": 0.68,
+                "total_cost": 1532961.5,
+                "fraud_allowed": 3,
+                "legit_reviewed_pct": 0.5078630743372552,
+                "legit_blocked": 21,
+                "cost_change": -6.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "odds_factor",
+                "amount": 0.5,
+                "t_review": 4.9451474081667345e-06,
+                "t_block": 0.45985401459854014,
+                "total_cost": 1532988.5,
+                "fraud_allowed": 3,
+                "legit_reviewed_pct": 0.5078547536236707,
+                "legit_blocked": 31,
+                "cost_change": 21.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "odds_factor",
+                "amount": 2.0,
+                "t_review": 4.9451474081667345e-06,
+                "t_block": 0.7730061349693251,
+                "total_cost": 1532964.5,
+                "fraud_allowed": 3,
+                "legit_reviewed_pct": 0.5078655705513305,
+                "legit_blocked": 18,
+                "cost_change": -3.0
+              }
+            ],
+            "recall_by_amount_quartile": [
+              {
+                "quartile": "Q1",
+                "n_fraud": 200,
+                "recall_at_review": 1.0,
+                "recall_at_block": 0.6
+              },
+              {
+                "quartile": "Q2",
+                "n_fraud": 206,
+                "recall_at_review": 0.9854368932038835,
+                "recall_at_block": 0.6213592233009708
+              },
+              {
+                "quartile": "Q3",
+                "n_fraud": 190,
+                "recall_at_review": 1.0,
+                "recall_at_block": 0.8894736842105263
+              },
+              {
+                "quartile": "Q4",
+                "n_fraud": 225,
+                "recall_at_review": 1.0,
+                "recall_at_block": 0.9866666666666667
+              }
+            ]
+          }
+        },
+        "blind_spot": {
+          "definition": "real fraud with raw score < 0.001",
+          "n": 33,
+          "amount": 3710902.26,
+          "n_allowed_at_deployed_threshold": 3
+        }
+      },
+      "3": {
+        "pr_auc": 0.8559526331019498,
+        "ci_low": 0.8299064197549038,
+        "ci_high": 0.8774647003005875,
+        "n_bootstrap": 200,
+        "calibration_held_out": {
+          "brier": 0.00015003082672303337,
+          "ece": 1.0819649439166445e-05,
+          "mean_predicted": 0.0006807177454290765,
+          "base_rate": 0.0006834951714641597
+        },
+        "calibration_method": "platt",
+        "operating_points": {
+          "robust": {
+            "t_review": 2.5751340534900166e-05,
+            "t_block": 0.655,
+            "total_cost": 1318956.17,
+            "fraud_allowed": 4,
+            "fraud_allowed_amount": 1236247.17,
+            "fraud_reviewed": 190,
+            "fraud_blocked": 628,
+            "legit_reviewed": 82469,
+            "legit_reviewed_pct": 0.0686200928591636,
+            "legit_blocked": 10,
+            "block_precision": 0.9843260188087775,
+            "block_recall": 0.7639902676399026,
+            "block_f1": 0.8602739726027396,
+            "n_fraud": 822,
+            "n_legit": 1201820,
+            "eval_2_total_cost": 608596.72,
+            "robustness": [
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": -0.05,
+                "t_review": 0.0,
+                "t_block": 0.655,
+                "total_cost": 1202054.0,
+                "fraud_allowed": 0,
+                "legit_reviewed_pct": 0.9999916792864156,
+                "legit_blocked": 10,
+                "cost_change": -116902.16999999993
+              },
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": -0.02,
+                "t_review": 0.0,
+                "t_block": 0.655,
+                "total_cost": 1202054.0,
+                "fraud_allowed": 0,
+                "legit_reviewed_pct": 0.9999916792864156,
+                "legit_blocked": 10,
+                "cost_change": -116902.16999999993
+              },
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": 0.02,
+                "t_review": 0.0200257513405349,
+                "t_block": 0.655,
+                "total_cost": 13898534.090000002,
+                "fraud_allowed": 110,
+                "legit_reviewed_pct": 0.0010018139155613984,
+                "legit_blocked": 10,
+                "cost_change": 12579577.920000002
+              },
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": 0.05,
+                "t_review": 0.050025751340534906,
+                "t_block": 0.655,
+                "total_cost": 20484850.080000002,
+                "fraud_allowed": 134,
+                "legit_reviewed_pct": 0.00030370604583049044,
+                "legit_blocked": 10,
+                "cost_change": 19165893.910000004
+              },
+              {
+                "moved": "t_review",
+                "kind": "odds_factor",
+                "amount": 0.5,
+                "t_review": 1.2875836052469512e-05,
+                "t_block": 0.655,
+                "total_cost": 1438958.17,
+                "fraud_allowed": 4,
+                "legit_reviewed_pct": 0.16847032001464446,
+                "legit_blocked": 10,
+                "cost_change": 120002.0
+              },
+              {
+                "moved": "t_review",
+                "kind": "odds_factor",
+                "amount": 2.0,
+                "t_review": 5.150135484087382e-05,
+                "t_block": 0.655,
+                "total_cost": 1292921.17,
+                "fraud_allowed": 4,
+                "legit_reviewed_pct": 0.04695711504218602,
+                "legit_blocked": 10,
+                "cost_change": -26035.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": -0.05,
+                "t_review": 2.5751340534900166e-05,
+                "t_block": 0.605,
+                "total_cost": 1318968.17,
+                "fraud_allowed": 4,
+                "legit_reviewed_pct": 0.06861676457372984,
+                "legit_blocked": 14,
+                "cost_change": 12.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": -0.02,
+                "t_review": 2.5751340534900166e-05,
+                "t_block": 0.635,
+                "total_cost": 1318960.17,
+                "fraud_allowed": 4,
+                "legit_reviewed_pct": 0.06861926078780516,
+                "legit_blocked": 11,
+                "cost_change": 4.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": 0.02,
+                "t_review": 2.5751340534900166e-05,
+                "t_block": 0.675,
+                "total_cost": 1318960.17,
+                "fraud_allowed": 4,
+                "legit_reviewed_pct": 0.0686200928591636,
+                "legit_blocked": 10,
+                "cost_change": 4.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": 0.05,
+                "t_review": 2.5751340534900166e-05,
+                "t_block": 0.7050000000000001,
+                "total_cost": 1318953.17,
+                "fraud_allowed": 4,
+                "legit_reviewed_pct": 0.06862175700188049,
+                "legit_blocked": 8,
+                "cost_change": -3.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "odds_factor",
+                "amount": 0.5,
+                "t_review": 2.5751340534900166e-05,
+                "t_block": 0.48698884758364314,
+                "total_cost": 1318963.17,
+                "fraud_allowed": 4,
+                "legit_reviewed_pct": 0.06861510043101296,
+                "legit_blocked": 16,
+                "cost_change": 7.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "odds_factor",
+                "amount": 2.0,
+                "t_review": 2.5751340534900166e-05,
+                "t_block": 0.7915407854984894,
+                "total_cost": 1318948.17,
+                "fraud_allowed": 4,
+                "legit_reviewed_pct": 0.0686242532159558,
+                "legit_blocked": 5,
+                "cost_change": -8.0
+              }
+            ],
+            "recall_by_amount_quartile": [
+              {
+                "quartile": "Q1",
+                "n_fraud": 200,
+                "recall_at_review": 1.0,
+                "recall_at_block": 0.56
+              },
+              {
+                "quartile": "Q2",
+                "n_fraud": 206,
+                "recall_at_review": 0.9805825242718447,
+                "recall_at_block": 0.6116504854368932
+              },
+              {
+                "quartile": "Q3",
+                "n_fraud": 190,
+                "recall_at_review": 1.0,
+                "recall_at_block": 0.8842105263157894
+              },
+              {
+                "quartile": "Q4",
+                "n_fraud": 225,
+                "recall_at_review": 1.0,
+                "recall_at_block": 0.9866666666666667
+              }
+            ]
+          },
+          "plain": {
+            "t_review": 5.182691140258363e-05,
+            "t_block": 0.535,
+            "total_cost": 1292782.17,
+            "fraud_allowed": 4,
+            "fraud_allowed_amount": 1236247.17,
+            "fraud_reviewed": 178,
+            "fraud_blocked": 640,
+            "legit_reviewed": 56282,
+            "legit_reviewed_pct": 0.04683064019570318,
+            "legit_blocked": 15,
+            "block_precision": 0.9770992366412213,
+            "block_recall": 0.7785888077858881,
+            "block_f1": 0.8666215301286392,
+            "n_fraud": 822,
+            "n_legit": 1201820,
+            "eval_2_total_cost": 584889.72,
+            "robustness": [
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": -0.05,
+                "t_review": 0.0,
+                "t_block": 0.535,
+                "total_cost": 1202062.0,
+                "fraud_allowed": 0,
+                "legit_reviewed_pct": 0.9999875189296235,
+                "legit_blocked": 15,
+                "cost_change": -90720.16999999993
+              },
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": -0.02,
+                "t_review": 0.0,
+                "t_block": 0.535,
+                "total_cost": 1202062.0,
+                "fraud_allowed": 0,
+                "legit_reviewed_pct": 0.9999875189296235,
+                "legit_blocked": 15,
+                "cost_change": -90720.16999999993
+              },
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": 0.02,
+                "t_review": 0.020051826911402584,
+                "t_block": 0.535,
+                "total_cost": 13898539.090000002,
+                "fraud_allowed": 110,
+                "legit_reviewed_pct": 0.0009951573446938808,
+                "legit_blocked": 15,
+                "cost_change": 12605756.920000002
+              },
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": 0.05,
+                "t_review": 0.050051826911402586,
+                "t_block": 0.535,
+                "total_cost": 20484857.080000002,
+                "fraud_allowed": 134,
+                "legit_reviewed_pct": 0.00029871361767985224,
+                "legit_blocked": 15,
+                "cost_change": 19192074.910000004
+              },
+              {
+                "moved": "t_review",
+                "kind": "odds_factor",
+                "amount": 0.5,
+                "t_review": 2.591412722587972e-05,
+                "t_block": 0.535,
+                "total_cost": 1318565.17,
+                "fraud_allowed": 4,
+                "legit_reviewed_pct": 0.06828393603035396,
+                "legit_blocked": 15,
+                "cost_change": 25783.0
+              },
+              {
+                "moved": "t_review",
+                "kind": "odds_factor",
+                "amount": 2.0,
+                "t_review": 0.0001036484510260789,
+                "t_block": 0.535,
+                "total_cost": 1278458.17,
+                "fraud_allowed": 4,
+                "legit_reviewed_pct": 0.03491205005741292,
+                "legit_blocked": 15,
+                "cost_change": -14324.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": -0.05,
+                "t_review": 5.182691140258363e-05,
+                "t_block": 0.48500000000000004,
+                "total_cost": 1292781.17,
+                "fraud_allowed": 4,
+                "legit_reviewed_pct": 0.04682980812434474,
+                "legit_blocked": 16,
+                "cost_change": -1.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": -0.02,
+                "t_review": 5.182691140258363e-05,
+                "t_block": 0.515,
+                "total_cost": 1292779.17,
+                "fraud_allowed": 4,
+                "legit_reviewed_pct": 0.04683064019570318,
+                "legit_blocked": 15,
+                "cost_change": -3.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": 0.02,
+                "t_review": 5.182691140258363e-05,
+                "t_block": 0.555,
+                "total_cost": 1292783.17,
+                "fraud_allowed": 4,
+                "legit_reviewed_pct": 0.04683064019570318,
+                "legit_blocked": 15,
+                "cost_change": 1.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": 0.05,
+                "t_review": 5.182691140258363e-05,
+                "t_block": 0.5850000000000001,
+                "total_cost": 1292783.17,
+                "fraud_allowed": 4,
+                "legit_reviewed_pct": 0.04683147226706162,
+                "legit_blocked": 14,
+                "cost_change": 1.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "odds_factor",
+                "amount": 0.5,
+                "t_review": 5.182691140258363e-05,
+                "t_block": 0.36518771331058025,
+                "total_cost": 1292797.17,
+                "fraud_allowed": 4,
+                "legit_reviewed_pct": 0.04682481569619411,
+                "legit_blocked": 22,
+                "cost_change": 15.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "odds_factor",
+                "amount": 2.0,
+                "t_review": 5.182691140258363e-05,
+                "t_block": 0.6970684039087948,
+                "total_cost": 1292771.17,
+                "fraud_allowed": 4,
+                "legit_reviewed_pct": 0.046836464695212264,
+                "legit_blocked": 8,
+                "cost_change": -11.0
+              }
+            ],
+            "recall_by_amount_quartile": [
+              {
+                "quartile": "Q1",
+                "n_fraud": 200,
+                "recall_at_review": 1.0,
+                "recall_at_block": 0.585
+              },
+              {
+                "quartile": "Q2",
+                "n_fraud": 206,
+                "recall_at_review": 0.9805825242718447,
+                "recall_at_block": 0.6359223300970874
+              },
+              {
+                "quartile": "Q3",
+                "n_fraud": 190,
+                "recall_at_review": 1.0,
+                "recall_at_block": 0.8842105263157894
+              },
+              {
+                "quartile": "Q4",
+                "n_fraud": 225,
+                "recall_at_review": 1.0,
+                "recall_at_block": 0.9955555555555555
+              }
+            ]
+          }
+        },
+        "blind_spot": {
+          "definition": "real fraud with raw score < 0.001",
+          "n": 35,
+          "amount": 3344210.0300000003,
+          "n_allowed_at_deployed_threshold": 4
+        }
+      },
+      "4": {
+        "pr_auc": 0.8580698583398039,
+        "ci_low": 0.832295294176846,
+        "ci_high": 0.8789539048197363,
+        "n_bootstrap": 200,
+        "calibration_held_out": {
+          "brier": 0.00015075628399428294,
+          "ece": 1.1128716559262476e-05,
+          "mean_predicted": 0.000682066801198312,
+          "base_rate": 0.0006834951714641597
+        },
+        "calibration_method": "platt",
+        "operating_points": {
+          "robust": {
+            "t_review": 0.00011220184543019641,
+            "t_block": 0.7,
+            "total_cost": 703020.11,
+            "fraud_allowed": 2,
+            "fraud_allowed_amount": 662490.11,
+            "fraud_reviewed": 197,
+            "fraud_blocked": 623,
+            "legit_reviewed": 40278,
+            "legit_reviewed_pct": 0.033514170175234226,
+            "legit_blocked": 11,
+            "block_precision": 0.9826498422712934,
+            "block_recall": 0.7579075425790754,
+            "block_f1": 0.8557692307692308,
+            "n_fraud": 822,
+            "n_legit": 1201820,
+            "eval_2_total_cost": 569608.72,
+            "robustness": [
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": -0.05,
+                "t_review": 0.0,
+                "t_block": 0.7,
+                "total_cost": 1202063.0,
+                "fraud_allowed": 0,
+                "legit_reviewed_pct": 0.9999908472150572,
+                "legit_blocked": 11,
+                "cost_change": 499042.89
+              },
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": -0.02,
+                "t_review": 0.0,
+                "t_block": 0.7,
+                "total_cost": 1202063.0,
+                "fraud_allowed": 0,
+                "legit_reviewed_pct": 0.9999908472150572,
+                "legit_blocked": 11,
+                "cost_change": 499042.89
+              },
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": 0.02,
+                "t_review": 0.020112201845430198,
+                "t_block": 0.7,
+                "total_cost": 14711798.16,
+                "fraud_allowed": 112,
+                "legit_reviewed_pct": 0.0009835083456757251,
+                "legit_blocked": 11,
+                "cost_change": 14008778.05
+              },
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": 0.05,
+                "t_review": 0.0501122018454302,
+                "t_block": 0.7,
+                "total_cost": 19491518.89,
+                "fraud_allowed": 132,
+                "legit_reviewed_pct": 0.00028040804779417883,
+                "legit_blocked": 11,
+                "cost_change": 18788498.78
+              },
+              {
+                "moved": "t_review",
+                "kind": "odds_factor",
+                "amount": 0.5,
+                "t_review": 5.6104070205204785e-05,
+                "t_block": 0.7,
+                "total_cost": 715708.11,
+                "fraud_allowed": 2,
+                "legit_reviewed_pct": 0.04407149157111714,
+                "legit_blocked": 11,
+                "cost_change": 12688.0
+              },
+              {
+                "moved": "t_review",
+                "kind": "odds_factor",
+                "amount": 2.0,
+                "t_review": 0.00022437851517691508,
+                "t_block": 0.7,
+                "total_cost": 696576.11,
+                "fraud_allowed": 2,
+                "legit_reviewed_pct": 0.028152302341448804,
+                "legit_blocked": 11,
+                "cost_change": -6444.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": -0.05,
+                "t_review": 0.00011220184543019641,
+                "t_block": 0.6499999999999999,
+                "total_cost": 703020.11,
+                "fraud_allowed": 2,
+                "legit_reviewed_pct": 0.03351333810387579,
+                "legit_blocked": 12,
+                "cost_change": 0.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": -0.02,
+                "t_review": 0.00011220184543019641,
+                "t_block": 0.6799999999999999,
+                "total_cost": 703019.11,
+                "fraud_allowed": 2,
+                "legit_reviewed_pct": 0.033514170175234226,
+                "legit_blocked": 11,
+                "cost_change": -1.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": 0.02,
+                "t_review": 0.00011220184543019641,
+                "t_block": 0.72,
+                "total_cost": 703013.11,
+                "fraud_allowed": 2,
+                "legit_reviewed_pct": 0.033515834317951104,
+                "legit_blocked": 9,
+                "cost_change": -7.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": 0.05,
+                "t_review": 0.00011220184543019641,
+                "t_block": 0.75,
+                "total_cost": 703009.11,
+                "fraud_allowed": 2,
+                "legit_reviewed_pct": 0.03351749846066799,
+                "legit_blocked": 7,
+                "cost_change": -11.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "odds_factor",
+                "amount": 0.5,
+                "t_review": 0.00011220184543019641,
+                "t_block": 0.5384615384615384,
+                "total_cost": 703027.11,
+                "fraud_allowed": 2,
+                "legit_reviewed_pct": 0.03350917774708359,
+                "legit_blocked": 17,
+                "cost_change": 7.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "odds_factor",
+                "amount": 2.0,
+                "t_review": 0.00011220184543019641,
+                "t_block": 0.8235294117647058,
+                "total_cost": 703008.11,
+                "fraud_allowed": 2,
+                "legit_reviewed_pct": 0.03351916260338487,
+                "legit_blocked": 5,
+                "cost_change": -12.0
+              }
+            ],
+            "recall_by_amount_quartile": [
+              {
+                "quartile": "Q1",
+                "n_fraud": 200,
+                "recall_at_review": 1.0,
+                "recall_at_block": 0.55
+              },
+              {
+                "quartile": "Q2",
+                "n_fraud": 206,
+                "recall_at_review": 0.9902912621359223,
+                "recall_at_block": 0.6067961165048543
+              },
+              {
+                "quartile": "Q3",
+                "n_fraud": 190,
+                "recall_at_review": 1.0,
+                "recall_at_block": 0.8736842105263158
+              },
+              {
+                "quartile": "Q4",
+                "n_fraud": 225,
+                "recall_at_review": 1.0,
+                "recall_at_block": 0.9866666666666667
+              }
+            ]
+          },
+          "plain": {
+            "t_review": 0.000223872113856834,
+            "t_block": 0.575,
+            "total_cost": 696593.11,
+            "fraud_allowed": 2,
+            "fraud_allowed_amount": 662490.11,
+            "fraud_reviewed": 182,
+            "fraud_blocked": 638,
+            "legit_reviewed": 33836,
+            "legit_reviewed_pct": 0.028153966484165682,
+            "legit_blocked": 17,
+            "block_precision": 0.9740458015267176,
+            "block_recall": 0.7761557177615572,
+            "block_f1": 0.8639133378469872,
+            "n_fraud": 822,
+            "n_legit": 1201820,
+            "eval_2_total_cost": 563105.72,
+            "robustness": [
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": -0.05,
+                "t_review": 0.0,
+                "t_block": 0.575,
+                "total_cost": 1202072.0,
+                "fraud_allowed": 0,
+                "legit_reviewed_pct": 0.9999858547869065,
+                "legit_blocked": 17,
+                "cost_change": 505478.89
+              },
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": -0.02,
+                "t_review": 0.0,
+                "t_block": 0.575,
+                "total_cost": 1202072.0,
+                "fraud_allowed": 0,
+                "legit_reviewed_pct": 0.9999858547869065,
+                "legit_blocked": 17,
+                "cost_change": 505478.89
+              },
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": 0.02,
+                "t_review": 0.020223872113856834,
+                "t_block": 0.575,
+                "total_cost": 14711797.16,
+                "fraud_allowed": 112,
+                "legit_reviewed_pct": 0.0009701952039406899,
+                "legit_blocked": 17,
+                "cost_change": 14015204.05
+              },
+              {
+                "moved": "t_review",
+                "kind": "absolute",
+                "amount": 0.05,
+                "t_review": 0.050223872113856836,
+                "t_block": 0.575,
+                "total_cost": 19491527.89,
+                "fraud_allowed": 132,
+                "legit_reviewed_pct": 0.0002754156196435406,
+                "legit_blocked": 17,
+                "cost_change": 18794934.78
+              },
+              {
+                "moved": "t_review",
+                "kind": "odds_factor",
+                "amount": 0.5,
+                "t_review": 0.00011194858801193777,
+                "t_block": 0.575,
+                "total_cost": 703060.11,
+                "fraud_allowed": 2,
+                "legit_reviewed_pct": 0.03353497195919522,
+                "legit_blocked": 17,
+                "cost_change": 6467.0
+              },
+              {
+                "moved": "t_review",
+                "kind": "odds_factor",
+                "amount": 2.0,
+                "t_review": 0.000447644012702289,
+                "t_block": 0.575,
+                "total_cost": 1164868.35,
+                "fraud_allowed": 6,
+                "legit_reviewed_pct": 0.02458770864189313,
+                "legit_blocked": 17,
+                "cost_change": 468275.2400000001
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": -0.05,
+                "t_review": 0.000223872113856834,
+                "t_block": 0.5249999999999999,
+                "total_cost": 696594.11,
+                "fraud_allowed": 2,
+                "legit_reviewed_pct": 0.028153134412807243,
+                "legit_blocked": 18,
+                "cost_change": 1.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": -0.02,
+                "t_review": 0.000223872113856834,
+                "t_block": 0.5549999999999999,
+                "total_cost": 696591.11,
+                "fraud_allowed": 2,
+                "legit_reviewed_pct": 0.028153966484165682,
+                "legit_blocked": 17,
+                "cost_change": -2.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": 0.02,
+                "t_review": 0.000223872113856834,
+                "t_block": 0.595,
+                "total_cost": 696591.11,
+                "fraud_allowed": 2,
+                "legit_reviewed_pct": 0.02815479855552412,
+                "legit_blocked": 16,
+                "cost_change": -2.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "absolute",
+                "amount": 0.05,
+                "t_review": 0.000223872113856834,
+                "t_block": 0.625,
+                "total_cost": 696581.11,
+                "fraud_allowed": 2,
+                "legit_reviewed_pct": 0.028158126840957882,
+                "legit_blocked": 12,
+                "cost_change": -12.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "odds_factor",
+                "amount": 0.5,
+                "t_review": 0.000223872113856834,
+                "t_block": 0.40350877192982454,
+                "total_cost": 696615.11,
+                "fraud_allowed": 2,
+                "legit_reviewed_pct": 0.028146477841939726,
+                "legit_blocked": 26,
+                "cost_change": 22.0
+              },
+              {
+                "moved": "t_block",
+                "kind": "odds_factor",
+                "amount": 2.0,
+                "t_review": 0.000223872113856834,
+                "t_block": 0.7301587301587301,
+                "total_cost": 696578.11,
+                "fraud_allowed": 2,
+                "legit_reviewed_pct": 0.0281606230550332,
+                "legit_blocked": 9,
+                "cost_change": -15.0
+              }
+            ],
+            "recall_by_amount_quartile": [
+              {
+                "quartile": "Q1",
+                "n_fraud": 200,
+                "recall_at_review": 1.0,
+                "recall_at_block": 0.585
+              },
+              {
+                "quartile": "Q2",
+                "n_fraud": 206,
+                "recall_at_review": 0.9902912621359223,
+                "recall_at_block": 0.6359223300970874
+              },
+              {
+                "quartile": "Q3",
+                "n_fraud": 190,
+                "recall_at_review": 1.0,
+                "recall_at_block": 0.8842105263157894
+              },
+              {
+                "quartile": "Q4",
+                "n_fraud": 225,
+                "recall_at_review": 1.0,
+                "recall_at_block": 0.9866666666666667
+              }
+            ]
+          }
+        },
+        "blind_spot": {
+          "definition": "real fraud with raw score < 0.001",
+          "n": 27,
+          "amount": 2528987.54,
+          "n_allowed_at_deployed_threshold": 2
+        }
+      }
+    },
+    "seed_summary": {
+      "pr_auc": {
+        "mean": 0.854168747937754,
+        "std": 0.002768214231478304,
+        "min": 0.8498115338182548,
+        "max": 0.8580698583398039,
+        "values": [
+          0.8536586831557074,
+          0.853351031273054,
+          0.8498115338182548,
+          0.8559526331019498,
+          0.8580698583398039
+        ]
+      },
+      "total_cost": {
+        "mean": 1308429.522,
+        "std": 395438.0988963121,
+        "min": 703020.11,
+        "max": 1822455.33,
+        "values": [
+          1822455.33,
+          1077073.5,
+          1620642.5,
+          1318956.17,
+          703020.11
+        ]
+      },
+      "fraud_allowed": {
+        "mean": 3.6,
+        "std": 1.3564659966250538,
+        "min": 2.0,
+        "max": 6.0,
+        "values": [
+          6,
+          3,
+          3,
+          4,
+          2
+        ]
+      },
+      "legit_reviewed_pct": {
+        "mean": 0.16943668769033632,
+        "std": 0.20853673137540302,
+        "min": 0.033514170175234226,
+        "max": 0.5808207551879649,
+        "values": [
+          0.03568338020668652,
+          0.12854504002263234,
+          0.5808207551879649,
+          0.0686200928591636,
+          0.033514170175234226
+        ]
+      },
+      "legit_blocked": {
+        "mean": 12.6,
+        "std": 3.9293765408777004,
+        "min": 8.0,
+        "max": 19.0,
+        "values": [
+          8,
+          15,
+          19,
+          10,
+          11
+        ]
+      }
+    },
+    "ensemble": {
+      "pr_auc": 0.8589569528576115,
+      "ci_low": 0.8337767519545627,
+      "ci_high": 0.8808151965933994,
+      "n_bootstrap": 200,
+      "calibration_held_out": {
+        "brier": 0.00014867986723387467,
+        "ece": 1.3569401887813454e-05,
+        "mean_predicted": 0.0006791085046920051,
+        "base_rate": 0.0006834951714641597
+      },
+      "calibration_method": "platt",
+      "operating_points": {
+        "robust": {
+          "t_review": 0.00015997565537215173,
+          "t_block": 0.675,
+          "total_cost": 698581.11,
+          "fraud_allowed": 2,
+          "fraud_allowed_amount": 662490.11,
+          "fraud_reviewed": 193,
+          "fraud_blocked": 627,
+          "legit_reviewed": 35843,
+          "legit_reviewed_pct": 0.02982393370055416,
+          "legit_blocked": 11,
+          "block_precision": 0.9827586206896551,
+          "block_recall": 0.7627737226277372,
+          "block_f1": 0.8589041095890411,
+          "n_fraud": 822,
+          "n_legit": 1201820,
+          "eval_2_total_cost": 564775.72,
+          "robustness": [
+            {
+              "moved": "t_review",
+              "kind": "absolute",
+              "amount": -0.05,
+              "t_review": 0.0,
+              "t_block": 0.675,
+              "total_cost": 1202059.0,
+              "fraud_allowed": 0,
+              "legit_reviewed_pct": 0.9999908472150572,
+              "legit_blocked": 11,
+              "cost_change": 503477.89
+            },
+            {
+              "moved": "t_review",
+              "kind": "absolute",
+              "amount": -0.02,
+              "t_review": 0.0,
+              "t_block": 0.675,
+              "total_cost": 1202059.0,
+              "fraud_allowed": 0,
+              "legit_reviewed_pct": 0.9999908472150572,
+              "legit_blocked": 11,
+              "cost_change": 503477.89
+            },
+            {
+              "moved": "t_review",
+              "kind": "absolute",
+              "amount": 0.02,
+              "t_review": 0.020159975655372152,
+              "t_block": 0.675,
+              "total_cost": 14344052.02,
+              "fraud_allowed": 112,
+              "legit_reviewed_pct": 0.0009468972059043783,
+              "legit_blocked": 11,
+              "cost_change": 13645470.91
+            },
+            {
+              "moved": "t_review",
+              "kind": "absolute",
+              "amount": 0.05,
+              "t_review": 0.050159975655372155,
+              "t_block": 0.675,
+              "total_cost": 18948505.840000004,
+              "fraud_allowed": 131,
+              "legit_reviewed_pct": 0.0002762476910019803,
+              "legit_blocked": 11,
+              "cost_change": 18249924.730000004
+            },
+            {
+              "moved": "t_review",
+              "kind": "odds_factor",
+              "amount": 0.5,
+              "t_review": 7.999422625046107e-05,
+              "t_block": 0.675,
+              "total_cost": 706621.11,
+              "fraud_allowed": 2,
+              "legit_reviewed_pct": 0.03651378742240934,
+              "legit_blocked": 11,
+              "cost_change": 8040.0
+            },
+            {
+              "moved": "t_review",
+              "kind": "odds_factor",
+              "amount": 2.0,
+              "t_review": 0.0003199001345106315,
+              "t_block": 0.675,
+              "total_cost": 741928.91,
+              "fraud_allowed": 3,
+              "legit_reviewed_pct": 0.025731806759747716,
+              "legit_blocked": 11,
+              "cost_change": 43347.80000000005
+            },
+            {
+              "moved": "t_block",
+              "kind": "absolute",
+              "amount": -0.05,
+              "t_review": 0.00015997565537215173,
+              "t_block": 0.625,
+              "total_cost": 698574.11,
+              "fraud_allowed": 2,
+              "legit_reviewed_pct": 0.02982310162919572,
+              "legit_blocked": 12,
+              "cost_change": -7.0
+            },
+            {
+              "moved": "t_block",
+              "kind": "absolute",
+              "amount": -0.02,
+              "t_review": 0.00015997565537215173,
+              "t_block": 0.655,
+              "total_cost": 698582.11,
+              "fraud_allowed": 2,
+              "legit_reviewed_pct": 0.02982310162919572,
+              "legit_blocked": 12,
+              "cost_change": 1.0
+            },
+            {
+              "moved": "t_block",
+              "kind": "absolute",
+              "amount": 0.02,
+              "t_review": 0.00015997565537215173,
+              "t_block": 0.6950000000000001,
+              "total_cost": 698575.11,
+              "fraud_allowed": 2,
+              "legit_reviewed_pct": 0.02982559784327104,
+              "legit_blocked": 9,
+              "cost_change": -6.0
+            },
+            {
+              "moved": "t_block",
+              "kind": "absolute",
+              "amount": 0.05,
+              "t_review": 0.00015997565537215173,
+              "t_block": 0.7250000000000001,
+              "total_cost": 698578.11,
+              "fraud_allowed": 2,
+              "legit_reviewed_pct": 0.029826429914629478,
+              "legit_blocked": 8,
+              "cost_change": -3.0
+            },
+            {
+              "moved": "t_block",
+              "kind": "odds_factor",
+              "amount": 0.5,
+              "t_review": 0.00015997565537215173,
+              "t_block": 0.509433962264151,
+              "total_cost": 698582.11,
+              "fraud_allowed": 2,
+              "legit_reviewed_pct": 0.02981977334376196,
+              "legit_blocked": 16,
+              "cost_change": 1.0
+            },
+            {
+              "moved": "t_block",
+              "kind": "odds_factor",
+              "amount": 2.0,
+              "t_review": 0.00015997565537215173,
+              "t_block": 0.8059701492537313,
+              "total_cost": 698570.11,
+              "fraud_allowed": 2,
+              "legit_reviewed_pct": 0.029829758200063238,
+              "legit_blocked": 4,
+              "cost_change": -11.0
+            }
+          ],
+          "recall_by_amount_quartile": [
+            {
+              "quartile": "Q1",
+              "n_fraud": 200,
+              "recall_at_review": 1.0,
+              "recall_at_block": 0.58
+            },
+            {
+              "quartile": "Q2",
+              "n_fraud": 206,
+              "recall_at_review": 0.9902912621359223,
+              "recall_at_block": 0.5970873786407767
+            },
+            {
+              "quartile": "Q3",
+              "n_fraud": 190,
+              "recall_at_review": 1.0,
+              "recall_at_block": 0.8736842105263158
+            },
+            {
+              "quartile": "Q4",
+              "n_fraud": 225,
+              "recall_at_review": 1.0,
+              "recall_at_block": 0.9866666666666667
+            }
+          ]
+        },
+        "plain": {
+          "t_review": 0.00031622776601683794,
+          "t_block": 0.675,
+          "total_cost": 742000.91,
+          "fraud_allowed": 3,
+          "fraud_allowed_amount": 710756.91,
+          "fraud_reviewed": 192,
+          "fraud_blocked": 627,
+          "legit_reviewed": 30997,
+          "legit_reviewed_pct": 0.025791715897555374,
+          "legit_blocked": 11,
+          "block_precision": 0.9827586206896551,
+          "block_recall": 0.7627737226277372,
+          "block_f1": 0.8589041095890411,
+          "n_fraud": 822,
+          "n_legit": 1201820,
+          "eval_2_total_cost": 560217.72,
+          "robustness": [
+            {
+              "moved": "t_review",
+              "kind": "absolute",
+              "amount": -0.05,
+              "t_review": 0.0,
+              "t_block": 0.675,
+              "total_cost": 1202059.0,
+              "fraud_allowed": 0,
+              "legit_reviewed_pct": 0.9999908472150572,
+              "legit_blocked": 11,
+              "cost_change": 460058.08999999997
+            },
+            {
+              "moved": "t_review",
+              "kind": "absolute",
+              "amount": -0.02,
+              "t_review": 0.0,
+              "t_block": 0.675,
+              "total_cost": 1202059.0,
+              "fraud_allowed": 0,
+              "legit_reviewed_pct": 0.9999908472150572,
+              "legit_blocked": 11,
+              "cost_change": 460058.08999999997
+            },
+            {
+              "moved": "t_review",
+              "kind": "absolute",
+              "amount": 0.02,
+              "t_review": 0.02031622776601684,
+              "t_block": 0.675,
+              "total_cost": 14344045.02,
+              "fraud_allowed": 112,
+              "legit_reviewed_pct": 0.0009410727063953005,
+              "legit_blocked": 11,
+              "cost_change": 13602044.11
+            },
+            {
+              "moved": "t_review",
+              "kind": "absolute",
+              "amount": 0.05,
+              "t_review": 0.05031622776601684,
+              "t_block": 0.675,
+              "total_cost": 18948505.840000004,
+              "fraud_allowed": 131,
+              "legit_reviewed_pct": 0.0002762476910019803,
+              "legit_blocked": 11,
+              "cost_change": 18206504.930000003
+            },
+            {
+              "moved": "t_review",
+              "kind": "odds_factor",
+              "amount": 0.5,
+              "t_review": 0.0001581388869618911,
+              "t_block": 0.675,
+              "total_cost": 698691.11,
+              "fraud_allowed": 2,
+              "legit_reviewed_pct": 0.029915461549982526,
+              "legit_blocked": 11,
+              "cost_change": -43309.80000000005
+            },
+            {
+              "moved": "t_review",
+              "kind": "odds_factor",
+              "amount": 2.0,
+              "t_review": 0.0006322555952592354,
+              "t_block": 0.675,
+              "total_cost": 945528.25,
+              "fraud_allowed": 7,
+              "legit_reviewed_pct": 0.022098983208799987,
+              "legit_blocked": 11,
+              "cost_change": 203527.33999999997
+            },
+            {
+              "moved": "t_block",
+              "kind": "absolute",
+              "amount": -0.05,
+              "t_review": 0.00031622776601683794,
+              "t_block": 0.625,
+              "total_cost": 741993.91,
+              "fraud_allowed": 3,
+              "legit_reviewed_pct": 0.025790883826196934,
+              "legit_blocked": 12,
+              "cost_change": -7.0
+            },
+            {
+              "moved": "t_block",
+              "kind": "absolute",
+              "amount": -0.02,
+              "t_review": 0.00031622776601683794,
+              "t_block": 0.655,
+              "total_cost": 742001.91,
+              "fraud_allowed": 3,
+              "legit_reviewed_pct": 0.025790883826196934,
+              "legit_blocked": 12,
+              "cost_change": 1.0
+            },
+            {
+              "moved": "t_block",
+              "kind": "absolute",
+              "amount": 0.02,
+              "t_review": 0.00031622776601683794,
+              "t_block": 0.6950000000000001,
+              "total_cost": 741994.91,
+              "fraud_allowed": 3,
+              "legit_reviewed_pct": 0.025793380040272255,
+              "legit_blocked": 9,
+              "cost_change": -6.0
+            },
+            {
+              "moved": "t_block",
+              "kind": "absolute",
+              "amount": 0.05,
+              "t_review": 0.00031622776601683794,
+              "t_block": 0.7250000000000001,
+              "total_cost": 741997.91,
+              "fraud_allowed": 3,
+              "legit_reviewed_pct": 0.025794212111630695,
+              "legit_blocked": 8,
+              "cost_change": -3.0
+            },
+            {
+              "moved": "t_block",
+              "kind": "odds_factor",
+              "amount": 0.5,
+              "t_review": 0.00031622776601683794,
+              "t_block": 0.509433962264151,
+              "total_cost": 742001.91,
+              "fraud_allowed": 3,
+              "legit_reviewed_pct": 0.025787555540763177,
+              "legit_blocked": 16,
+              "cost_change": 1.0
+            },
+            {
+              "moved": "t_block",
+              "kind": "odds_factor",
+              "amount": 2.0,
+              "t_review": 0.00031622776601683794,
+              "t_block": 0.8059701492537313,
+              "total_cost": 741989.91,
+              "fraud_allowed": 3,
+              "legit_reviewed_pct": 0.02579754039706445,
+              "legit_blocked": 4,
+              "cost_change": -11.0
+            }
+          ],
+          "recall_by_amount_quartile": [
+            {
+              "quartile": "Q1",
+              "n_fraud": 200,
+              "recall_at_review": 0.995,
+              "recall_at_block": 0.58
+            },
+            {
+              "quartile": "Q2",
+              "n_fraud": 206,
+              "recall_at_review": 0.9902912621359223,
+              "recall_at_block": 0.5970873786407767
+            },
+            {
+              "quartile": "Q3",
+              "n_fraud": 190,
+              "recall_at_review": 1.0,
+              "recall_at_block": 0.8736842105263158
+            },
+            {
+              "quartile": "Q4",
+              "n_fraud": 225,
+              "recall_at_review": 1.0,
+              "recall_at_block": 0.9866666666666667
+            }
+          ]
+        }
+      },
+      "blind_spot": {
+        "definition": "real fraud with raw score < 0.001",
+        "n": 32,
+        "amount": 2834751.57,
+        "n_allowed_at_deployed_threshold": 2
+      }
+    }
+  },
+  "hybrid_minus_supervised": {
+    "difference": -0.004254323296770113,
+    "ci_low": -0.009299677182102336,
+    "ci_high": 0.0015231480250173597,
+    "p_two_sided": 0.18,
+    "significant": false,
+    "supervised": "phase2/lightgbm ensemble",
+    "supervised_pr_auc": 0.8632112761543816
+  },
+  "supervised_blind_spot": {
+    "definition": "the 41 held-out frauds (5%) with the lowest supervised ensemble score",
+    "n": 41,
+    "amount": 7421666.58,
+    "anomaly_percentile_median": 0.9307707530586825,
+    "in_top_1pct_most_anomalous": 4,
+    "in_top_5pct_most_anomalous": 15,
+    "in_top_10pct_most_anomalous": 29,
+    "all_fraud_anomaly_percentile_median": 0.9968016250887629,
+    "all_fraud_in_top_5pct_most_anomalous": 759,
+    "hybrid_score_higher_than_supervised": 17
+  }
+}
