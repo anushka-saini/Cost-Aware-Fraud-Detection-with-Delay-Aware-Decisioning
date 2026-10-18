@@ -3,9 +3,11 @@ Fraud Detection — Streamlit Frontend
 Talks to the FastAPI /score endpoint and renders a big visual
 ALLOW / REVIEW / BLOCK decision plus a probability gauge.
 
+A lightweight backup demo. The main interface is the React dashboard.
+
 Run this AFTER the FastAPI backend is already running:
-    Terminal 1: python -m uvicorn main:app --host 0.0.0.0 --port 8000   (from api/)
-    Terminal 2: streamlit run app.py                                    (from wherever this file is)
+    Terminal 1: uvicorn fraud.service.app:app --port 8000     (from the project root)
+    Terminal 2: streamlit run app.py
 """
 
 import streamlit as st
@@ -165,9 +167,8 @@ def apply_random_row():
         "destination_transactions_last_7d": float(row["destination_transactions_last_7d"]),
         "destination_avg_previous_amount": float(row["destination_avg_previous_amount"]),
         "destination_amount_deviation": float(row["destination_amount_deviation"]),
-        "total_transactions": float(row["total_transactions"]),
-        "total_transaction_amount": float(row["total_transaction_amount"]),
-        "avg_transaction_amount": float(row["avg_transaction_amount"]),
+        # Hour index of the transaction: the model uses the time of day.
+        "step": int(row["step"]),
     }
     st.session_state.ground_truth = int(row["actual_fraud"])
 
@@ -231,7 +232,7 @@ st.markdown("""
 
 st.markdown('<p class="title-text">🛡️ Cost-Aware Fraud Detection</p>', unsafe_allow_html=True)
 st.markdown(
-    '<p class="subtitle-text">Delay-aware decisioning on PaySim transactions — Random Forest, cost-optimized thresholds</p>',
+    '<p class="subtitle-text">Three-tier decisioning on PaySim transactions — calibrated scores, cost-derived thresholds</p>',
     unsafe_allow_html=True,
 )
 
@@ -346,12 +347,10 @@ if submitted:
         **type_flags,
     }
 
-    # Carry through real system-level values from a preset, if set.
-    # Manual entries leave these out entirely so the API falls back to
-    # its own median defaults.
-    for sys_field in ("total_transactions", "total_transaction_amount", "avg_transaction_amount"):
-        if fv.get(sys_field) is not None:
-            payload[sys_field] = fv[sys_field]
+    # Carry the transaction's hour through when it comes from real data.
+    # Manual entries leave it out and the API uses the current hour.
+    if fv.get("step") is not None:
+        payload["step"] = fv["step"]
 
     try:
         response = requests.post(API_URL, json=payload, timeout=5)
@@ -362,7 +361,7 @@ if submitted:
     except requests.exceptions.ConnectionError:
         st.error(
             "Could not reach the API. Make sure the FastAPI backend is running:\n\n"
-            "`python -m uvicorn main:app --host 0.0.0.0 --port 8000` (run from the `api/` folder)"
+            "`uvicorn fraud.service.app:app --port 8000` (run from the project root)"
         )
     except requests.exceptions.RequestException as e:
         st.error(f"API request failed: {e}")
@@ -473,4 +472,4 @@ if result is not None:
         st.json(result)
 
 st.markdown("---")
-st.caption("Cost-aware, delay-aware fraud decisioning · PaySim dataset · Random Forest")
+st.caption("Cost-aware fraud decisioning · PaySim dataset")
