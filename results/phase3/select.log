@@ -1,0 +1,16 @@
+train    1,311,225 rows   778 fraud
+eval_1   1,228,723 rows   799 fraud
+eval_2   1,176,235 rows   786 fraud
+
+[lightgbm]
+  lightgbm scale_pos_weight=1: eval_1 PR-AUC mean 0.4552 (std 0.0019) over seeds [42, 1, 2]
+  lightgbm scale_pos_weight=5: eval_1 PR-AUC mean 0.3971 (std 0.0371) over seeds [42, 1, 2]
+  lightgbm scale_pos_weight=10: eval_1 PR-AUC mean 0.3006 (std 0.0156) over seeds [42, 1, 2]
+  lightgbm scale_pos_weight=20: eval_1 PR-AUC mean 0.2004 (std 0.0694) over seeds [42, 1, 2]
+  lightgbm scale_pos_weight=50: eval_1 PR-AUC mean 0.1485 (std 0.0930) over seeds [42, 1, 2]
+  lightgbm scale_pos_weight=100: eval_1 PR-AUC mean 0.0575 (std 0.0099) over seeds [42, 1, 2]
+  lightgbm scale_pos_weight=200: eval_1 PR-AUC mean 0.0429 (std 0.0059) over seeds [42, 1, 2]
+  lightgbm scale_pos_weight=500: eval_1 PR-AUC mean 0.0090 (std 0.0009) over seeds [42, 1, 2]
+  -> chosen on eval_1: scale_pos_weight = 1
+  -> ensemble on eval_2: calibration=isotonic, review>=1e-07, block>=0.8, cost 446,410, fraud allowed 0
+  done in 175s

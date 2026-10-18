@@ -1,0 +1,2 @@
+held_out 1,202,642 rows  822 fraud
+[lightgbm] seeds PR-AUC 0.5020 +/- 0.0023 | ensemble PR-AUC 0.5028 [0.4659, 0.5341] | cost 464,257, fraud allowed 0, legit reviewed 38.58%, legit blocked 2
