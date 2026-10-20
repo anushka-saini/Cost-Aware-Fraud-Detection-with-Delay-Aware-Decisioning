@@ -1,0 +1,506 @@
+[
+  {
+    "period": "eval_1",
+    "days": [
+      8,
+      9,
+      10
+    ],
+    "reference": "train (days 5-7)",
+    "n_rows": 1228723,
+    "created_at": "2026-10-09T18:05:42+00:00",
+    "model": {
+      "name": "fraud_scorer",
+      "version": "v2"
+    },
+    "status": "warning",
+    "thresholds": {
+      "psi_warning": 0.1,
+      "psi_alert": 0.25,
+      "rate_band": [
+        0.5,
+        2.0
+      ],
+      "override_rate_band": [
+        0.0,
+        0.3
+      ]
+    },
+    "psi": [
+      {
+        "name": "amount",
+        "kind": "feature",
+        "psi": 0.008717000032244957,
+        "level": "ok"
+      },
+      {
+        "name": "destination_transactions_last_24h",
+        "kind": "feature",
+        "psi": 0.06819370286660073,
+        "level": "ok"
+      },
+      {
+        "name": "destination_transactions_last_7d",
+        "kind": "feature",
+        "psi": 0.175799542939632,
+        "level": "warning"
+      },
+      {
+        "name": "destination_avg_previous_amount",
+        "kind": "feature",
+        "psi": 0.002502975510161136,
+        "level": "ok"
+      },
+      {
+        "name": "destination_amount_deviation",
+        "kind": "feature",
+        "psi": 0.007542368096526421,
+        "level": "ok"
+      },
+      {
+        "name": "destination_is_first_transaction",
+        "kind": "feature",
+        "psi": 0.0005042040621346024,
+        "level": "ok"
+      },
+      {
+        "name": "origin_balance_error",
+        "kind": "feature",
+        "psi": 0.004367589863448605,
+        "level": "ok"
+      },
+      {
+        "name": "destination_balance_error",
+        "kind": "feature",
+        "psi": 0.0073326957611709554,
+        "level": "ok"
+      },
+      {
+        "name": "destination_balance_is_zero",
+        "kind": "feature",
+        "psi": 0.0005700496749833654,
+        "level": "ok"
+      },
+      {
+        "name": "hour_sin",
+        "kind": "feature",
+        "psi": 0.012124380087092896,
+        "level": "ok"
+      },
+      {
+        "name": "hour_cos",
+        "kind": "feature",
+        "psi": 0.010736957623243927,
+        "level": "ok"
+      },
+      {
+        "name": "type_CASH_IN",
+        "kind": "feature",
+        "psi": 0.0003039880232628667,
+        "level": "ok"
+      },
+      {
+        "name": "type_CASH_OUT",
+        "kind": "feature",
+        "psi": 0.00010131099201801362,
+        "level": "ok"
+      },
+      {
+        "name": "type_DEBIT",
+        "kind": "feature",
+        "psi": 0.00011509629648915695,
+        "level": "ok"
+      },
+      {
+        "name": "type_PAYMENT",
+        "kind": "feature",
+        "psi": 0.0008458474553265556,
+        "level": "ok"
+      },
+      {
+        "name": "type_TRANSFER",
+        "kind": "feature",
+        "psi": 1.0003935515394525e-05,
+        "level": "ok"
+      },
+      {
+        "name": "model_score",
+        "kind": "score",
+        "psi": 0.000596236677903852,
+        "level": "ok"
+      },
+      {
+        "name": "anomaly_score",
+        "kind": "score",
+        "psi": 0.010623389421671396,
+        "level": "ok"
+      }
+    ],
+    "rates": [
+      {
+        "name": "review_rate",
+        "observed": 0.02892433852056159,
+        "expected": 0.028739155015791912,
+        "band_low": 0.014369577507895956,
+        "band_high": 0.057478310031583824,
+        "level": "ok"
+      },
+      {
+        "name": "block_rate",
+        "observed": 0.0004866841428051725,
+        "expected": 0.0005143529991880875,
+        "band_low": 0.0002571764995940437,
+        "band_high": 0.001028705998376175,
+        "level": "ok"
+      }
+    ],
+    "alerts": [
+      {
+        "type": "psi",
+        "name": "destination_transactions_last_7d",
+        "level": "warning",
+        "value": 0.175799542939632
+      }
+    ]
+  },
+  {
+    "period": "eval_2",
+    "days": [
+      11,
+      12,
+      13
+    ],
+    "reference": "train (days 5-7)",
+    "n_rows": 1176235,
+    "created_at": "2026-10-09T18:05:44+00:00",
+    "model": {
+      "name": "fraud_scorer",
+      "version": "v2"
+    },
+    "status": "alert",
+    "thresholds": {
+      "psi_warning": 0.1,
+      "psi_alert": 0.25,
+      "rate_band": [
+        0.5,
+        2.0
+      ],
+      "override_rate_band": [
+        0.0,
+        0.3
+      ]
+    },
+    "psi": [
+      {
+        "name": "amount",
+        "kind": "feature",
+        "psi": 0.006135312653642228,
+        "level": "ok"
+      },
+      {
+        "name": "destination_transactions_last_24h",
+        "kind": "feature",
+        "psi": 0.261830581249091,
+        "level": "alert"
+      },
+      {
+        "name": "destination_transactions_last_7d",
+        "kind": "feature",
+        "psi": 0.16387845407724855,
+        "level": "warning"
+      },
+      {
+        "name": "destination_avg_previous_amount",
+        "kind": "feature",
+        "psi": 0.0035278378364684585,
+        "level": "ok"
+      },
+      {
+        "name": "destination_amount_deviation",
+        "kind": "feature",
+        "psi": 0.007205677272780058,
+        "level": "ok"
+      },
+      {
+        "name": "destination_is_first_transaction",
+        "kind": "feature",
+        "psi": 0.00036238646186967507,
+        "level": "ok"
+      },
+      {
+        "name": "origin_balance_error",
+        "kind": "feature",
+        "psi": 0.00520250057432977,
+        "level": "ok"
+      },
+      {
+        "name": "destination_balance_error",
+        "kind": "feature",
+        "psi": 0.010338465898161382,
+        "level": "ok"
+      },
+      {
+        "name": "destination_balance_is_zero",
+        "kind": "feature",
+        "psi": 0.0005126627318621938,
+        "level": "ok"
+      },
+      {
+        "name": "hour_sin",
+        "kind": "feature",
+        "psi": 0.0017148666194009804,
+        "level": "ok"
+      },
+      {
+        "name": "hour_cos",
+        "kind": "feature",
+        "psi": 0.0017403666292059132,
+        "level": "ok"
+      },
+      {
+        "name": "type_CASH_IN",
+        "kind": "feature",
+        "psi": 0.0001415033528197657,
+        "level": "ok"
+      },
+      {
+        "name": "type_CASH_OUT",
+        "kind": "feature",
+        "psi": 0.00030776304023257813,
+        "level": "ok"
+      },
+      {
+        "name": "type_DEBIT",
+        "kind": "feature",
+        "psi": 2.1902322459120574e-05,
+        "level": "ok"
+      },
+      {
+        "name": "type_PAYMENT",
+        "kind": "feature",
+        "psi": 0.0006598146124944906,
+        "level": "ok"
+      },
+      {
+        "name": "type_TRANSFER",
+        "kind": "feature",
+        "psi": 9.265778398397864e-06,
+        "level": "ok"
+      },
+      {
+        "name": "model_score",
+        "kind": "score",
+        "psi": 0.002048326100409429,
+        "level": "ok"
+      },
+      {
+        "name": "anomaly_score",
+        "kind": "score",
+        "psi": 0.012243771224917224,
+        "level": "ok"
+      }
+    ],
+    "rates": [
+      {
+        "name": "review_rate",
+        "observed": 0.028739155015791912,
+        "expected": 0.028739155015791912,
+        "band_low": 0.014369577507895956,
+        "band_high": 0.057478310031583824,
+        "level": "ok"
+      },
+      {
+        "name": "block_rate",
+        "observed": 0.0005143529991880875,
+        "expected": 0.0005143529991880875,
+        "band_low": 0.0002571764995940437,
+        "band_high": 0.001028705998376175,
+        "level": "ok"
+      }
+    ],
+    "alerts": [
+      {
+        "type": "psi",
+        "name": "destination_transactions_last_24h",
+        "level": "alert",
+        "value": 0.261830581249091
+      },
+      {
+        "type": "psi",
+        "name": "destination_transactions_last_7d",
+        "level": "warning",
+        "value": 0.16387845407724855
+      }
+    ]
+  },
+  {
+    "period": "held_out",
+    "days": [
+      14,
+      15,
+      16
+    ],
+    "reference": "train (days 5-7)",
+    "n_rows": 1202642,
+    "created_at": "2026-10-09T18:05:44+00:00",
+    "model": {
+      "name": "fraud_scorer",
+      "version": "v2"
+    },
+    "status": "alert",
+    "thresholds": {
+      "psi_warning": 0.1,
+      "psi_alert": 0.25,
+      "rate_band": [
+        0.5,
+        2.0
+      ],
+      "override_rate_band": [
+        0.0,
+        0.3
+      ]
+    },
+    "psi": [
+      {
+        "name": "amount",
+        "kind": "feature",
+        "psi": 0.005998777430389697,
+        "level": "ok"
+      },
+      {
+        "name": "destination_transactions_last_24h",
+        "kind": "feature",
+        "psi": 0.40788970862226887,
+        "level": "alert"
+      },
+      {
+        "name": "destination_transactions_last_7d",
+        "kind": "feature",
+        "psi": 0.5352565725325421,
+        "level": "alert"
+      },
+      {
+        "name": "destination_avg_previous_amount",
+        "kind": "feature",
+        "psi": 0.004165953605746889,
+        "level": "ok"
+      },
+      {
+        "name": "destination_amount_deviation",
+        "kind": "feature",
+        "psi": 0.00609154747983388,
+        "level": "ok"
+      },
+      {
+        "name": "destination_is_first_transaction",
+        "kind": "feature",
+        "psi": 0.00015036361396805672,
+        "level": "ok"
+      },
+      {
+        "name": "origin_balance_error",
+        "kind": "feature",
+        "psi": 0.0036933245285189825,
+        "level": "ok"
+      },
+      {
+        "name": "destination_balance_error",
+        "kind": "feature",
+        "psi": 0.011964353241826669,
+        "level": "ok"
+      },
+      {
+        "name": "destination_balance_is_zero",
+        "kind": "feature",
+        "psi": 0.0002140614985517295,
+        "level": "ok"
+      },
+      {
+        "name": "hour_sin",
+        "kind": "feature",
+        "psi": 0.003492480071872012,
+        "level": "ok"
+      },
+      {
+        "name": "hour_cos",
+        "kind": "feature",
+        "psi": 0.003923721365658471,
+        "level": "ok"
+      },
+      {
+        "name": "type_CASH_IN",
+        "kind": "feature",
+        "psi": 5.164341181249694e-05,
+        "level": "ok"
+      },
+      {
+        "name": "type_CASH_OUT",
+        "kind": "feature",
+        "psi": 0.0001666234856431582,
+        "level": "ok"
+      },
+      {
+        "name": "type_DEBIT",
+        "kind": "feature",
+        "psi": 0.00013546734146194884,
+        "level": "ok"
+      },
+      {
+        "name": "type_PAYMENT",
+        "kind": "feature",
+        "psi": 0.00023307162371278872,
+        "level": "ok"
+      },
+      {
+        "name": "type_TRANSFER",
+        "kind": "feature",
+        "psi": 1.3975882343755208e-05,
+        "level": "ok"
+      },
+      {
+        "name": "model_score",
+        "kind": "score",
+        "psi": 0.0008915216306168014,
+        "level": "ok"
+      },
+      {
+        "name": "anomaly_score",
+        "kind": "score",
+        "psi": 0.018090864269586403,
+        "level": "ok"
+      }
+    ],
+    "rates": [
+      {
+        "name": "review_rate",
+        "observed": 0.028045752601356014,
+        "expected": 0.028739155015791912,
+        "band_low": 0.014369577507895956,
+        "band_high": 0.057478310031583824,
+        "level": "ok"
+      },
+      {
+        "name": "block_rate",
+        "observed": 0.0005288356801109557,
+        "expected": 0.0005143529991880875,
+        "band_low": 0.0002571764995940437,
+        "band_high": 0.001028705998376175,
+        "level": "ok"
+      }
+    ],
+    "alerts": [
+      {
+        "type": "psi",
+        "name": "destination_transactions_last_24h",
+        "level": "alert",
+        "value": 0.40788970862226887
+      },
+      {
+        "type": "psi",
+        "name": "destination_transactions_last_7d",
+        "level": "alert",
+        "value": 0.5352565725325421
+      }
+    ]
+  }
+]
