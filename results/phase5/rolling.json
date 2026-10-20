@@ -1,0 +1,556 @@
+{
+  "design": {
+    "scoring_days": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+    ],
+    "delays": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "seeds": [
+      42,
+      1,
+      2,
+      3,
+      4
+    ],
+    "supervised_training": "all labelled dense-window days from day 5 through day t-1-D",
+    "autoencoder_training": "days t-3 to t-1, no labels, early stopping on day t-1",
+    "statistic": "mean of daily PR-AUC; 95% CI from 200 bootstrap resamples of rows within each day",
+    "lightgbm_scale_pos_weight": 1,
+    "note": "No setting is tuned in this experiment. It scores days 14-16 as part of the rolling evaluation, with configurations fixed in earlier phases."
+  },
+  "by_delay": [
+    {
+      "delay_days": 0,
+      "supervised": {
+        "mean_daily_pr_auc": 0.8759561063276079,
+        "ci_low": 0.8641050377994807,
+        "ci_high": 0.8908741513474561,
+        "per_day": {
+          "11": 0.8563175291075832,
+          "12": 0.9148757382704992,
+          "13": 0.8682655582494127,
+          "14": 0.8768814351435331,
+          "15": 0.8693019008643729,
+          "16": 0.8700944763302466
+        }
+      },
+      "hybrid": {
+        "mean_daily_pr_auc": 0.872561240372879,
+        "ci_low": 0.8584826277276714,
+        "ci_high": 0.8890120624625665,
+        "per_day": {
+          "11": 0.8575863167550928,
+          "12": 0.9183017907524024,
+          "13": 0.8537267604574532,
+          "14": 0.8755918230400219,
+          "15": 0.8680772628736823,
+          "16": 0.8620834883586214
+        }
+      },
+      "hybrid_minus_supervised": {
+        "difference": -0.0033948659547289317,
+        "ci_low": -0.007175638130926942,
+        "ci_high": -4.79521019033062e-05,
+        "significant": true
+      }
+    },
+    {
+      "delay_days": 1,
+      "supervised": {
+        "mean_daily_pr_auc": 0.8745481732881109,
+        "ci_low": 0.861893432788483,
+        "ci_high": 0.889546143556214,
+        "per_day": {
+          "11": 0.8550985969877007,
+          "12": 0.9100671427105306,
+          "13": 0.8643682910251733,
+          "14": 0.8794902611148232,
+          "15": 0.8681249422756171,
+          "16": 0.8701398056148199
+        }
+      },
+      "hybrid": {
+        "mean_daily_pr_auc": 0.8717965108831107,
+        "ci_low": 0.8590496445389522,
+        "ci_high": 0.8865886186305988,
+        "per_day": {
+          "11": 0.8489504971674992,
+          "12": 0.9165503913170424,
+          "13": 0.8557814884868367,
+          "14": 0.8766539436554013,
+          "15": 0.8682119295813125,
+          "16": 0.8646308150905717
+        }
+      },
+      "hybrid_minus_supervised": {
+        "difference": -0.0027516624050001326,
+        "ci_low": -0.006565035553841758,
+        "ci_high": 0.0012616521071842665,
+        "significant": false
+      }
+    },
+    {
+      "delay_days": 2,
+      "supervised": {
+        "mean_daily_pr_auc": 0.8754365332822344,
+        "ci_low": 0.8634834670686705,
+        "ci_high": 0.8901514715708331,
+        "per_day": {
+          "11": 0.8554760328943024,
+          "12": 0.9189699586551107,
+          "13": 0.8611332106580689,
+          "14": 0.877581233923518,
+          "15": 0.8697726547181284,
+          "16": 0.8696861088442776
+        }
+      },
+      "hybrid": {
+        "mean_daily_pr_auc": 0.8722435502641342,
+        "ci_low": 0.859213931108693,
+        "ci_high": 0.8862523965021526,
+        "per_day": {
+          "11": 0.8478661510854864,
+          "12": 0.9184454711682728,
+          "13": 0.8603174955182816,
+          "14": 0.8767537094900617,
+          "15": 0.8648898501981943,
+          "16": 0.865188624124508
+        }
+      },
+      "hybrid_minus_supervised": {
+        "difference": -0.003192983018100115,
+        "ci_low": -0.0059548641616295975,
+        "ci_high": -0.00013348511653606953,
+        "significant": true
+      }
+    },
+    {
+      "delay_days": 3,
+      "supervised": {
+        "mean_daily_pr_auc": 0.8708531587109144,
+        "ci_low": 0.8568194857787841,
+        "ci_high": 0.8863734772652736,
+        "per_day": {
+          "11": 0.8526713361353154,
+          "12": 0.9069482329791665,
+          "13": 0.8607075332028866,
+          "14": 0.8659578516972519,
+          "15": 0.8695499192421384,
+          "16": 0.8692840790087273
+        }
+      },
+      "hybrid": {
+        "mean_daily_pr_auc": 0.8707561649593828,
+        "ci_low": 0.8575620595613243,
+        "ci_high": 0.88512802384701,
+        "per_day": {
+          "11": 0.8491737150863818,
+          "12": 0.9156068403511329,
+          "13": 0.8629236631642867,
+          "14": 0.8719574482432576,
+          "15": 0.8595045840168408,
+          "16": 0.8653707388943972
+        }
+      },
+      "hybrid_minus_supervised": {
+        "difference": -9.699375153160439e-05,
+        "ci_low": -0.005862995809838317,
+        "ci_high": 0.006681370531124226,
+        "significant": false
+      }
+    }
+  ],
+  "delay_effect": [
+    {
+      "variant": "supervised",
+      "delay_days": 1,
+      "difference_vs_no_delay": -0.0014079330394970446,
+      "ci_low": -0.00355624125534075,
+      "ci_high": 0.000524360768963586,
+      "significant": false
+    },
+    {
+      "variant": "supervised",
+      "delay_days": 2,
+      "difference_vs_no_delay": -0.0005195730453735337,
+      "ci_low": -0.0033305632729296515,
+      "ci_high": 0.0019475023465458903,
+      "significant": false
+    },
+    {
+      "variant": "supervised",
+      "delay_days": 3,
+      "difference_vs_no_delay": -0.005102947616693498,
+      "ci_low": -0.010045840353997915,
+      "ci_high": -8.269928313602978e-06,
+      "significant": true
+    },
+    {
+      "variant": "hybrid",
+      "delay_days": 1,
+      "difference_vs_no_delay": -0.0007647294897682455,
+      "ci_low": -0.0032701548871496566,
+      "ci_high": 0.001432684185792738,
+      "significant": false
+    },
+    {
+      "variant": "hybrid",
+      "delay_days": 2,
+      "difference_vs_no_delay": -0.00031769010874471704,
+      "ci_low": -0.003435287084363972,
+      "ci_high": 0.0031539210342190014,
+      "significant": false
+    },
+    {
+      "variant": "hybrid",
+      "delay_days": 3,
+      "difference_vs_no_delay": -0.001805075413496171,
+      "ci_low": -0.005254590020691843,
+      "ci_high": 0.0022833484450796903,
+      "significant": false
+    }
+  ],
+  "anomaly_only_daily_pr_auc": {
+    "11": 0.09835684336930026,
+    "12": 0.03733525870532833,
+    "13": 0.03837312107946138,
+    "14": 0.09673873760023569,
+    "15": 0.04705523294800861,
+    "16": 0.2350282077656303
+  },
+  "champion_challenger": {
+    "0": {
+      "decisions": [
+        {
+          "scoring_day": 11,
+          "validation_day": 10,
+          "challenger_trained_through_day": 9,
+          "decision": "promote",
+          "reason": "no model in service yet",
+          "serving_model_trained_through_day": 9,
+          "serving_pr_auc_on_scoring_day": 0.8550985969877007
+        },
+        {
+          "scoring_day": 12,
+          "validation_day": 11,
+          "challenger_trained_through_day": 10,
+          "champion_trained_through_day": 9,
+          "pr_auc_difference": 0.0012189321198824432,
+          "ci_low": -0.003299661595336814,
+          "ci_high": 0.005336616957107671,
+          "decision": "keep",
+          "reason": "challenger not significantly better on the validation day",
+          "serving_model_trained_through_day": 9,
+          "serving_pr_auc_on_scoring_day": 0.9189699586551107
+        },
+        {
+          "scoring_day": 13,
+          "validation_day": 12,
+          "challenger_trained_through_day": 11,
+          "champion_trained_through_day": 9,
+          "pr_auc_difference": -0.004094220384611491,
+          "ci_low": -0.015384980125450434,
+          "ci_high": 0.0036904531451702866,
+          "decision": "keep",
+          "reason": "challenger not significantly better on the validation day",
+          "serving_model_trained_through_day": 9,
+          "serving_pr_auc_on_scoring_day": 0.8607075332028866
+        },
+        {
+          "scoring_day": 14,
+          "validation_day": 13,
+          "challenger_trained_through_day": 12,
+          "champion_trained_through_day": 9,
+          "pr_auc_difference": 0.007558025046526029,
+          "ci_low": 0.0005737859081882207,
+          "ci_high": 0.018323698729794294,
+          "decision": "promote",
+          "reason": "challenger significantly better on the validation day",
+          "serving_model_trained_through_day": 12,
+          "serving_pr_auc_on_scoring_day": 0.8794902611148232
+        },
+        {
+          "scoring_day": 15,
+          "validation_day": 14,
+          "challenger_trained_through_day": 13,
+          "champion_trained_through_day": 12,
+          "pr_auc_difference": -0.002608825971290085,
+          "ci_low": -0.005298427438773154,
+          "ci_high": 0.00031127576641582297,
+          "decision": "keep",
+          "reason": "challenger not significantly better on the validation day",
+          "serving_model_trained_through_day": 12,
+          "serving_pr_auc_on_scoring_day": 0.8697726547181284
+        },
+        {
+          "scoring_day": 16,
+          "validation_day": 15,
+          "challenger_trained_through_day": 14,
+          "champion_trained_through_day": 12,
+          "pr_auc_difference": -0.00047075385375550116,
+          "ci_low": -0.003684265313039717,
+          "ci_high": 0.002461715344010177,
+          "decision": "keep",
+          "reason": "challenger not significantly better on the validation day",
+          "serving_model_trained_through_day": 12,
+          "serving_pr_auc_on_scoring_day": 0.8692840790087273
+        }
+      ],
+      "n_promotions": 2,
+      "mean_daily_pr_auc": 0.8755538472812295,
+      "always_retrain_mean_daily_pr_auc": 0.8759561063276079
+    },
+    "1": {
+      "decisions": [
+        {
+          "scoring_day": 11,
+          "validation_day": 9,
+          "challenger_trained_through_day": 8,
+          "decision": "promote",
+          "reason": "no model in service yet",
+          "serving_model_trained_through_day": 8,
+          "serving_pr_auc_on_scoring_day": 0.8554760328943024
+        },
+        {
+          "scoring_day": 12,
+          "validation_day": 10,
+          "challenger_trained_through_day": 9,
+          "champion_trained_through_day": 8,
+          "pr_auc_difference": -0.0023171257422622826,
+          "ci_low": -0.013134766751052011,
+          "ci_high": 0.007110456565692175,
+          "decision": "keep",
+          "reason": "challenger not significantly better on the validation day",
+          "serving_model_trained_through_day": 8,
+          "serving_pr_auc_on_scoring_day": 0.9069482329791665
+        },
+        {
+          "scoring_day": 13,
+          "validation_day": 11,
+          "challenger_trained_through_day": 10,
+          "champion_trained_through_day": 8,
+          "pr_auc_difference": 0.0008414962132807791,
+          "ci_low": -0.004527161988061354,
+          "ci_high": 0.005479872524654954,
+          "decision": "keep",
+          "reason": "challenger not significantly better on the validation day",
+          "serving_model_trained_through_day": 8,
+          "serving_pr_auc_on_scoring_day": 0.866105546154008
+        },
+        {
+          "scoring_day": 14,
+          "validation_day": 12,
+          "challenger_trained_through_day": 11,
+          "champion_trained_through_day": 8,
+          "pr_auc_difference": 0.007927505291332682,
+          "ci_low": -0.00954397584022774,
+          "ci_high": 0.03175294317200489,
+          "decision": "keep",
+          "reason": "challenger not significantly better on the validation day",
+          "serving_model_trained_through_day": 8,
+          "serving_pr_auc_on_scoring_day": 0.8727314646294596
+        },
+        {
+          "scoring_day": 15,
+          "validation_day": 13,
+          "challenger_trained_through_day": 12,
+          "champion_trained_through_day": 8,
+          "pr_auc_difference": 0.0021600120954046176,
+          "ci_low": -0.0031609517070963628,
+          "ci_high": 0.00810558652606981,
+          "decision": "keep",
+          "reason": "challenger not significantly better on the validation day",
+          "serving_model_trained_through_day": 8,
+          "serving_pr_auc_on_scoring_day": 0.8668759683493092
+        },
+        {
+          "scoring_day": 16,
+          "validation_day": 14,
+          "challenger_trained_through_day": 13,
+          "champion_trained_through_day": 8,
+          "pr_auc_difference": 0.004149970514073509,
+          "ci_low": -0.0011083358515061312,
+          "ci_high": 0.009612583249105773,
+          "decision": "keep",
+          "reason": "challenger not significantly better on the validation day",
+          "serving_model_trained_through_day": 8,
+          "serving_pr_auc_on_scoring_day": 0.866770959282869
+        }
+      ],
+      "n_promotions": 1,
+      "mean_daily_pr_auc": 0.8724847007148524,
+      "always_retrain_mean_daily_pr_auc": 0.8745481732881109
+    },
+    "2": {
+      "decisions": [
+        {
+          "scoring_day": 11,
+          "validation_day": 8,
+          "challenger_trained_through_day": 7,
+          "decision": "promote",
+          "reason": "no model in service yet",
+          "serving_model_trained_through_day": 7,
+          "serving_pr_auc_on_scoring_day": 0.8526713361353154
+        },
+        {
+          "scoring_day": 12,
+          "validation_day": 9,
+          "challenger_trained_through_day": 8,
+          "champion_trained_through_day": 7,
+          "pr_auc_difference": 0.0033715767257564977,
+          "ci_low": -0.00270547206846469,
+          "ci_high": 0.010766398420279146,
+          "decision": "keep",
+          "reason": "challenger not significantly better on the validation day",
+          "serving_model_trained_through_day": 7,
+          "serving_pr_auc_on_scoring_day": 0.9169708841268468
+        },
+        {
+          "scoring_day": 13,
+          "validation_day": 10,
+          "challenger_trained_through_day": 9,
+          "champion_trained_through_day": 7,
+          "pr_auc_difference": 0.0028813485923668836,
+          "ci_low": -0.008648477759735426,
+          "ci_high": 0.01304392121227237,
+          "decision": "keep",
+          "reason": "challenger not significantly better on the validation day",
+          "serving_model_trained_through_day": 7,
+          "serving_pr_auc_on_scoring_day": 0.8633789455066749
+        },
+        {
+          "scoring_day": 14,
+          "validation_day": 11,
+          "challenger_trained_through_day": 10,
+          "champion_trained_through_day": 7,
+          "pr_auc_difference": 0.003646192972267759,
+          "ci_low": -0.002514190543173483,
+          "ci_high": 0.0105218834119587,
+          "decision": "keep",
+          "reason": "challenger not significantly better on the validation day",
+          "serving_model_trained_through_day": 7,
+          "serving_pr_auc_on_scoring_day": 0.8716849412331502
+        },
+        {
+          "scoring_day": 15,
+          "validation_day": 12,
+          "challenger_trained_through_day": 11,
+          "champion_trained_through_day": 7,
+          "pr_auc_difference": -0.0020951458563476244,
+          "ci_low": -0.015287442469183468,
+          "ci_high": 0.007197135938346162,
+          "decision": "keep",
+          "reason": "challenger not significantly better on the validation day",
+          "serving_model_trained_through_day": 7,
+          "serving_pr_auc_on_scoring_day": 0.8659607343954685
+        },
+        {
+          "scoring_day": 16,
+          "validation_day": 13,
+          "challenger_trained_through_day": 12,
+          "champion_trained_through_day": 7,
+          "pr_auc_difference": 0.004886612742737717,
+          "ci_low": -0.002949196470831469,
+          "ci_high": 0.011770100256921164,
+          "decision": "keep",
+          "reason": "challenger not significantly better on the validation day",
+          "serving_model_trained_through_day": 7,
+          "serving_pr_auc_on_scoring_day": 0.8542252185475188
+        }
+      ],
+      "n_promotions": 1,
+      "mean_daily_pr_auc": 0.8708153433241623,
+      "always_retrain_mean_daily_pr_auc": 0.8754365332822344
+    },
+    "3": {
+      "decisions": [
+        {
+          "scoring_day": 11,
+          "validation_day": 7,
+          "challenger_trained_through_day": 6,
+          "decision": "promote",
+          "reason": "no model in service yet",
+          "serving_model_trained_through_day": 6,
+          "serving_pr_auc_on_scoring_day": 0.8407061583875944
+        },
+        {
+          "scoring_day": 12,
+          "validation_day": 8,
+          "challenger_trained_through_day": 7,
+          "champion_trained_through_day": 6,
+          "pr_auc_difference": 0.004664904884454701,
+          "ci_low": -0.002441244772311013,
+          "ci_high": 0.013059975183861707,
+          "decision": "keep",
+          "reason": "challenger not significantly better on the validation day",
+          "serving_model_trained_through_day": 6,
+          "serving_pr_auc_on_scoring_day": 0.9151681693522812
+        },
+        {
+          "scoring_day": 13,
+          "validation_day": 9,
+          "challenger_trained_through_day": 8,
+          "champion_trained_through_day": 6,
+          "pr_auc_difference": 0.01620691917838024,
+          "ci_low": 0.007568601509029521,
+          "ci_high": 0.024658060272599515,
+          "decision": "promote",
+          "reason": "challenger significantly better on the validation day",
+          "serving_model_trained_through_day": 8,
+          "serving_pr_auc_on_scoring_day": 0.866105546154008
+        },
+        {
+          "scoring_day": 14,
+          "validation_day": 10,
+          "challenger_trained_through_day": 9,
+          "champion_trained_through_day": 8,
+          "pr_auc_difference": -0.0023171257422622826,
+          "ci_low": -0.013134766751052011,
+          "ci_high": 0.007110456565692175,
+          "decision": "keep",
+          "reason": "challenger not significantly better on the validation day",
+          "serving_model_trained_through_day": 8,
+          "serving_pr_auc_on_scoring_day": 0.8727314646294596
+        },
+        {
+          "scoring_day": 15,
+          "validation_day": 11,
+          "challenger_trained_through_day": 10,
+          "champion_trained_through_day": 8,
+          "pr_auc_difference": 0.0008414962132807791,
+          "ci_low": -0.004527161988061354,
+          "ci_high": 0.005479872524654954,
+          "decision": "keep",
+          "reason": "challenger not significantly better on the validation day",
+          "serving_model_trained_through_day": 8,
+          "serving_pr_auc_on_scoring_day": 0.8668759683493092
+        },
+        {
+          "scoring_day": 16,
+          "validation_day": 12,
+          "challenger_trained_through_day": 11,
+          "champion_trained_through_day": 8,
+          "pr_auc_difference": 0.007927505291332682,
+          "ci_low": -0.00954397584022774,
+          "ci_high": 0.03175294317200489,
+          "decision": "keep",
+          "reason": "challenger not significantly better on the validation day",
+          "serving_model_trained_through_day": 8,
+          "serving_pr_auc_on_scoring_day": 0.866770959282869
+        }
+      ],
+      "n_promotions": 2,
+      "mean_daily_pr_auc": 0.8713930443592536,
+      "always_retrain_mean_daily_pr_auc": 0.8708531587109144
+    }
+  }
+}

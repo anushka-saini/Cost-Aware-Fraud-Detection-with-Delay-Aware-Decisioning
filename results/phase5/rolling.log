@@ -1,0 +1,61 @@
+LightGBM scale_pos_weight = 1 (fixed in Phase 2 on eval_1)
+supervised trained on days 5-6: 861,588 rows, 500 fraud [60s]
+supervised trained on days 5-7: 1,311,225 rows, 778 fraud [68s]
+supervised trained on days 5-8: 1,729,144 rows, 1033 fraud [95s]
+supervised trained on days 5-9: 2,122,089 rows, 1315 fraud [110s]
+supervised trained on days 5-10: 2,539,948 rows, 1577 fraud [127s]
+supervised trained on days 5-11: 2,889,724 rows, 1875 fraud [89s]
+supervised trained on days 5-12: 3,318,307 rows, 2117 fraud [118s]
+supervised trained on days 5-13: 3,716,183 rows, 2363 fraud [139s]
+supervised trained on days 5-14: 4,117,465 rows, 2613 fraud [205s]
+supervised trained on days 5-15: 4,493,059 rows, 2865 fraud [196s]
+day 11: autoencoder refitted on days 8-10 (epoch 35), anomaly-only PR-AUC 0.0984 [150s]
+  delay 0d (labels through day 10): supervised 0.8563, hybrid 0.8576
+  delay 1d (labels through day 9): supervised 0.8551, hybrid 0.8490
+  delay 2d (labels through day 8): supervised 0.8555, hybrid 0.8479
+  delay 3d (labels through day 7): supervised 0.8527, hybrid 0.8492
+  day 11 done in 445s
+day 12: autoencoder refitted on days 9-11 (epoch 40), anomaly-only PR-AUC 0.0373 [174s]
+  delay 0d (labels through day 11): supervised 0.9149, hybrid 0.9183
+  delay 1d (labels through day 10): supervised 0.9101, hybrid 0.9166
+  delay 2d (labels through day 9): supervised 0.9190, hybrid 0.9184
+  delay 3d (labels through day 8): supervised 0.9069, hybrid 0.9156
+  day 12 done in 332s
+day 13: autoencoder refitted on days 10-12 (epoch 27), anomaly-only PR-AUC 0.0384 [26s]
+  delay 0d (labels through day 12): supervised 0.8683, hybrid 0.8537
+  delay 1d (labels through day 11): supervised 0.8644, hybrid 0.8558
+  delay 2d (labels through day 10): supervised 0.8611, hybrid 0.8603
+  delay 3d (labels through day 9): supervised 0.8607, hybrid 0.8629
+  day 13 done in 210s
+day 14: autoencoder refitted on days 11-13 (epoch 39), anomaly-only PR-AUC 0.0967 [32s]
+  delay 0d (labels through day 13): supervised 0.8769, hybrid 0.8756
+  delay 1d (labels through day 12): supervised 0.8795, hybrid 0.8767
+  delay 2d (labels through day 11): supervised 0.8776, hybrid 0.8768
+  delay 3d (labels through day 10): supervised 0.8660, hybrid 0.8720
+  day 14 done in 236s
+day 15: autoencoder refitted on days 12-14 (epoch 40), anomaly-only PR-AUC 0.0471 [35s]
+  delay 0d (labels through day 14): supervised 0.8693, hybrid 0.8681
+  delay 1d (labels through day 13): supervised 0.8681, hybrid 0.8682
+  delay 2d (labels through day 12): supervised 0.8698, hybrid 0.8649
+  delay 3d (labels through day 11): supervised 0.8695, hybrid 0.8595
+  day 15 done in 254s
+day 16: autoencoder refitted on days 13-15 (epoch 39), anomaly-only PR-AUC 0.2350 [34s]
+  delay 0d (labels through day 15): supervised 0.8701, hybrid 0.8621
+  delay 1d (labels through day 14): supervised 0.8701, hybrid 0.8646
+  delay 2d (labels through day 13): supervised 0.8697, hybrid 0.8652
+  delay 3d (labels through day 12): supervised 0.8693, hybrid 0.8654
+  day 16 done in 285s
+delay 0d: supervised 0.8760 [0.8641, 0.8909] | hybrid 0.8726 [0.8585, 0.8890] | diff -0.0034 [-0.0072, -0.0000]
+delay 1d: supervised 0.8745 [0.8619, 0.8895] | hybrid 0.8718 [0.8590, 0.8866] | diff -0.0028 [-0.0066, +0.0013]
+delay 2d: supervised 0.8754 [0.8635, 0.8902] | hybrid 0.8722 [0.8592, 0.8863] | diff -0.0032 [-0.0060, -0.0001]
+delay 3d: supervised 0.8709 [0.8568, 0.8864] | hybrid 0.8708 [0.8576, 0.8851] | diff -0.0001 [-0.0059, +0.0067]
+supervised: delay 1d vs 0d: -0.0014 [-0.0036, +0.0005]
+supervised: delay 2d vs 0d: -0.0005 [-0.0033, +0.0019]
+supervised: delay 3d vs 0d: -0.0051 [-0.0100, -0.0000]
+hybrid: delay 1d vs 0d: -0.0008 [-0.0033, +0.0014]
+hybrid: delay 2d vs 0d: -0.0003 [-0.0034, +0.0032]
+hybrid: delay 3d vs 0d: -0.0018 [-0.0053, +0.0023]
+champion/challenger, delay 0d: 2 promotions, mean daily PR-AUC 0.8756 (always retrain: 0.8760)
+champion/challenger, delay 1d: 1 promotions, mean daily PR-AUC 0.8725 (always retrain: 0.8745)
+champion/challenger, delay 2d: 1 promotions, mean daily PR-AUC 0.8708 (always retrain: 0.8754)
+champion/challenger, delay 3d: 2 promotions, mean daily PR-AUC 0.8714 (always retrain: 0.8709)
