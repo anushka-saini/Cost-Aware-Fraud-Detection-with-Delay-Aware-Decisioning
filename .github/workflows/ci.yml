@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          # CPU-only PyTorch: the default wheel pulls in several GB of CUDA libraries.
+          pip install torch==2.14.1 --index-url https://download.pytorch.org/whl/cpu
+          pip install -e ".[dev]"
+
+      - name: Lint
+        run: ruff check src scripts tests api/main.py migrations/env.py
+
+      - name: Migrations apply to an empty database
+        env:
+          FRAUD_DATABASE_URL: sqlite:///ci.db
+        run: alembic upgrade head
+
+      # The PaySim data is not in the repository, so tests marked "data"
+      # (train/serve parity on held-out rows) skip themselves here. Everything
+      # else, including the API tests against the registered model, runs.
+      - name: Tests
+        run: pytest --cov=fraud --cov-report=term-missing
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the API image
+        run: docker build -f api/Dockerfile -t fraud-api .
+      - name: Start the API container and wait for it to be healthy
+        run: |
+          docker run -d --name fraud-api -p 8000:8000 fraud-api
+          for i in $(seq 1 60); do
+            if curl -fsS http://localhost:8000/health; then exit 0; fi
+            sleep 2
+          done
+          docker logs fraud-api
+          exit 1

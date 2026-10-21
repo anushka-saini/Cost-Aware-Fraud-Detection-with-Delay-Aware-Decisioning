@@ -1,0 +1,52 @@
+# One command from a clean clone:
+#
+#     docker compose up --build
+#
+# API:       http://localhost:8000   (docs at /docs)
+# Dashboard: http://localhost:5173
+#
+# NOTE: written but not yet run end to end. The development machine did not
+# have the disk space to build the images; see README, "Limitations".
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: fraud
+      POSTGRES_USER: fraud
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-fraud-dev-password}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fraud -d fraud"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    environment:
+      FRAUD_DATABASE_URL: postgresql+psycopg://fraud:${POSTGRES_PASSWORD:-fraud-dev-password}@db:5432/fraud
+      FRAUD_JWT_SECRET: ${FRAUD_JWT_SECRET:-change-me-in-production-0123456789abcdef}
+      FRAUD_CORS_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ./dashboard
+    environment:
+      FRAUD_API_URL: http://api:8000
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "5173:5173"
+
+volumes:
+  pgdata:

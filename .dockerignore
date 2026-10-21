@@ -1,0 +1,14 @@
+fraud_env/
+data/
+models/runs/
+models/*.pkl
+models/*.joblib
+notebooks/
+dashboard/node_modules/
+dashboard/dist/
+.git/
+**/__pycache__/
+*.db
+.env
+.pytest_cache/
+.ruff_cache/
