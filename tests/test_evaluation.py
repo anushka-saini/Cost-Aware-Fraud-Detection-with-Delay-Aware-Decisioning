@@ -6,10 +6,13 @@ from fraud.evaluation import (
     CostCurve,
     assign_tier,
     cost_report,
+    holm_adjust,
     paired_bootstrap_difference,
+    paired_cost_difference,
     pr_auc_with_ci,
     precision_at_k,
     psi,
+    row_costs,
     sweep_thresholds,
     threshold_robustness,
 )
@@ -135,3 +138,35 @@ def test_fast_bootstrap_equals_sklearn_on_the_same_resamples():
         idx = state.randint(0, n, n)
         slow.append(average_precision_score(y[idx], scores[idx]))
     assert np.allclose(fast, slow, rtol=0, atol=1e-12)
+
+
+def test_holm_adjust_matches_a_worked_example():
+    # Sorted: 0.01 x 3 = 0.03, then 0.02 x 2 = 0.04, then 0.04 x 1 = 0.04.
+    adjusted = holm_adjust({"a": 0.04, "b": 0.01, "c": 0.02})
+    assert adjusted == pytest.approx({"b": 0.03, "c": 0.04, "a": 0.04})
+    assert holm_adjust({"x": 0.6, "y": 0.5}) == pytest.approx({"y": 1.0, "x": 1.0})
+
+
+def test_row_costs_add_up_to_the_cost_report(data):
+    y, probs, amounts = data
+    costs = row_costs(y, probs, amounts, 0.05, 0.6)
+    assert costs.sum() == pytest.approx(cost_report(y, probs, amounts, 0.05, 0.6)["total_cost"])
+
+
+def test_paired_cost_difference(data):
+    y, probs, amounts = data
+    cheap = row_costs(y, probs, amounts, 0.05, 0.6)
+    review_all = row_costs(y, probs, amounts, 0.0, 2.0)
+    test = paired_cost_difference(cheap, review_all, n_iterations=100, seed=0)
+    assert test["difference"] == pytest.approx(cheap.sum() - review_all.sum())
+    assert test["ci_low"] <= test["difference"] <= test["ci_high"]
+    same = paired_cost_difference(cheap, cheap, n_iterations=20, seed=0)
+    assert same["difference"] == 0 and not same["significant"] and same["p_normal"] == 1.0
+
+
+def test_paired_bootstrap_reports_a_normal_p_value(data):
+    y, probs, _ = data
+    noisy = np.clip(probs + np.random.default_rng(0).normal(0, 0.3, len(probs)), 0, 1)
+    test = paired_bootstrap_difference(y, probs, noisy, n_iterations=50, seed=0)
+    assert test["difference"] > 0 and test["std_error"] > 0
+    assert 0 <= test["p_normal"] < 0.05

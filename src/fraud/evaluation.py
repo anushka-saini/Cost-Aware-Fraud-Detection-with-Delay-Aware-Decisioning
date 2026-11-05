@@ -1,8 +1,10 @@
 """Metrics, bootstrap intervals, the cost function and threshold sweeps."""
 
+import math
+
 import numpy as np
 import pandas as pd
-from sklearn.metrics import average_precision_score
+from sklearn.metrics import average_precision_score, roc_auc_score
 
 from fraud.config import get_settings
 
@@ -80,24 +82,86 @@ def pr_auc_with_ci(y_true, scores, n_iterations=None, seed=None) -> dict:
             "n_bootstrap": int(len(boot))}
 
 
-def paired_bootstrap_difference(y_true, scores_a, scores_b, n_iterations=None, seed=None) -> dict:
-    """PR-AUC(a) - PR-AUC(b) on the same resamples.
+def roc_auc(y_true, scores, sample_weight=None) -> float:
+    return float(roc_auc_score(np.asarray(y_true), np.asarray(scores), sample_weight=sample_weight))
+
+
+class _ROCOnResample:
+    """ROC-AUC on a bootstrap resample. A resample is given as a count per
+    row, which scikit-learn accepts directly as a sample weight."""
+
+    def __init__(self, y_true, scores):
+        self.y = np.asarray(y_true)
+        self.scores = np.asarray(scores)
+
+    def __call__(self, counts) -> float:
+        return roc_auc(self.y, self.scores, sample_weight=counts)
+
+
+def roc_auc_with_ci(y_true, scores, n_iterations=None, seed=None) -> dict:
+    n_iterations, seed = _bootstrap_args(n_iterations, seed)
+    auc = _ROCOnResample(y_true, scores)
+    boot = np.array([auc(counts) for counts in _resample_counts(len(auc.y), n_iterations, seed)])
+    low, high = np.percentile(boot, [2.5, 97.5])
+    return {"roc_auc": roc_auc(y_true, scores), "ci_low": float(low), "ci_high": float(high),
+            "n_bootstrap": int(len(boot))}
+
+
+def paired_bootstrap_difference(y_true, scores_a, scores_b, n_iterations=None, seed=None,
+                                metric: str = "pr_auc") -> dict:
+    """metric(a) - metric(b) on the same resamples (PR-AUC, or ROC-AUC with ``metric="roc_auc"``).
 
     ``significant`` is True only when the 95% interval of the difference
     excludes zero. Use this, not a comparison of point estimates, before
     calling one model better than another.
     """
     n_iterations, seed = _bootstrap_args(n_iterations, seed)
-    ap_a, ap_b = _FastAP(y_true, scores_a), _FastAP(y_true, scores_b)
+    if metric == "pr_auc":
+        ap_a, ap_b, exact = _FastAP(y_true, scores_a), _FastAP(y_true, scores_b), pr_auc
+    else:
+        ap_a, ap_b, exact = _ROCOnResample(y_true, scores_a), _ROCOnResample(y_true, scores_b), roc_auc
     diffs = np.array([ap_a(c) - ap_b(c) for c in _resample_counts(len(ap_a.y), n_iterations, seed)])
     diffs = diffs[~np.isnan(diffs)]
     low, high = np.percentile(diffs, [2.5, 97.5])
+    difference = exact(y_true, scores_a) - exact(y_true, scores_b)
     return {
-        "difference": pr_auc(y_true, scores_a) - pr_auc(y_true, scores_b),
+        "metric": metric,
+        "difference": difference,
         "ci_low": float(low), "ci_high": float(high),
         "p_two_sided": float(min(1.0, 2 * min((diffs <= 0).mean(), (diffs >= 0).mean()))),
+        **normal_p_value(difference, diffs),
         "significant": bool(low > 0 or high < 0),
     }
+
+
+def normal_p_value(difference, resampled_differences) -> dict:
+    """Two-sided p-value from the bootstrap standard error: z = difference / SE.
+
+    With 200 resamples the percentile p-value moves in steps of 0.01, too coarse
+    for a multiple-testing correction. This one is continuous.
+    """
+    std_error = float(np.std(resampled_differences, ddof=1))
+    if std_error == 0:
+        return {"std_error": 0.0, "p_normal": 1.0 if difference == 0 else 0.0}
+    z = abs(difference) / std_error
+    return {"std_error": std_error, "p_normal": float(math.erfc(z / math.sqrt(2)))}
+
+
+def holm_adjust(p_values: dict) -> dict:
+    """Holm-Bonferroni adjusted p-values (same keys as the input).
+
+    Sort the p-values from smallest to largest; the k-th smallest of m is
+    multiplied by (m - k + 1), and an adjusted value is never allowed to be
+    smaller than the one before it.
+    """
+    names = sorted(p_values, key=p_values.get)
+    m = len(names)
+    adjusted, largest_so_far = {}, 0.0
+    for rank, name in enumerate(names):
+        value = min(1.0, (m - rank) * p_values[name])
+        largest_so_far = max(largest_so_far, value)
+        adjusted[name] = largest_so_far
+    return adjusted
 
 
 def precision_at_k(y_true, scores, k: float) -> dict:
@@ -157,6 +221,38 @@ def cost_report(y_true, probs, amounts, t_review, t_block, cost_false_block=None
         "block_f1": float(2 * precision * recall / (precision + recall)) if precision + recall else 0.0,
         "n_fraud": n_fraud, "n_legit": n_legit,
     }
+
+
+def row_costs(y_true, probs, amounts, t_review, t_block, cost_false_block=None, cost_review=None) -> np.ndarray:
+    """The cost of each transaction on its own; they add up to cost_report's total."""
+    settings = get_settings()
+    cost_false_block = settings.cost_false_block if cost_false_block is None else cost_false_block
+    cost_review = settings.cost_review if cost_review is None else cost_review
+    y = np.asarray(y_true).astype(bool)
+    probs, amounts = np.asarray(probs), np.asarray(amounts, dtype=np.float64)
+    block = probs >= t_block
+    review = (probs >= t_review) & ~block
+    allow = ~block & ~review
+    costs = np.zeros(len(y))
+    costs[allow & y] = amounts[allow & y]          # missed fraud: its amount
+    costs[block & ~y] = cost_false_block           # wrongful block
+    costs[review] = cost_review                    # every review
+    return costs
+
+
+def paired_cost_difference(costs_a, costs_b, n_iterations=None, seed=None) -> dict:
+    """Total cost of A minus total cost of B, with a paired bootstrap over rows.
+
+    A is significantly cheaper only when the whole 95% interval is below zero.
+    """
+    n_iterations, seed = _bootstrap_args(n_iterations, seed)
+    per_row = np.asarray(costs_a, dtype=np.float64) - np.asarray(costs_b, dtype=np.float64)
+    diffs = np.array([counts @ per_row for counts in _resample_counts(len(per_row), n_iterations, seed)])
+    low, high = np.percentile(diffs, [2.5, 97.5])
+    difference = float(per_row.sum())
+    return {"difference": difference, "ci_low": float(low), "ci_high": float(high),
+            **normal_p_value(difference, diffs), "significant": bool(low > 0 or high < 0),
+            "n_bootstrap": n_iterations}
 
 
 class CostCurve:
