@@ -1,17 +1,19 @@
 """Shared service state and the operations several routers need:
 the active scorer, the SQL feature store, scoring-and-recording, and the audit log."""
 
+import time
 import uuid
 from contextvars import ContextVar
 from datetime import timedelta
 
 import pandas as pd
+from fastapi import Depends
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from fraud.features import compute_online_features, hour_sin_cos, to_model_frame
 from fraud.registry import list_versions, load_bundle
-from fraud.service.db import AnalystCase, Assessment, AuditLog, ModelVersion, Transaction, now
+from fraud.service.db import AnalystCase, Assessment, AuditLog, ModelVersion, Transaction, get_db, now
 from fraud.service.settings import get_service_settings
 from fraud.serving import Scorer
 
@@ -27,6 +29,7 @@ class ModelState:
 
     def __init__(self):
         self.scorer: Scorer | None = None
+        self.checked_at = 0.0       # when this worker last compared its version with the database
 
     def load(self, version: str | None = None) -> Scorer:
         settings = get_service_settings()
@@ -44,6 +47,30 @@ def get_scorer() -> Scorer:
     if state.scorer is None:
         state.load(get_service_settings().model_version)
     return state.scorer
+
+
+ACTIVE_VERSION_CHECK_SECONDS = 10
+
+
+def active_version_in_db(db: Session) -> str | None:
+    return db.scalar(select(ModelVersion.version).where(
+        ModelVersion.name == get_service_settings().model_name, ModelVersion.is_active.is_(True)))
+
+
+def follow_active_version(db: Session = Depends(get_db)):
+    """Keep this worker on the version the database marks as active.
+
+    Each worker process holds its own copy of the model. When an admin rolls
+    back, only the worker that handled that request switches at once; the
+    database records the new active version, and every other worker notices
+    here (checking at most every 10 seconds) and loads it too.
+    """
+    if time.monotonic() - state.checked_at < ACTIVE_VERSION_CHECK_SECONDS:
+        return
+    state.checked_at = time.monotonic()
+    active = active_version_in_db(db)
+    if active and active != get_scorer().version and active in list_versions(get_service_settings().model_name):
+        state.load(active)
 
 
 def sync_model_versions(db: Session, activated_by: str = "system"):
