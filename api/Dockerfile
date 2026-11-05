@@ -34,9 +34,17 @@ ENV FRAUD_PROJECT_ROOT=/app \
     FRAUD_SIMULATOR_DIR=/app/results/simulator \
     FRAUD_DATABASE_URL=sqlite:////app/api/fraud.db
 
+# Number of server processes. Keep 1 with SQLite (one writer at a time);
+# docker-compose uses PostgreSQL and sets 2. Hosting platforms set PORT.
+ENV WEB_CONCURRENCY=1 \
+    PORT=8000 \
+    FRAUD_SETUP_ON_START=false
+
 EXPOSE 8000
 HEALTHCHECK --interval=15s --timeout=5s --start-period=60s --retries=5 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
+    CMD python -c "import os, urllib.request; urllib.request.urlopen(f'http://localhost:{os.environ[\"PORT\"]}/health')"
 
-# Apply migrations, then serve.
-CMD ["sh", "-c", "alembic upgrade head && uvicorn fraud.service.app:app --host 0.0.0.0 --port 8000"]
+# 1. Apply migrations. 2. Prepare the database once (users, model versions,
+# demo history). 3. Start the workers. --proxy-headers makes the rate limiter
+# see the visitor's address rather than the hosting platform's proxy.
+CMD ["sh", "-c", "alembic upgrade head && python -m fraud.service.setup && uvicorn fraud.service.app:app --host 0.0.0.0 --port ${PORT} --workers ${WEB_CONCURRENCY} --proxy-headers --forwarded-allow-ips='*'"]

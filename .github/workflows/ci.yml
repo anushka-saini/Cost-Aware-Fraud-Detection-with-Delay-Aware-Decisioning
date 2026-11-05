@@ -36,18 +36,40 @@ jobs:
       - name: Tests
         run: pytest --cov=fraud --cov-report=term-missing
 
-  docker:
+  stack:
+    # The whole system from a clean clone: PostgreSQL, the API with two
+    # workers, and the dashboard, exactly as docker-compose.yml starts them.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build the API image
-        run: docker build -f api/Dockerfile -t fraud-api .
-      - name: Start the API container and wait for it to be healthy
+
+      - name: Build and start the stack
+        run: docker compose up -d --build --wait --wait-timeout 600
+
+      - name: The API reports PostgreSQL and a loaded model
         run: |
-          docker run -d --name fraud-api -p 8000:8000 fraud-api
-          for i in $(seq 1 60); do
-            if curl -fsS http://localhost:8000/health; then exit 0; fi
-            sleep 2
-          done
-          docker logs fraud-api
-          exit 1
+          curl -fsS http://localhost:8000/status | python3 -c "
+          import json, sys
+          status = json.load(sys.stdin)
+          assert status['status'] == 'ok', status
+          assert status['database']['backend'] == 'postgresql', status['database']
+          print('model', status['model']['version'], 'database', status['database'])
+          "
+
+      - name: A transaction can be scored end to end
+        run: |
+          curl -fsS -X POST http://localhost:8000/score/raw -H "Content-Type: application/json" -d '{
+            "step": 300, "type": "TRANSFER", "amount": 181.0, "nameOrig": "C_ci_sender",
+            "oldbalanceOrg": 181.0, "newbalanceOrig": 0.0, "nameDest": "C_ci_recipient",
+            "oldbalanceDest": 0.0, "newbalanceDest": 0.0}'
+
+      - name: The dashboard is served
+        run: curl -fsS http://localhost:5173/ > /dev/null
+
+      - name: Logs (on failure)
+        if: failure()
+        run: docker compose logs
+
+      - name: Stop
+        if: always()
+        run: docker compose down -v

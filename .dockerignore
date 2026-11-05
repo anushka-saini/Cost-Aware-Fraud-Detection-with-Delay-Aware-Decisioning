@@ -12,3 +12,4 @@ dashboard/dist/
 .env
 .pytest_cache/
 .ruff_cache/
+catboost_info/

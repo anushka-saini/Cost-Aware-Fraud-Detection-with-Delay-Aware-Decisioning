@@ -2,11 +2,15 @@
 #
 #     docker compose up --build
 #
-# API:       http://localhost:8000   (docs at /docs)
+# API:       http://localhost:8000   (docs at /docs, service status at /status)
 # Dashboard: http://localhost:5173
 #
-# NOTE: written but not yet run end to end. The development machine did not
-# have the disk space to build the images; see README, "Limitations".
+# Runs as a demo: the login page shows the demo accounts. To change the
+# database password or the token secret, put them in a .env file next to this
+# one (POSTGRES_PASSWORD=..., FRAUD_JWT_SECRET=...).
+#
+# NOTE (5 Nov 2026): the CI workflow builds and starts this stack on every
+# push; it has not yet been run on the development laptop (disk space).
 
 services:
   db:
@@ -29,8 +33,10 @@ services:
       dockerfile: api/Dockerfile
     environment:
       FRAUD_DATABASE_URL: postgresql+psycopg://fraud:${POSTGRES_PASSWORD:-fraud-dev-password}@db:5432/fraud
-      FRAUD_JWT_SECRET: ${FRAUD_JWT_SECRET:-change-me-in-production-0123456789abcdef}
+      FRAUD_JWT_SECRET: ${FRAUD_JWT_SECRET:-local-compose-secret-change-me-0123456789abcdef}
       FRAUD_CORS_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
+      FRAUD_DEMO_MODE: "true"
+      WEB_CONCURRENCY: "2"          # two workers; they share state through PostgreSQL
     depends_on:
       db:
         condition: service_healthy
