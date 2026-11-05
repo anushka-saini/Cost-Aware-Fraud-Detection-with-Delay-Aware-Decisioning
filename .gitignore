@@ -32,3 +32,6 @@ htmlcov/
 dashboard/node_modules/
 dashboard/dist/
 dashboard/.vite/
+
+# CatBoost training logs
+catboost_info/

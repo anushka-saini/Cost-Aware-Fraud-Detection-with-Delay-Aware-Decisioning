@@ -29,6 +29,8 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest==9.1.1", "pytest-cov", "ruff==0.16.10", "httpx==0.28.1"]
+# Only for the V3 model search (scripts/v3_phase1.py), not for serving.
+research = ["optuna==5.0.0", "xgboost==3.4.1", "catboost==1.2.10", "tabm==0.0.3"]
 postgres = ["psycopg[binary]>=3.2"]
 
 [tool.setuptools.packages.find]
