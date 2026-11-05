@@ -5,9 +5,12 @@ import pytest
 from fraud.features import (
     FEATURES_V1,
     FEATURES_V2,
+    FEATURES_V3,
+    NO_PREVIOUS_TRANSACTION,
     build_feature_frame,
     compute_online_features,
     destination_history_features,
+    recipient_profile_features,
     to_model_frame,
 )
 
@@ -138,3 +141,28 @@ def test_to_model_frame_enforces_columns_and_order():
     assert list(frame.columns) == FEATURES_V2
     with pytest.raises(KeyError):
         to_model_frame([row], FEATURES_V1)  # the hourly totals are not available online
+
+
+def test_recipient_profile_features(raw):
+    raw = raw.join(pd.get_dummies(raw["type"], prefix="type").astype(int))
+    profile = recipient_profile_features(raw)
+    # Recipient X receives rows 0, 2, 3, 4, 5, 6 (types PAYMENT, CASH_OUT, CASH_OUT, TRANSFER, DEBIT, CASH_IN).
+    assert profile["recipient_transfer_share"].tolist() == pytest.approx([0, 0, 0, 0, 0, 1 / 4, 1 / 5])
+    hours = profile["recipient_hours_since_previous"].tolist()
+    assert hours == [NO_PREVIOUS_TRANSACTION, NO_PREVIOUS_TRANSACTION, 0, 4, 20, 1, 174]
+
+
+def test_online_recipient_profile_matches_batch(raw):
+    batch = build_feature_frame(raw)
+    for i, row in raw.iterrows():
+        earlier = raw.loc[: i - 1]
+        earlier = earlier[earlier["nameDest"] == row["nameDest"]]
+        online = compute_online_features(
+            step=row["step"], type=row["type"], amount=row["amount"],
+            old_balance_origin=row["oldbalanceOrg"], new_balance_origin=row["newbalanceOrig"],
+            old_balance_destination=row["oldbalanceDest"], new_balance_destination=row["newbalanceDest"],
+            history_steps=earlier["step"].tolist(), history_amounts=earlier["amount"].tolist(),
+            history_types=earlier["type"].tolist(),
+        )
+        for column in FEATURES_V3:
+            assert float(online[column]) == pytest.approx(float(batch.loc[i, column])), (i, column)

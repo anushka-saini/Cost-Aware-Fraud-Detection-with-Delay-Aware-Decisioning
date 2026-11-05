@@ -5,7 +5,14 @@ from collections.abc import Sequence
 import pandas as pd
 
 from fraud.config import get_settings
-from fraud.features import LEGACY_HOURLY, build_feature_frame, time_features
+from fraud.features import (
+    LEGACY_HOURLY,
+    RECIPIENT_PROFILE,
+    TIME_OF_DAY,
+    build_feature_frame,
+    recipient_profile_features,
+    time_features,
+)
 
 TARGET = "isFraud"
 
@@ -47,15 +54,21 @@ def load_feature_frame(columns: Sequence[str] | None = None, rebuild: bool = Fal
     import pyarrow.parquet as pq
 
     cached = set(pq.read_schema(settings.features).names)
-    wanted = None if columns is None else list(columns)
-    derived = [] if wanted is None else [c for c in wanted if c not in cached]
-    read = None if wanted is None else [c for c in wanted if c in cached]
-    if derived and "step" not in read:
-        read.append("step")
+    wanted = list(cached) if columns is None else list(columns)
+    need_time = columns is None or any(c in TIME_OF_DAY and c not in cached for c in wanted)
+    need_profile = columns is None or any(c in RECIPIENT_PROFILE and c not in cached for c in wanted)
+
+    read = [c for c in wanted if c in cached]
+    helpers = ["step"] + (["nameDest", "type_TRANSFER"] if need_profile else [])
+    read += [c for c in helpers if c not in read]
     frame = pd.read_parquet(settings.features, columns=read)
-    if wanted is None or derived:
-        frame = pd.concat([frame, time_features(frame)], axis=1)
-    return frame if wanted is None else frame[wanted]
+
+    # Columns the cache does not store are computed here (the cache file is never changed).
+    if need_time:
+        frame = frame.join(time_features(frame))
+    if need_profile:
+        frame = frame.join(recipient_profile_features(frame))
+    return frame if columns is None else frame[wanted]
 
 
 def dense_window(frame: pd.DataFrame) -> pd.DataFrame:

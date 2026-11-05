@@ -36,6 +36,9 @@ BALANCE = ["origin_balance_error", "destination_balance_error", "destination_bal
 # one being scored. Kept only to reproduce the original (v1) models.
 LEGACY_HOURLY = ["total_transactions", "total_transaction_amount", "avg_transaction_amount"]
 TIME_OF_DAY = ["hour_sin", "hour_cos"]
+# Added in v3: what kind of account the recipient looks like (mule-style signals).
+RECIPIENT_PROFILE = ["recipient_transfer_share", "recipient_hours_since_previous"]
+NO_PREVIOUS_TRANSACTION = -1.0   # value of recipient_hours_since_previous for a first transaction
 
 # v1: the original 17 features, in the order the saved models were trained on.
 FEATURES_V1 = ["amount", *DESTINATION_HISTORY, *BALANCE, *LEGACY_HOURLY, *TYPE_COLUMNS]
@@ -44,7 +47,12 @@ FEATURES_V2 = ["amount", *DESTINATION_HISTORY, *BALANCE, *TIME_OF_DAY, *TYPE_COL
 # v2 without the balance features (simulator-artefact check).
 FEATURES_V2_NO_BALANCE = [f for f in FEATURES_V2 if f not in BALANCE]
 
-FEATURE_SETS = {"v1": FEATURES_V1, "v2": FEATURES_V2, "v2_no_balance": FEATURES_V2_NO_BALANCE}
+# v3: v2 plus the recipient profile.
+FEATURES_V3 = [*FEATURES_V2, *RECIPIENT_PROFILE]
+FEATURES_V3_NO_BALANCE = [f for f in FEATURES_V3 if f not in BALANCE]
+
+FEATURE_SETS = {"v1": FEATURES_V1, "v2": FEATURES_V2, "v2_no_balance": FEATURES_V2_NO_BALANCE,
+                "v3": FEATURES_V3, "v3_no_balance": FEATURES_V3_NO_BALANCE}
 
 BINARY_FEATURES = {"destination_is_first_transaction", "destination_balance_is_zero", *TYPE_COLUMNS}
 
@@ -147,6 +155,36 @@ def destination_history_features(df: pd.DataFrame) -> pd.DataFrame:
     return result
 
 
+def recipient_profile_features(df: pd.DataFrame) -> pd.DataFrame:
+    """Two facts about the recipient's earlier incoming transactions:
+
+    * recipient_transfer_share: the share of them that were TRANSFERs (0 if none)
+    * recipient_hours_since_previous: hours since the latest one (-1 if none)
+
+    ``df`` needs ``nameDest``, ``step`` and ``type_TRANSFER`` and must be in
+    chronological row order, like the raw PaySim file. "Earlier" means earlier
+    rows, the same rule the other recipient-history features use.
+
+    A fan-in feature (distinct senders per recipient) was considered too, but in
+    PaySim no sender ever pays the same recipient twice, so it would be an exact
+    copy of destination_transactions_last_24h / _7d.
+    """
+    is_transfer = df["type_TRANSFER"].astype("int64")
+    by_recipient = df.groupby("nameDest", sort=False)
+
+    previous_count = by_recipient.cumcount()
+    previous_transfers = is_transfer.groupby(df["nameDest"], sort=False).cumsum() - is_transfer
+    transfer_share = (previous_transfers / previous_count.where(previous_count > 0)).fillna(0.0)
+
+    previous_step = by_recipient["step"].shift(1)
+    hours_since_previous = (df["step"] - previous_step).fillna(NO_PREVIOUS_TRANSACTION)
+
+    return pd.DataFrame({
+        "recipient_transfer_share": transfer_share.astype("float64"),
+        "recipient_hours_since_previous": hours_since_previous.astype("float64"),
+    }, index=df.index)
+
+
 def legacy_hourly_features(df: pd.DataFrame) -> pd.DataFrame:
     """Whole-hour totals (leaky: see LEGACY_HOURLY). Only for reproducing v1."""
     grouped = df.groupby("step")["amount"]
@@ -160,13 +198,15 @@ def legacy_hourly_features(df: pd.DataFrame) -> pd.DataFrame:
 def build_feature_frame(raw: pd.DataFrame, include_legacy_hourly: bool = True) -> pd.DataFrame:
     """All engineered features for a raw PaySim table, plus the columns needed
     for splitting and evaluation (``step``, ``day_bucket``, ``isFraud``, names)."""
+    types = type_one_hot(raw)
     parts = [
         raw[["step", "amount", "nameOrig", "nameDest", "isFraud"]],
         pd.DataFrame({"day_bucket": day_bucket(raw["step"], int(raw["step"].min()))}, index=raw.index),
         destination_history_features(raw),
         balance_features(raw),
         time_features(raw),
-        type_one_hot(raw),
+        types,
+        recipient_profile_features(raw[["nameDest", "step"]].join(types)),
     ]
     if include_legacy_hourly:
         parts.append(legacy_hourly_features(raw))
@@ -188,11 +228,13 @@ def compute_online_features(
     new_balance_destination: float,
     history_steps: Sequence[int] = (),
     history_amounts: Sequence[float] = (),
+    history_types: Sequence[str] | None = None,
 ) -> dict:
     """Features for one incoming transaction.
 
     ``history_steps`` / ``history_amounts`` are the recipient's earlier
-    transactions (any order). Returns every v2 feature keyed by name.
+    transactions (any order). Returns every v2 feature keyed by name, plus the
+    v3 recipient-profile features when ``history_types`` is given.
     """
     if type not in TRANSACTION_TYPES:
         raise ValueError(f"Unknown transaction type: {type!r}")
@@ -219,6 +261,17 @@ def compute_online_features(
         "hour_cos": float(cos),
     }
     features.update({f"type_{t}": type == t for t in TRANSACTION_TYPES})
+
+    if history_types is not None:
+        if len(history_types) != len(steps):
+            raise ValueError("history_types must have the same length as history_steps")
+        if len(steps):
+            transfers = sum(1 for t in history_types if t == "TRANSFER")
+            features["recipient_transfer_share"] = transfers / len(steps)
+            features["recipient_hours_since_previous"] = float(step - steps.max())
+        else:
+            features["recipient_transfer_share"] = 0.0
+            features["recipient_hours_since_previous"] = NO_PREVIOUS_TRANSACTION
     return features
 
 
