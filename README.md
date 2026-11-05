@@ -1,158 +1,127 @@
 # Cost-Aware Fraud Detection with Delay-Aware Decisioning
 
-Most fraud detection projects stop at "the model got a good score." I wanted to go one step further and ask the questions a real fraud team would ask before trusting a model with live payments:
+A fraud detection system built on the [PaySim](https://www.kaggle.com/datasets/ealaxi/paysim1) mobile-money dataset (6.36 million transactions, 8,213 fraud), taken past "the model got a good score" to the questions a fraud team would ask before trusting it:
 
-- Does it keep working next week, or does it quietly get worse as the data shifts?
-- Fraud labels arrive late in real life (chargebacks take days). Does the model survive that?
-- A false alarm and a missed fraud don't cost the same. So what should the system actually *do* with a score?
-- Can it explain itself, and where exactly does it fail?
+- Were the numbers earned honestly, or tuned on the test set?
+- Does the live service score a transaction the same way the evaluation did?
+- A false alarm and a missed fraud do not cost the same. What should the system *do* with a score?
+- What happens when fraud labels arrive late, or when the data drifts?
+- Can an analyst see why a transaction was flagged, and act on it?
 
-This repo is my attempt at answering those, built on the [PaySim](https://www.kaggle.com/datasets/ealaxi/paysim1) mobile-money dataset (about 6.36 million transactions, 8,213 of them fraud). It includes the notebooks, a FastAPI scoring service, a Streamlit demo and a React dashboard.
+The repository contains the modelling code, a scoring and operations API, a nine-page operations dashboard, and a record of what was wrong with the first version and how it was corrected.
 
-It's also an honest record. I found four real bugs in my own pipeline along the way, and my first model turned out to have a blind spot that cost it badly. All of that is written up below rather than tidied away.
+![Threshold simulator](docs/screenshots/06-threshold-simulator.png)
 
-## How it works
+## What it does
 
-Instead of a yes/no fraud label, every transaction gets a fraud probability and lands in one of three tiers:
+Every transaction gets a calibrated fraud probability and lands in one of three tiers:
 
 | Tier | When | What happens |
 |---|---|---|
-| **ALLOW** | probability below 0.32 | Goes through automatically |
-| **REVIEW** | 0.32 to 0.85 | Held for a human to look at |
-| **BLOCK** | 0.85 and above | Stopped automatically |
+| **ALLOW** | probability below 0.000146 | Goes through |
+| **REVIEW** | 0.000146 to 0.775 | Opens a case for an analyst |
+| **BLOCK** | 0.775 and above | Stopped automatically |
 
-The two thresholds weren't picked by feel. They come from a cost sweep with three stated assumptions: a missed fraud costs the transaction amount, wrongly blocking a legitimate payment costs 5 units, and sending anything to review costs 1 unit. Those numbers are illustrative, not real business figures, and I tested how sensitive the thresholds are to them in notebook 05.
+The thresholds come from a cost model with three stated assumptions: a missed fraud costs its amount, wrongly blocking a legitimate payment costs 5 units, and sending a transaction to review costs 1. Those numbers are illustrative, not real business figures, and the dashboard's simulator lets you change them.
 
-For anything that gets flagged, the API also returns the top three reasons in plain English ("this being the first transaction ever to this recipient"), taken from that transaction's own SHAP values.
+The review threshold looks tiny because it is a calibrated probability at a fraud rate of 0.07%, and missing a fraud is far more expensive than a review.
 
 ## Results
 
-Everything below is measured on a held-out period the models never saw: days 14 to 16, about 1.2 million transactions with 822 fraud cases. Training used days 5 to 7, which has only 778 fraud rows. Splits are by time, never random, because a real model only ever predicts the future.
+All figures are for the held-out period, days 14 to 16: 1,202,642 transactions, 822 fraud. Models were trained on days 5 to 7. Class weights were chosen on days 8 to 10, calibration and thresholds on days 11 to 13, and the held-out period was scored once. Each model is the average of five training seeds. Intervals are 95%, from 200 bootstrap resamples.
 
-| Model | Held-out PR-AUC | 95% CI | Total cost at its own thresholds |
-|---|---|---|---|
-| LightGBM (my original model) | 0.7198 | 0.6877 to 0.7492 | 46,455,419 |
-| **Random Forest (deployed)** | 0.8335 | 0.8085 to 0.8546 | 47,547 |
-| MLP, 3 hidden layers | 0.8485 | 0.8217 to 0.8720 | 48,551 |
+| Model | PR-AUC [95% CI] | 5 seeds | Total cost | Fraud let through | Legitimate reviewed | Wrongful blocks |
+|---|---|---|---|---|---|---|
+| **LightGBM ensemble (deployed)** | 0.8632 [0.8384, 0.8835] | 0.8585 ± 0.0022 | 33,744 | 0 | 2.79% | 3 |
+| MLP (64-32-16) | 0.8493 [0.8242, 0.8734] | 0.8468 ± 0.0011 | 59,162 | 1 | 4.90% | 1 |
+| Random Forest | 0.8265 [0.7979, 0.8503] | 0.8261 ± 0.0022 | 130,171 | 2 | 3.92% | 3 |
+| Logistic regression | 0.6142 [0.5772, 0.6453] | 0.6142 ± 0.0000 | 5,043,316 | 4 | 6.82% | 7 |
 
-Confidence intervals are from 200 bootstrap resamples of the held-out set.
+- **LightGBM is the best ranker, and the difference is significant** by paired bootstrap: +0.0367 PR-AUC over the Random Forest (CI +0.0258 to +0.0466) and +0.0140 over the MLP (CI +0.0074 to +0.0192).
+- **The deployed model is an ensemble for a reason.** A single LightGBM is steady in PR-AUC but not in cost: across the five seeds it ranges from 32,112 to 1,202,032, because the review threshold sits next to a cliff. Averaging the five removes that.
+- **The block tier is precise:** 99.5% precision at 77.0% recall. The remaining frauds go to a person instead of through.
 
-A few things worth pointing out:
+Full tables, seed spreads, threshold robustness and paired tests are in [results/old_vs_new.md](results/old_vs_new.md). Every number in this README is in [results/metrics.json](results/metrics.json) with the script that produced it.
 
-- **The deployed model is the Random Forest**, with thresholds 0.32 and 0.85. On the held-out set it let none of the 822 fraud cases through as ALLOW, sent 3.93% of legitimate transactions to review, and wrongly blocked 23 legitimate ones.
-- **The cost gap is almost entirely one blind spot.** LightGBM scored 37 real fraud cases at under 0.1% probability. A missed fraud costs its full amount, which is where the 46 million comes from. The Random Forest and the MLP both flag all 37.
-- **The MLP surprised me.** I expected a neural network to lose to tree models on tabular data with so few fraud examples. It didn't. Its interval overlaps the Random Forest's, so I can't call a winner between those two, and I kept the Random Forest because it had the lowest cost and is easier to explain.
-- **Small fraud is caught but less confidently.** Review-level recall is 100% in every amount quartile, but auto-block recall ranges from 50% for the smallest fraud to 99.6% for the largest. Small fraud tends to go to a human rather than being blocked outright, which I think is the right way round.
+### What changed from the first version
 
-One caveat on the cost column: the thresholds were swept on the held-out set, so those cost figures are optimistic.
+The first version of this project reported a Random Forest at PR-AUC 0.8335 with "0 of 822 frauds missed" at a cost of 47,547. Those figures were not honest: the class weights and the thresholds had been chosen by looking at the held-out set.
 
-### Does it hold up over time?
-
-Two features that track how busy a recipient account has been drift quite a lot across the evaluation window (PSI up to 0.54, where anything over 0.25 counts as a large shift). PR-AUC stays flat anyway, and the reason is simple: SHAP shows the model barely uses those features.
-
-That's a slightly lucky result, so I also tested the unlucky case. Shifting the two balance-error features the model leans on hardest drops LightGBM's PR-AUC from 0.72 to about 0.53. So the model is stable against the drift that actually occurred, not against drift in general.
-
-### What about late labels?
-
-I simulated a 2-day label delay by hiding the most recent labels from training. Once I averaged over five training seeds, there was no measurable effect on PR-AUC. A single-seed run looked like it showed a pattern, but that was just training noise, which was a useful lesson in itself.
-
-### Does the approach work on other data?
-
-I reran the same method on the [ULB credit card fraud dataset](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud) (284,807 transactions, 492 fraud), retraining from scratch since the two datasets share no features.
-
-| Model | Held-out PR-AUC | 95% CI |
+| | First version | Corrected |
 |---|---|---|
-| LightGBM | 0.6818 | 0.5947 to 0.7662 |
-| Logistic regression baseline | 0.7365 | 0.6570 to 0.8148 |
-| MLP | 0.7972 | 0.7312 to 0.8613 |
+| Deployed model | Random Forest | LightGBM 5-seed ensemble |
+| LightGBM PR-AUC | 0.7198 (class weight 20, never tuned properly) | 0.8632 (class weight 1, chosen on validation) |
+| Random Forest PR-AUC | 0.8335 | 0.8265 |
+| Random Forest, frauds let through | 0 | 2 |
+| Random Forest cost | 47,547 | 130,171 |
+| Deployed model cost | 47,547 | 33,744 |
 
-It transferred only partly. The process carried over fine, but LightGBM overfit (training PR-AUC of 1.0) and didn't beat plain logistic regression. With only 115 fraud cases in that held-out period, all three intervals overlap. Full write-up in [reports/06_cross_dataset_summary.md](reports/06_cross_dataset_summary.md).
+The corrected deployed model is better than the first one, but the route there mattered: the old ranking of models was wrong, and the model that looked best was only best because it had been tuned on the test.
 
-## Four issues found (and what I did about them)
+## Limitations
 
-These changed my numbers more than any modelling choice did.
+Read these before quoting any number above.
 
-**1. Leaky hourly features. Disclosed, not fixed.**
-Three features (`total_transactions`, `total_transaction_amount`, `avg_transaction_amount`) are totals for the whole hour, attached to every transaction in that hour. A transaction at the start of the hour is therefore seeing a little of the future. I built a leak-free version using only the previous hour, and it performed much worse, most likely because these features were really acting as a time-of-day signal. I kept the original and I'm flagging it here as a known weakness.
+- **The model leans on a property of the simulator.** Three features compare an account's balance before and after a transaction. Without them PR-AUC falls from 0.8632 to 0.5028 and 38.58% of legitimate traffic would need review. In PaySim that relationship comes from the simulator's own bookkeeping. These results are an upper bound for this dataset, not an estimate for real payments. See [results/phase3/summary.md](results/phase3/summary.md).
+- **"Delay-aware" is a mechanism, not a measured benefit.** The system retrains only on matured labels, gates each new model behind a champion/challenger test, and falls back on a label-free anomaly score when the model is stale. On this data, label delays of one or two days had no measurable effect and three days cost 0.005 PR-AUC, so no performance benefit is claimed. See [results/phase5/summary.md](results/phase5/summary.md).
+- **The autoencoder is unstable and the hybrid did not help.** With no labels, the autoencoder puts 71.2% of fraud in its top 1% most anomalous transactions, but its PR-AUC ranges from 0.061 to 0.223 across five seeds. Adding its score to the supervised model changed PR-AUC by −0.0043 (not significant). See [results/phase4/summary.md](results/phase4/summary.md).
+- **The model is fragile to drift in the features it relies on.** Adding a constant to the two balance-error features lets about 158 of 822 frauds through. The monitoring raises an alert in that case; it does not prevent it. See [results/monitoring/summary.md](results/monitoring/summary.md).
+- **The review threshold is still next to a cliff.** It was placed to be safe if calibrated odds are off by a factor of two, but a large enough move to the right is very expensive. The simulator shows this directly.
+- **The cost values are illustrative**, not real business costs.
+- **Docker is untested.** `docker-compose.yml` and both Dockerfiles are written but have never been built: the development machine had no disk space for the images. Treat them as unverified. The PostgreSQL path is likewise unverified; everything was run on SQLite.
+- **Not production-grade throughput.** One worker on SQLite scores a transaction in 81.7 ms at the median (174.9 ms at the 95th percentile) and manages about 9 requests per second under load.
+- **The live demo oversamples fraud** (1.21% of replayed rows against a true rate of 0.068%) so that a short demo contains fraud. Rates on the live-feed page are not the model's real rates.
+- **PaySim is synthetic.** Its fraud follows simulator rules and does not change over time, which is probably why label delay shows no effect.
 
-**2. Features attached to the wrong rows. Fixed.**
-Five recipient-history features were computed on a re-sorted copy of the data and then glued back on by position, so every value ended up next to the wrong transaction. I caught it because a "first ever transaction to this recipient" flag was true for 100% of rows in one period, which is impossible.
+## Architecture
 
-**3. A dropped `fillna`. Fixed.**
-While fixing #2 I lost a `fillna(0)`, leaving 55 to 65% of two count features as NaN. LightGBM accepts NaN without complaint, so nothing crashed. The training data was just quietly wrong.
+```mermaid
+flowchart LR
+    subgraph Offline["Offline (scripts/)"]
+        raw[PaySim CSV] --> feat[fraud.features]
+        feat --> proto["fraud.protocol<br/>select on eval_1 / eval_2,<br/>evaluate once on held-out"]
+        proto --> reg[(Model registry<br/>models/registry)]
+        proto --> res[(results/metrics.json)]
+    end
+    subgraph Service["API (fraud.service)"]
+        api[FastAPI] --> fs[(Feature store<br/>transactions table)]
+        api --> scorer["fraud.serving.Scorer<br/>ensemble → calibrator → tier"]
+        api --> db[(assessments, cases,<br/>audit log, labels)]
+    end
+    reg --> scorer
+    feat -. same feature code .-> api
+    res --> api
+    pay[Payment system] -- "POST /score/raw" --> api
+    dash[React dashboard] -- "REST + WebSocket" --> api
+    db -- matured labels --> retrain[scripts/retrain.py]
+    retrain -- "champion / challenger" --> reg
+```
 
-**4. The API was sending 14 features to a 17-feature model. Fixed.**
-During deployment testing, an obviously fraudulent transaction came back with a 0% fraud probability. The three hourly features from #1 were missing from the request. Again, no error, just a confidently wrong answer.
-
-Here's what the first three did to the baseline PR-AUC:
-
-| Stage | PR-AUC |
-|---|---|
-| Original (leaky, misaligned, NaN-filled) | 0.8327 |
-| Leakage fix attempted | 0.4999 |
-| Row alignment fixed | 0.6575 |
-| NaN fill restored | 0.6684 |
-
-The best-looking number was the most broken one. Three of the four issues failed silently, and that's the main thing I took away from this project: the bugs that throw errors are the easy ones.
+The point of the layout is that there is one definition of every feature and one scoring path. The evaluation scripts and the API both call `fraud.features` and `fraud.serving.Scorer`, and `tests/test_parity.py` replays 1,000 held-out transactions through the live API and checks the probabilities match the offline ones to 1e-6. The first version of this project had the API sending 14 features to a 17-feature model and returning a confident 0% for obvious fraud; this test is what would have caught it.
 
 ## Running it
 
-You'll need Python 3.12 and, for the dashboard, Node.js 18 or later.
+You need Python 3.12 and Node.js 20 or later. The trained model, the demo data and all result files are in the repository, so nothing needs to be downloaded or retrained to run the system.
 
 ```bash
 git clone https://github.com/anushka-saini/Cost-Aware-Fraud-Detection-with-Delay-Aware-Decisioning.git
 cd Cost-Aware-Fraud-Detection-with-Delay-Aware-Decisioning
 
 python -m venv fraud_env
-fraud_env\Scripts\activate        # macOS/Linux: source fraud_env/bin/activate
-pip install -r requirements.txt
+fraud_env\Scripts\activate          # macOS / Linux: source fraud_env/bin/activate
+pip install torch==2.14.1 --index-url https://download.pytorch.org/whl/cpu
+pip install -e ".[dev]"
 ```
 
-`requirements.txt` is a full freeze from my Windows machine. On macOS or Linux, remove the `pywin32` and `pywinpty` lines before installing.
-
-The trained model and a 500-row demo sample are in the repo, so the API and both front ends work straight after cloning. You only need the raw data if you want to rerun the notebooks.
-
-### 1. Start the API
+**1. Start the API** (from the project root):
 
 ```bash
-cd api
-uvicorn main:app --reload
+uvicorn fraud.service.app:app --port 8000
 ```
 
-Run it from inside `api/`, since the model file is loaded by relative path. Interactive docs are at http://127.0.0.1:8000/docs.
+On first start it creates a SQLite database at `api/fraud.db`, two demo accounts, and loads the demo recipients' history into the feature store. Interactive API docs are at http://127.0.0.1:8000/docs.
 
-Try it with:
-
-```bash
-curl -X POST http://127.0.0.1:8000/score -H "Content-Type: application/json" -d "{\"amount\": 1595587.46, \"origin_balance_error\": 0, \"destination_balance_error\": 1595587.46, \"destination_balance_is_zero\": 1, \"destination_is_first_transaction\": 1, \"type_TRANSFER\": true}"
-```
-
-You get back a probability, a tier, the reasons, and an `assessment_id`.
-
-| Endpoint | What it does |
-|---|---|
-| `POST /score` | Scores a transaction and returns the tier and reasons |
-| `POST /confirm-decision` | Records whether the user proceeded or cancelled after a warning |
-| `POST /explain` | SHAP contribution of every feature for one transaction |
-| `GET /model-info` | Which model is loaded, its parameters and thresholds |
-| `GET /decision-log` | Everything recorded by `/confirm-decision` |
-| `GET /validation-metrics` | The notebook figures shown on the dashboard |
-| `GET /demo-sample/random` | One random held-out transaction with its true label |
-| `GET /health` | Health check |
-
-### 2. Streamlit demo
-
-In a second terminal, from the project root:
-
-```bash
-streamlit run app.py
-```
-
-There are preset scenarios, plus a **Random Real Transaction** button that pulls a genuine held-out transaction and shows whether the model got it right. If the model flags something, you can choose to proceed or cancel, and that choice is logged.
-
-### 3. React dashboard
-
-In another terminal:
+**2. Start the dashboard** (second terminal):
 
 ```bash
 cd dashboard
@@ -160,72 +129,117 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173. It has three pages:
+Open http://localhost:5173 and sign in:
 
-- **Live Scoring**: score a transaction and see each feature's SHAP contribution
-- **Model Validation**: charts of the results from the notebooks
-- **Decision Log**: how often users override warnings, broken down by tier
+| Account | Username | Password | Sees |
+|---|---|---|---|
+| Analyst | `analyst` | `analyst123` | Overview, live feed, review queue, simulator, audit log |
+| Admin | `admin` | `admin123` | All of that, plus monitoring, model comparison and threshold proposals |
 
-The dashboard talks to the API through a dev proxy, so there's no CORS setup. If your API is somewhere other than `127.0.0.1:8000`, set `FRAUD_API_URL` before `npm run dev`.
+Go to **Live feed** and press **Start**. Transactions sent to review appear in the **Review queue**.
 
-### Rerunning the notebooks
+**With Docker** (unverified, see Limitations): `docker compose up --build`, then open http://localhost:5173.
 
-The datasets are too large for the repo. Download them from Kaggle and place them here:
+**Streamlit backup demo:** `streamlit run app.py` with the API running. It is a single scoring form, kept as a fallback.
 
-- PaySim → `data/raw/transaction_data.csv`
-- ULB credit card fraud → `data/raw/creditcard.csv` (only for notebook 06)
+### Tests
 
-Then run the notebooks in order.
+```bash
+pytest                    # 64 tests; those needing the PaySim data skip themselves if it is absent
+ruff check src scripts tests
+python scripts/smoke_test.py      # starts a real server and walks the demo path
+```
+
+Coverage is 77% of `src/` overall and above 90% on the service modules; the rest is training code that only the scripts exercise.
+
+## The dashboard
+
+| Page | What it is for |
+|---|---|
+| ![Overview](docs/screenshots/02-overview.png) **Overview** | Volumes, block and review rates, queue size, active model, drift status |
+| ![Live feed](docs/screenshots/03-live-feed.png) **Live feed** | Held-out transactions replayed through the real scoring path over a WebSocket |
+| ![Review queue](docs/screenshots/04-review-queue.png) **Review queue** | The analyst's main screen: sort, filter, bulk actions, keyboard shortcuts |
+| ![Case detail](docs/screenshots/05-case-detail.png) **Case detail** | Both scores, a SHAP waterfall, plain-English reasons, the recipient's history, similar cases, mandatory notes, audit trail |
+| ![Simulator](docs/screenshots/06b-threshold-simulator-held-out.png) **Threshold simulator** | Move the thresholds and the cost assumptions and see cost, missed fraud and workload recomputed instantly, with the cost curve showing the cliff |
+| ![Monitoring](docs/screenshots/07-monitoring.png) **Monitoring** | PSI by feature and period, operating-rate bands, the drift stress test, champion/challenger history |
+| ![Model comparison](docs/screenshots/08-model-comparison.png) **Model comparison** | Every model with intervals and seed spread, and the old numbers against the corrected ones |
+| ![Audit log](docs/screenshots/09-audit-log.png) **Audit log** | Every decision, flag, sign-in, model change and threshold proposal; searchable, exportable |
+
+Light and dark mode are both supported ([dark example](docs/screenshots/10-dark-threshold-simulator.png)). An admin can *propose* thresholds from the simulator; a proposal is written to the audit log and never changes production.
+
+## The API
+
+Scoring endpoints are open, as a payment system would call them. Everything else needs a token from `POST /auth/login`.
+
+| Endpoint | What it does |
+|---|---|
+| `POST /score/raw` | Scores a raw transaction. The service computes the recipient-history features itself from stored transactions. |
+| `POST /score` | Scores pre-computed features (the original request format, still accepted) |
+| `POST /explain` | SHAP contribution of every input for one transaction |
+| `POST /confirm-decision` | Records the customer's proceed / cancel choice after a warning |
+| `GET /cases`, `GET /cases/{id}` | Review queue and case detail |
+| `POST /cases/{id}/decision` | Approve, decline or escalate, with a mandatory note. The verdict becomes a training label. |
+| `WS /stream` | Replays held-out transactions as a live feed at a chosen speed |
+| `GET /simulator/scores` | Precomputed scores for the threshold simulator |
+| `POST /thresholds/proposals` | Admin only. Records a proposal in the audit log. |
+| `GET /monitoring/drift`, `GET /overview` | Drift reports and KPIs |
+| `GET /models`, `POST /models/rollback` | Registered model versions; switch the serving version (admin) |
+| `GET /audit`, `GET /audit/export.csv` | Audit log |
+| `POST /labels`, `GET /labels` | Outcomes learned after scoring, with their maturity |
+| `GET /model-info`, `GET /health` | The loaded model bundle; health check |
+
+```bash
+curl -X POST http://127.0.0.1:8000/score/raw -H "Content-Type: application/json" -d "{\"step\": 340, \"type\": \"TRANSFER\", \"amount\": 250000, \"nameOrig\": \"C1\", \"nameDest\": \"C2\", \"oldbalanceOrg\": 250000, \"newbalanceOrig\": 0, \"oldbalanceDest\": 0, \"newbalanceDest\": 0}"
+```
+
+## Reproducing the results
+
+The PaySim data is too large for the repository. Download it from Kaggle to `data/raw/transaction_data.csv`. The scripts build the features from that file when no cached feature table exists (slower on every run; `notebooks/01_data_audit.ipynb` writes the cache to `data/processed/paysim_features.parquet`). Then:
+
+```bash
+python scripts/verify_features.py                                    # features rebuilt from raw match the cache
+python scripts/run_protocol.py --tag phase2 --features v2 --stage select   # weights on eval_1, thresholds on eval_2
+python scripts/run_protocol.py --tag phase2 --features v2 --stage final    # the single held-out evaluation
+python scripts/run_protocol.py --tag phase3 --features v2_no_balance --stage select --families lightgbm
+python scripts/run_protocol.py --tag phase3 --features v2_no_balance --stage final  --families lightgbm
+python scripts/phase4_autoencoder.py --stage select && python scripts/phase4_autoencoder.py --stage final
+python scripts/phase5_rolling.py
+python scripts/register_model.py --tag phase2 --family lightgbm --autoencoder-tag phase4
+python scripts/run_monitoring.py
+python scripts/render_old_vs_new.py --tags phase2 phase1
+```
+
+The `final` stage refuses to run twice for the same tag, so the held-out set cannot be reused by accident. Expect several hours on a laptop.
 
 ## What's in the repo
 
 ```
-├── api/
-│   ├── main.py                  Scoring API: /score, /confirm-decision
-│   ├── dashboard_routes.py      Read-only endpoints for the dashboard
-│   ├── validation_metrics.json  Figures shown on the dashboard, each with its source cell
-│   ├── rf_model.pkl             Deployed Random Forest
-│   ├── fraud_model.pkl          Original LightGBM model
-│   └── Dockerfile
-├── dashboard/                   React + Vite + Recharts dashboard
-├── notebooks/                   The analysis, in order (see below)
-├── reports/                     Summaries and raw results from notebooks 06 and 07
-├── app.py                       Streamlit demo
-├── demo_sample.csv              500 held-out transactions with true labels
-└── requirements.txt
+├── src/fraud/                 Shared package
+│   ├── features.py            Feature engineering: one batch path, one online path, same formulas
+│   ├── protocol.py            The evaluation protocol (select on eval_1 / eval_2, evaluate once)
+│   ├── evaluation.py          PR-AUC, bootstrap, paired tests, cost model, threshold sweeps
+│   ├── models.py, autoencoder.py, calibration.py
+│   ├── serving.py             Scorer: features → ensemble → calibrator → tier → explanation
+│   ├── monitoring.py, labels.py, registry.py, reporting.py
+│   └── service/               FastAPI app: routes, database, auth, live feed
+├── scripts/                   Every experiment and result is produced by a script here
+├── tests/                     64 tests, including train/serve parity
+├── dashboard/                 React + TypeScript + Tailwind operations dashboard
+├── results/                   metrics.json, old_vs_new.md and a summary per experiment
+├── models/registry/           The registered model bundles the service loads
+├── migrations/                Alembic database migrations
+├── notebooks/                 The original analysis (01–07), kept as a record
+├── docs/                      Screenshots and the demo script
+└── app.py                     Streamlit backup demo
 ```
 
-### The notebooks
-
-| Notebook | What it covers |
-|---|---|
-| `01_data_audit` | Exploring PaySim, feature engineering, a logistic regression baseline |
-| `02_modeling` | LightGBM, performance over time, drift, SHAP, decision tiers |
-| `03_delay_aware_validation` | First label-delay analysis, and where bugs #2 and #3 were found |
-| `04_delay_aware_corrected` | The delay analysis and cost thresholds redone on corrected data |
-| `05_model_enhancement` | LightGBM vs Random Forest, cost sweeps, blind-spot and drift stress tests |
-| `06_cross_dataset_validation` | The same method on the ULB credit card data |
-| `07_mlp_comparison` | A PyTorch MLP against both tree models |
-
-Notebook 03 is kept as it was because it's the record of how the bugs were found. Its early outputs are pre-fix numbers, so don't quote them. Use 04 onwards. `02_modeling_old` is the earlier version of 02, kept for reference.
-
-## Limitations
-
-- **PaySim is synthetic.** Its fraud follows simulator rules and is probably easier to learn than the real thing. The weaker results on the ULB data support that.
-- **Thresholds were tuned on the held-out set**, so the cost figures are best-case.
-- **The hourly features leak** (issue #1 above).
-- **No feature store.** Features like "transactions to this recipient in the last 24 hours" are passed in by the caller. A real deployment would need to look them up from live history.
-- **Review thresholds are fragile.** For the Random Forest and the MLP, a small shift in the review threshold raises cost noticeably.
-- **Label delay and drift are simulated**, and only studied within days 5 to 16, the one stretch of the data with steady enough volume to trust.
-- **The Dockerfile hasn't been tested end to end.** It expects to be built from the project root (`docker build -f api/Dockerfile .`) and will need the Windows-only packages removed from `requirements.txt` first.
-- **Pending assessments live in memory** and the decision log is a CSV. Fine for a demo, not for production.
-- The LightGBM vs Random Forest comparison is still something I'm working on, so some figures may change.
+Notebooks 03, 05 and 07 carry a banner saying which of their figures are superseded. They are kept because they are the record of how the original bugs were found.
 
 ## Built with
 
-Python, pandas, scikit-learn, LightGBM, PyTorch, SHAP, Optuna, FastAPI, Streamlit, React, Vite and Recharts.
+Python, pandas, scikit-learn, LightGBM, PyTorch, SHAP, FastAPI, SQLAlchemy, Alembic, React, TypeScript, Vite, Tailwind CSS, TanStack Query and Table, Radix UI, Recharts.
 
 ## Data credits
 
 - PaySim: Lopez-Rojas, Elmir and Axelsson, *PaySim: A financial mobile money simulator for fraud detection* (2016).
-- Credit card fraud dataset: Machine Learning Group, Université Libre de Bruxelles.
+- Credit card fraud dataset (used in notebook 06): Machine Learning Group, Université Libre de Bruxelles.
