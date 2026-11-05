@@ -1,10 +1,12 @@
-"""Model definitions. Every model exposes ``fit`` and ``predict_proba``."""
+"""Model definitions. Every model exposes ``fit`` and ``predict_proba``.
+
+PyTorch is imported only inside the MLP code, so serving a tree model never
+loads it (it adds a few hundred MB of memory).
+"""
 
 import lightgbm as lgb
 import numpy as np
 import pandas as pd
-import torch
-import torch.nn as nn
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import average_precision_score
@@ -31,6 +33,42 @@ def make_lgbm(seed: int = 42, scale_pos_weight: float = 20, **overrides):
 def make_rf(seed: int = 42, fraud_weight: float = 500, **overrides):
     return RandomForestClassifier(**{**RF_PARAMS, "class_weight": {0: 1, 1: fraud_weight},
                                      "random_state": seed, **overrides})
+
+
+# XGBoost and CatBoost are imported only when used, so the API image does not
+# need them unless the deployed model is one of them.
+
+def make_xgb(seed: int = 42, **params):
+    """XGBoost with the fast histogram method."""
+    from xgboost import XGBClassifier
+
+    return XGBClassifier(tree_method="hist", n_jobs=-1, random_state=seed, **params)
+
+
+def make_catboost(seed: int = 42, **params):
+    import catboost
+
+    return catboost.CatBoostClassifier(random_seed=seed, verbose=0, thread_count=-1,
+                                       allow_writing_files=False, **params)
+
+
+class ScaledLogisticRegression:
+    """Logistic regression on log-scaled, standardised inputs.
+
+    PaySim amounts and balances span many orders of magnitude, so plain
+    logistic regression on the raw values mostly sees the largest columns.
+    """
+
+    def __init__(self, seed: int = 42, C: float = 1.0, fraud_weight: float = 1.0):
+        self.model = LogisticRegression(C=C, class_weight={0: 1, 1: fraud_weight}, max_iter=2000, random_state=seed)
+
+    def fit(self, X, y, sample_weight=None):
+        self.scaler_ = SignedLogScaler().fit(X)
+        self.model.fit(self.scaler_.transform(X), y, sample_weight=sample_weight)
+        return self
+
+    def predict_proba(self, X):
+        return self.model.predict_proba(self.scaler_.transform(X[self.scaler_.columns_]))
 
 
 def predict_fraud_proba(model, X) -> np.ndarray:
@@ -80,6 +118,8 @@ class SignedLogScaler:
 # ---------------------------------------------------------------------------
 
 def _mlp_net(n_inputs, hidden, dropout):
+    import torch.nn as nn
+
     layers, size = [], n_inputs
     for width in hidden:
         layers += [nn.Linear(size, width), nn.ReLU(), nn.Dropout(dropout)]
@@ -97,6 +137,9 @@ class MLPClassifier:
         self.params = {**MLP_PARAMS, **params}
 
     def fit(self, X, y, X_val, y_val, verbose: bool = False):
+        import torch
+        import torch.nn as nn
+
         p = self.params
         torch.manual_seed(self.seed)
         self.scaler_ = SignedLogScaler().fit(X)
@@ -135,12 +178,16 @@ class MLPClassifier:
         return self
 
     def _predict_tensor(self, T, batch=262144):
+        import torch
+
         self.net_.eval()
         with torch.no_grad():
             return torch.cat([torch.sigmoid(self.net_(T[i:i + batch]).squeeze(1))
                               for i in range(0, len(T), batch)]).numpy().astype(np.float64)
 
     def predict_proba(self, X):
+        import torch
+
         p = self._predict_tensor(torch.from_numpy(self.scaler_.transform(X[self.scaler_.columns_])))
         return np.column_stack([1 - p, p])
 

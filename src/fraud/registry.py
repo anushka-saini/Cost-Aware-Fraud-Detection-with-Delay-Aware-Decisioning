@@ -10,12 +10,12 @@ was promoted on and where it came from. Stored as
 import json
 import subprocess
 from datetime import UTC, datetime
+from importlib.metadata import version as package_version
 from pathlib import Path
 
 import joblib
 import lightgbm
 import sklearn
-import torch
 
 from fraud.config import get_settings
 
@@ -33,7 +33,8 @@ def git_hash() -> str | None:
 
 
 def library_versions() -> dict:
-    return {"sklearn": sklearn.__version__, "lightgbm": lightgbm.__version__, "torch": torch.__version__}
+    # Read torch's version from its package metadata, so saving a bundle does not import it.
+    return {"sklearn": sklearn.__version__, "lightgbm": lightgbm.__version__, "torch": package_version("torch")}
 
 
 def list_versions(name: str) -> list[str]:
