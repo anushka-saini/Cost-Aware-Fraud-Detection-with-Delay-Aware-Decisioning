@@ -3,6 +3,8 @@
 import csv
 import io
 import json
+import os
+import time
 from datetime import UTC
 from pathlib import Path
 
@@ -10,8 +12,10 @@ import pandas as pd
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from sqlalchemy import func, or_, select
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
+from fraud import __version__
 from fraud.config import PROJECT_ROOT
 from fraud.features import TRANSACTION_TYPES, hour_sin_cos, to_model_frame
 from fraud.labels import SOURCE_PRIORITY
@@ -44,9 +48,10 @@ from fraud.service.db import (
     now,
 )
 from fraud.service.security import admin_only, any_user, create_token, verify_password
-from fraud.service.settings import get_service_settings
+from fraud.service.settings import DEMO_ADMIN_PASSWORD, DEMO_ANALYST_PASSWORD, get_service_settings
 
 router = APIRouter()
+STARTED_AT = time.time()
 
 VALIDATION_METRICS_PATH = PROJECT_ROOT / "api" / "validation_metrics.json"
 DEMO_SAMPLE_PATH = PROJECT_ROOT / "demo_sample.csv"
@@ -67,6 +72,63 @@ DECISION_STATUS = {"approve": "approved", "decline": "declined", "escalate": "es
 def health():
     scorer = get_scorer()
     return {"status": "ok", "model": {"name": scorer.name, "version": scorer.version}}
+
+
+@router.get("/status", tags=["system"])
+def service_status(db: Session = Depends(get_db)):
+    """Everything the status page shows. Public: no secrets, no transaction data."""
+    settings = get_service_settings()
+    scorer = get_scorer()
+
+    started = time.perf_counter()
+    try:
+        db.execute(select(1))
+        database_ok = True
+    except SQLAlchemyError:
+        database_ok = False
+    database = {"ok": database_ok, "backend": db.get_bind().dialect.name,
+                "latency_ms": round((time.perf_counter() - started) * 1000, 2)}
+
+    monitoring, activity = None, None
+    if database_ok:
+        latest = db.scalar(select(DriftReport).order_by(DriftReport.created_at.desc()).limit(1))
+        if latest is not None:
+            monitoring = {"period": latest.period, "status": latest.status, "checked_at": latest.created_at.isoformat()}
+        activity = {
+            "transactions_scored_last_24h": sum(tier_counts(db, since=last_day()).values()),
+            "open_cases": db.scalar(select(func.count()).select_from(AnalystCase)
+                                    .where(AnalystCase.status == "open")),
+        }
+
+    bundle = scorer.bundle
+    # Shown on the login page: in demo mode, or on a development machine that
+    # still uses the demo passwords. Never in production otherwise.
+    on_laptop_with_demo_passwords = (settings.environment == "development"
+                                     and settings.admin_password == DEMO_ADMIN_PASSWORD
+                                     and settings.analyst_password == DEMO_ANALYST_PASSWORD)
+    demo_accounts = None
+    if settings.demo_mode or on_laptop_with_demo_passwords:
+        demo_accounts = [
+            {"username": settings.analyst_username, "password": settings.analyst_password, "role": "analyst"},
+            {"username": settings.admin_username, "password": settings.admin_password, "role": "admin"},
+        ]
+    return {
+        "status": "ok" if database_ok else "degraded",
+        "checked_at": now().isoformat(),
+        "api_version": __version__,
+        "environment": settings.environment,
+        "demo_mode": settings.demo_mode,
+        "uptime_seconds": round(time.time() - STARTED_AT),
+        "worker_pid": os.getpid(),
+        "model": {"name": scorer.name, "version": scorer.version,
+                  "thresholds": {"t_review": scorer.t_review, "t_block": scorer.t_block},
+                  "feature_count": len(scorer.feature_columns), "train_days": bundle.get("train_days"),
+                  "created_at": bundle.get("created_at")},
+        "database": database,
+        "monitoring": monitoring,
+        "activity": activity,
+        "demo_accounts": demo_accounts,
+    }
 
 
 @router.post("/auth/login", tags=["auth"])
@@ -191,6 +253,8 @@ def models(db: Session = Depends(get_db), user: User = Depends(any_user)):
 @router.post("/models/rollback", tags=["models"])
 def rollback(body: schemas.RollbackRequest, db: Session = Depends(get_db), user: User = Depends(admin_only)):
     """Switch the serving model to another registered version (default: the one before the active one)."""
+    if get_service_settings().demo_mode:
+        raise HTTPException(403, "Switching the model is turned off in the public demo")
     versions = list_versions(get_service_settings().model_name)
     current = get_scorer().version
     target = body.version

@@ -6,6 +6,7 @@ import pytest
 # throwaway in-memory database before anything from fraud.service is imported.
 os.environ["FRAUD_DATABASE_URL"] = "sqlite:///:memory:"
 os.environ["FRAUD_RATE_LIMIT_PER_MINUTE"] = "0"
+os.environ["FRAUD_LOGIN_ATTEMPTS_PER_MINUTE"] = "0"     # the fixtures log in many times a minute
 os.environ["FRAUD_REPLAY_HISTORY_PATH"] = "none"       # tests start with an empty feature store
 os.environ.setdefault("FRAUD_JWT_SECRET", "test-secret-not-for-production-use-0123456789")
 
