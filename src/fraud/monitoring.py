@@ -60,10 +60,18 @@ def rate_check(name: str, observed: float, expected: float | None, band=RATE_BAN
             "band_high": float(high), "level": "ok" if low <= observed <= high else "alert"}
 
 
+def novelty_share(anomaly_scores, threshold: float) -> float:
+    """Share of transactions whose autoencoder anomaly score is at or above the
+    novelty threshold (set at the 99th percentile of unlabelled eval_2 traffic,
+    so about 1% is expected). A rise means more traffic unlike anything seen before."""
+    return float(np.mean(np.asarray(anomaly_scores) >= threshold))
+
+
 def build_report(*, period: str, days, reference: pd.DataFrame, current: pd.DataFrame, feature_columns,
                  reference_scores: dict, current_scores: dict, review_rate: float | None = None,
                  expected_review_rate: float | None = None, block_rate: float | None = None,
                  expected_block_rate: float | None = None, override_rate: float | None = None,
+                 novelty: float | None = None, expected_novelty: float | None = None,
                  model: dict | None = None) -> dict:
     """One drift report: a period of traffic against the training reference.
 
@@ -81,6 +89,8 @@ def build_report(*, period: str, days, reference: pd.DataFrame, current: pd.Data
         rates.append(rate_check("block_rate", block_rate, expected_block_rate))
     if override_rate is not None:
         rates.append(rate_check("override_rate", override_rate, None, OVERRIDE_RATE_BAND, absolute=True))
+    if novelty is not None:
+        rates.append(rate_check("novelty_share", novelty, expected_novelty))
 
     alerts = [{"type": "psi", "name": r["name"], "level": r["level"], "value": r["psi"]}
               for r in psi_rows if r["level"] != "ok"]

@@ -7,6 +7,10 @@ written to results/monitoring/drift_reports.json, which the API serves at
 GET /monitoring/drift. Run it on a schedule (cron / Task Scheduler) in
 production; here it is run once over the historical periods.
 
+When a novelty detector is registered (scripts/register_novelty_detector.py),
+each report also checks the share of very unusual transactions against the
+expected 1%. The detector is monitoring-only: it never changes a decision.
+
 The stress test then shifts the two balance-error features on the held-out
 period and re-scores, to see how the deployed model degrades when the features
 it relies on most move.
@@ -21,8 +25,8 @@ import numpy as np
 from fraud.config import get_settings
 from fraud.data import SPLITS, get_split, load_dense
 from fraud.evaluation import cost_report, pr_auc
-from fraud.monitoring import DriftReportStore, build_report
-from fraud.registry import load_bundle
+from fraud.monitoring import DriftReportStore, build_report, novelty_share
+from fraud.registry import list_versions, load_bundle
 from fraud.results import record
 from fraud.serving import ANOMALY_COLUMN, Scorer
 
@@ -41,11 +45,20 @@ def tier_rates(scored):
     return float((scored["tier"] == "REVIEW").mean()), float((scored["tier"] == "BLOCK").mean())
 
 
+def load_novelty_detector():
+    """The monitoring-only novelty detector, or None when none is registered."""
+    if not list_versions("novelty_detector"):
+        return None
+    return load_bundle("novelty_detector")
+
+
 def main():
     settings = get_settings()
     scorer = Scorer(load_bundle(os.environ.get("FRAUD_MODEL_NAME", "fraud_scorer")))
     columns = scorer.base_columns
-    frame = load_dense(columns)
+    novelty = load_novelty_detector()
+    novelty_columns = novelty["feature_columns"] if novelty else []
+    frame = load_dense(list(dict.fromkeys([*columns, *novelty_columns])))
     store = DriftReportStore(settings.results / "monitoring" / "drift_reports.json")
 
     X_ref, _ = get_split(frame, "train", columns)
@@ -59,6 +72,13 @@ def main():
         scored[period] = scorer.score_frame(X)
     expected_review, expected_block = tier_rates(scored["eval_2"])     # thresholds were set on eval_2
 
+    novelty_by_period = {}
+    if novelty:
+        threshold = novelty["thresholds"]["novelty"]
+        for period in PERIODS:
+            X_novelty, _ = get_split(frame, period, novelty_columns)
+            novelty_by_period[period] = novelty_share(novelty["model"].anomaly_score(X_novelty), threshold)
+
     for period in PERIODS:
         X, _ = get_split(frame, period, columns)
         review_rate, block_rate = tier_rates(scored[period])
@@ -68,6 +88,8 @@ def main():
             current_scores={name: scored[period][col].to_numpy() for name, col in score_names.items()},
             review_rate=review_rate, expected_review_rate=expected_review,
             block_rate=block_rate, expected_block_rate=expected_block,
+            novelty=novelty_by_period.get(period),
+            expected_novelty=novelty["metrics"]["expected_novelty_share"] if novelty else None,
             model={"name": scorer.name, "version": scorer.version},
         )
         store.add(report)
@@ -107,6 +129,9 @@ def main():
                         "review_and_block_rate_band": "0.5x to 2x the rate observed on eval_2",
                         "override_rate_band": "0 to 30% of flagged transactions"},
         "reports": reports,
+        "novelty": ({"detector": f"novelty_detector {novelty['version']}", "threshold": novelty["thresholds"]["novelty"],
+                     "expected_share": novelty["metrics"]["expected_novelty_share"], "share_by_period": novelty_by_period}
+                    if novelty else None),
         "stress_test": {"split": "held_out (days 14-16)", "features_shifted": STRESS_FEATURES,
                         "baseline": baseline, "scenarios": stress},
         "share_of_zero_values_held_out": {f: float(np.mean(X_held[f] == 0)) for f in STRESS_FEATURES},
