@@ -179,8 +179,17 @@ class FeedbackLabel(Base):
 # Engine and sessions
 # ---------------------------------------------------------------------------
 
+def with_driver(url: str) -> str:
+    """Hosting platforms hand out PostgreSQL addresses as postgres:// or
+    postgresql://; SQLAlchemy needs to be told to use the psycopg driver."""
+    for prefix in ("postgres://", "postgresql://"):
+        if url.startswith(prefix):
+            return "postgresql+psycopg://" + url[len(prefix):]
+    return url
+
+
 def make_engine(url: str | None = None):
-    url = url or get_service_settings().database_url
+    url = with_driver(url or get_service_settings().database_url)
     if url.startswith("sqlite"):
         kwargs = {"connect_args": {"check_same_thread": False}}
         if ":memory:" in url:
