@@ -1,0 +1,84 @@
+{
+  "name": "fraud_scorer",
+  "version": "v3",
+  "model_class": "list",
+  "feature_columns": [
+    "amount",
+    "destination_transactions_last_24h",
+    "destination_transactions_last_7d",
+    "destination_avg_previous_amount",
+    "destination_amount_deviation",
+    "destination_is_first_transaction",
+    "origin_balance_error",
+    "destination_balance_error",
+    "destination_balance_is_zero",
+    "hour_sin",
+    "hour_cos",
+    "type_CASH_IN",
+    "type_CASH_OUT",
+    "type_DEBIT",
+    "type_PAYMENT",
+    "type_TRANSFER"
+  ],
+  "calibration": "platt",
+  "thresholds": {
+    "t_review": 0.00031622776601683794,
+    "t_block": 0.71
+  },
+  "metrics": {
+    "eval_2_pr_auc": 0.8820381836607003,
+    "eval_2_total_cost": 32519.0,
+    "held_out": {
+      "pr_auc": 0.8730114132414951,
+      "ci_low": 0.8473532825701808,
+      "ci_high": 0.8927410893581731,
+      "total_cost": 32586.0,
+      "fraud_allowed": 0,
+      "legit_reviewed_pct": 0.026946630943069677,
+      "legit_blocked": 3,
+      "block_precision": 0.9953051643192489,
+      "block_recall": 0.7737226277372263,
+      "block_f1": 0.8706365503080084
+    }
+  },
+  "train_days": [
+    5,
+    6,
+    7
+  ],
+  "protocol": {
+    "run_tag": "v3",
+    "family": "lightgbm",
+    "feature_set": "v2",
+    "hyperparameters": {
+      "n_estimators": 750,
+      "learning_rate": 0.02060660273039283,
+      "num_leaves": 13,
+      "max_depth": 3,
+      "min_child_samples": 237,
+      "subsample": 0.9890103830751898,
+      "subsample_freq": 1,
+      "colsample_bytree": 0.8859020039954552,
+      "reg_alpha": 0.01877141879885058,
+      "reg_lambda": 0.002509119434062874,
+      "scale_pos_weight": 1.4522805264450946
+    },
+    "seeds": [
+      1,
+      2,
+      3,
+      4,
+      42
+    ],
+    "hyperparameters_chosen_on": "Optuna folds inside days 5-10",
+    "calibration_and_thresholds_chosen_on": "days 11-13",
+    "held_out_test": "days 14-16, run once (scripts/v3_phase3.py)"
+  },
+  "git_hash": "24b20b0608c93f0f5fef3f6c74d123aac228351a",
+  "versions": {
+    "sklearn": "1.9.1",
+    "lightgbm": "4.7.0",
+    "torch": "2.14.1+cpu"
+  },
+  "created_at": "2026-11-06T00:25:38+00:00"
+}
