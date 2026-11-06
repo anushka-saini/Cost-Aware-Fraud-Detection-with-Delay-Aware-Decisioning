@@ -1,0 +1,370 @@
+{
+  "data": "days 11-13 (the same days the thresholds are chosen on, so these costs are in-sample)",
+  "proposed_model": "lightgbm",
+  "calibration": {
+    "method": "platt",
+    "day13_check": {
+      "none": {
+        "brier": 0.00013603214695613345,
+        "ece": 1.2525148319960818e-05,
+        "mean_predicted": 0.0006113096124646544,
+        "base_rate": 0.0006182830831716414
+      },
+      "isotonic": {
+        "brier": 0.0001363926368262302,
+        "ece": 2.315155345168097e-05,
+        "mean_predicted": 0.0005951315297199603,
+        "base_rate": 0.0006182830831716414
+      },
+      "platt": {
+        "brier": 0.00013658936914025146,
+        "ece": 3.894191196859289e-05,
+        "mean_predicted": 0.0005827491490174679,
+        "base_rate": 0.0006182830831716414
+      }
+    },
+    "eval_2_after": {
+      "brier": 0.00013692171113373797,
+      "ece": 8.091589528312007e-06,
+      "mean_predicted": 0.0006651000061174433,
+      "base_rate": 0.0006682338138212177
+    },
+    "isotonic_rejected_because": "its day-13 zero-region margin is x1.54, below the x2 the thresholds must survive"
+  },
+  "threshold_rule": "lowest worst-case cost when the calibrated odds are scaled anywhere from 1/2x to 2x",
+  "safe_point": {
+    "t_review": 0.00031622776601683794,
+    "t_block": 0.71,
+    "total_cost": 32519.0,
+    "fraud_allowed": 0,
+    "fraud_allowed_amount": 0.0,
+    "fraud_reviewed": 179,
+    "fraud_blocked": 607,
+    "legit_reviewed": 32320,
+    "legit_reviewed_pct": 0.027495876043962773,
+    "legit_blocked": 4,
+    "block_precision": 0.9934533551554828,
+    "block_recall": 0.772264631043257,
+    "block_f1": 0.8690050107372942
+  },
+  "safe_point_worst_case_cost": 34653.0,
+  "plain_cheapest_point": {
+    "t_review": 0.0006795272875787174,
+    "t_block": 0.735,
+    "total_cost": 30112.0,
+    "fraud_allowed": 0,
+    "fraud_allowed_amount": 0.0,
+    "fraud_reviewed": 180,
+    "fraud_blocked": 606,
+    "legit_reviewed": 29917,
+    "legit_reviewed_pct": 0.02545155085418423,
+    "legit_blocked": 3,
+    "block_precision": 0.9950738916256158,
+    "block_recall": 0.7709923664122137,
+    "block_f1": 0.8688172043010752
+  },
+  "cliff_safe": {
+    "review_threshold": 0.00031622776601683794,
+    "cliff": 0.0006858101859649017,
+    "odds_factor_to_cliff": 2.1695243018716877,
+    "cost_at_threshold": 32519.0,
+    "cost_just_past_cliff": 566697.41,
+    "extra_fraud_allowed_past_cliff": 1
+  },
+  "cliff_plain": {
+    "review_threshold": 0.0006795272875787174,
+    "cliff": 0.0006858101859649017,
+    "odds_factor_to_cliff": 1.0092523292793676,
+    "cost_at_threshold": 30112.0,
+    "cost_just_past_cliff": 566694.41,
+    "extra_fraud_allowed_past_cliff": 1
+  },
+  "robustness": [
+    {
+      "moved": "t_review",
+      "kind": "absolute",
+      "amount": -0.05,
+      "t_review": 0.0,
+      "t_block": 0.71,
+      "total_cost": 1175644.0,
+      "fraud_allowed": 0,
+      "legit_reviewed_pct": 0.9999965970450441,
+      "legit_blocked": 4,
+      "cost_change": 1143125.0
+    },
+    {
+      "moved": "t_review",
+      "kind": "absolute",
+      "amount": -0.02,
+      "t_review": 0.0,
+      "t_block": 0.71,
+      "total_cost": 1175644.0,
+      "fraud_allowed": 0,
+      "legit_reviewed_pct": 0.9999965970450441,
+      "legit_blocked": 4,
+      "cost_change": 1143125.0
+    },
+    {
+      "moved": "t_review",
+      "kind": "absolute",
+      "amount": 0.02,
+      "t_review": 0.02031622776601684,
+      "t_block": 0.71,
+      "total_cost": 10601985.780000001,
+      "fraud_allowed": 87,
+      "legit_reviewed_pct": 0.000789485549777149,
+      "legit_blocked": 4,
+      "cost_change": 10569466.780000001
+    },
+    {
+      "moved": "t_review",
+      "kind": "absolute",
+      "amount": 0.05,
+      "t_review": 0.05031622776601684,
+      "t_block": 0.71,
+      "total_cost": 15374291.200000001,
+      "fraud_allowed": 109,
+      "legit_reviewed_pct": 0.000269684180257927,
+      "legit_blocked": 4,
+      "cost_change": 15341772.200000001
+    },
+    {
+      "moved": "t_review",
+      "kind": "odds_factor",
+      "amount": 0.5,
+      "t_review": 0.0001581388869618911,
+      "t_block": 0.71,
+      "total_cost": 34649.0,
+      "fraud_allowed": 0,
+      "legit_reviewed_pct": 0.02930794955799869,
+      "legit_blocked": 4,
+      "cost_change": 2130.0
+    },
+    {
+      "moved": "t_review",
+      "kind": "odds_factor",
+      "amount": 2.0,
+      "t_review": 0.0006322555952592354,
+      "t_block": 0.71,
+      "total_cost": 30495.0,
+      "fraud_allowed": 0,
+      "legit_reviewed_pct": 0.025773980836259165,
+      "legit_blocked": 4,
+      "cost_change": -2024.0
+    },
+    {
+      "moved": "t_block",
+      "kind": "absolute",
+      "amount": -0.05,
+      "t_review": 0.00031622776601683794,
+      "t_block": 0.6599999999999999,
+      "total_cost": 32522.0,
+      "fraud_allowed": 0,
+      "legit_reviewed_pct": 0.02749502530522379,
+      "legit_blocked": 5,
+      "cost_change": 3.0
+    },
+    {
+      "moved": "t_block",
+      "kind": "absolute",
+      "amount": -0.02,
+      "t_review": 0.00031622776601683794,
+      "t_block": 0.69,
+      "total_cost": 32519.0,
+      "fraud_allowed": 0,
+      "legit_reviewed_pct": 0.027495876043962773,
+      "legit_blocked": 4,
+      "cost_change": 0.0
+    },
+    {
+      "moved": "t_block",
+      "kind": "absolute",
+      "amount": 0.02,
+      "t_review": 0.00031622776601683794,
+      "t_block": 0.73,
+      "total_cost": 32519.0,
+      "fraud_allowed": 0,
+      "legit_reviewed_pct": 0.027495876043962773,
+      "legit_blocked": 4,
+      "cost_change": 0.0
+    },
+    {
+      "moved": "t_block",
+      "kind": "absolute",
+      "amount": 0.05,
+      "t_review": 0.00031622776601683794,
+      "t_block": 0.76,
+      "total_cost": 32517.0,
+      "fraud_allowed": 0,
+      "legit_reviewed_pct": 0.02749672678270176,
+      "legit_blocked": 3,
+      "cost_change": -2.0
+    },
+    {
+      "moved": "t_block",
+      "kind": "odds_factor",
+      "amount": 0.5,
+      "t_review": 0.00031622776601683794,
+      "t_block": 0.5503875968992248,
+      "total_cost": 32521.0,
+      "fraud_allowed": 0,
+      "legit_reviewed_pct": 0.027494174566484807,
+      "legit_blocked": 6,
+      "cost_change": 2.0
+    },
+    {
+      "moved": "t_block",
+      "kind": "odds_factor",
+      "amount": 2.0,
+      "t_review": 0.00031622776601683794,
+      "t_block": 0.8304093567251462,
+      "total_cost": 32523.0,
+      "fraud_allowed": 0,
+      "legit_reviewed_pct": 0.02749672678270176,
+      "legit_blocked": 3,
+      "cost_change": 4.0
+    }
+  ],
+  "baselines": {
+    "block_nothing": {
+      "t_review": 2.0,
+      "t_block": 2.0,
+      "total_cost": 1126005468.73,
+      "fraud_allowed": 786,
+      "fraud_allowed_amount": 1126005468.73,
+      "fraud_reviewed": 0,
+      "fraud_blocked": 0,
+      "legit_reviewed": 0,
+      "legit_reviewed_pct": 0.0,
+      "legit_blocked": 0,
+      "block_precision": 0.0,
+      "block_recall": 0.0,
+      "block_f1": 0.0
+    },
+    "review_everything": {
+      "t_review": 0.0,
+      "t_block": 2.0,
+      "total_cost": 1176235.0,
+      "fraud_allowed": 0,
+      "fraud_allowed_amount": 0.0,
+      "fraud_reviewed": 786,
+      "fraud_blocked": 0,
+      "legit_reviewed": 1175449,
+      "legit_reviewed_pct": 1.0,
+      "legit_blocked": 0,
+      "block_precision": 0.0,
+      "block_recall": 0.0,
+      "block_f1": 0.0
+    },
+    "v2_deployed": {
+      "t_review": 0.00014609192171701344,
+      "t_block": 0.775,
+      "total_cost": 33839.0,
+      "fraud_allowed": 0,
+      "fraud_allowed_amount": 0.0,
+      "fraud_reviewed": 188,
+      "fraud_blocked": 598,
+      "legit_reviewed": 33616,
+      "legit_reviewed_pct": 0.028598433449686034,
+      "legit_blocked": 7,
+      "block_precision": 0.9884297520661157,
+      "block_recall": 0.7608142493638677,
+      "block_f1": 0.8598130841121495
+    }
+  },
+  "v2_cliff": {
+    "review_threshold": 0.00014609192171701344,
+    "cliff": 0.00030572804920359753,
+    "odds_factor_to_cliff": 2.093044336588538,
+    "cost_at_threshold": 33839.0,
+    "cost_just_past_cliff": 567567.41,
+    "extra_fraud_allowed_past_cliff": 1
+  },
+  "day_13_check": {
+    "note": "calibration and thresholds fitted on days 11-12, cost measured on day 13",
+    "proposed": {
+      "isotonic": {
+        "t_review": 1e-07,
+        "t_block": 0.765,
+        "total_cost": 9092.0,
+        "fraud_allowed": 0,
+        "fraud_allowed_amount": 0.0,
+        "fraud_reviewed": 62,
+        "fraud_blocked": 184,
+        "legit_reviewed": 9030,
+        "legit_reviewed_pct": 0.022709554108090436,
+        "legit_blocked": 0,
+        "block_precision": 1.0,
+        "block_recall": 0.7479674796747967,
+        "block_f1": 0.855813953488372,
+        "day_13_frauds_given_zero": 0
+      },
+      "platt": {
+        "t_review": 0.0002511886431509582,
+        "t_block": 0.715,
+        "total_cost": 9826.0,
+        "fraud_allowed": 0,
+        "fraud_allowed_amount": 0.0,
+        "fraud_reviewed": 62,
+        "fraud_blocked": 184,
+        "legit_reviewed": 9764,
+        "legit_reviewed_pct": 0.024555491285868772,
+        "legit_blocked": 0,
+        "block_precision": 1.0,
+        "block_recall": 0.7479674796747967,
+        "block_f1": 0.855813953488372,
+        "day_13_frauds_given_zero": 0
+      }
+    },
+    "v2_deployed": {
+      "isotonic": {
+        "t_review": 1e-07,
+        "t_block": 0.825,
+        "total_cost": 9361.0,
+        "fraud_allowed": 0,
+        "fraud_allowed_amount": 0.0,
+        "fraud_reviewed": 63,
+        "fraud_blocked": 183,
+        "legit_reviewed": 9293,
+        "legit_reviewed_pct": 0.023370973015114555,
+        "legit_blocked": 1,
+        "block_precision": 0.9945652173913043,
+        "block_recall": 0.7439024390243902,
+        "block_f1": 0.8511627906976743,
+        "day_13_frauds_given_zero": 0
+      },
+      "platt": {
+        "t_review": 0.00014125375446227554,
+        "t_block": 0.785,
+        "total_cost": 10264.0,
+        "fraud_allowed": 0,
+        "fraud_allowed_amount": 0.0,
+        "fraud_reviewed": 63,
+        "fraud_blocked": 183,
+        "legit_reviewed": 10196,
+        "legit_reviewed_pct": 0.025641928425923596,
+        "legit_blocked": 1,
+        "block_precision": 0.9945652173913043,
+        "block_recall": 0.7439024390243902,
+        "block_f1": 0.8511627906976743,
+        "day_13_frauds_given_zero": 0
+      }
+    }
+  },
+  "isotonic_zero_region_margin": {
+    "note": "isotonic gives many rows a probability of exactly 0, so the odds-based cliff is not a useful margin; this measures the gap on the raw model score instead",
+    "required_odds_factor": 2.0,
+    "days_11_13_in_sample": {
+      "zero_boundary_raw_score": 0.0007534285666666886,
+      "lowest_fraud_raw_score": 0.0007534285666666886,
+      "odds_factor": 1.0,
+      "legit_rows_between": 0
+    },
+    "day_13_out_of_sample": {
+      "zero_boundary_raw_score": 0.000754940005473886,
+      "lowest_fraud_raw_score": 0.0011651227924959456,
+      "odds_factor": 1.5439654208757363,
+      "legit_rows_between": 857
+    }
+  }
+}

@@ -1,0 +1,257 @@
+{
+  "family": "resnet",
+  "label": "ResNet-MLP",
+  "setup": {
+    "train_days": [
+      5,
+      6,
+      7
+    ],
+    "amount_weights": false,
+    "features": "v2"
+  },
+  "n_trials": 10,
+  "folds": [
+    [
+      [
+        5,
+        6,
+        7
+      ],
+      [
+        8,
+        9,
+        10
+      ]
+    ],
+    [
+      [
+        5,
+        6,
+        7,
+        8
+      ],
+      [
+        9,
+        10
+      ]
+    ]
+  ],
+  "best_fold_pr_auc": 0.8228680275703293,
+  "best_params": {
+    "learning_rate": 0.0003973374402029808,
+    "weight_decay": 3.058656666978529e-05,
+    "pos_weight": 1.1715937392307056,
+    "dropout": 0.2727961206236346,
+    "width": 128,
+    "n_blocks": 2,
+    "hidden_factor": 1,
+    "epochs": 18
+  },
+  "trials": [
+    {
+      "number": 0,
+      "state": "COMPLETE",
+      "value": 0.8113108419802575,
+      "params": {
+        "learning_rate": 0.0007106591851092234,
+        "weight_decay": 0.0007114476009343421,
+        "pos_weight": 29.10635913133069,
+        "dropout": 0.17959754525911098,
+        "width": 64,
+        "n_blocks": 3,
+        "hidden_factor": 2
+      },
+      "best_epochs": [
+        8,
+        6
+      ],
+      "fold_pr_auc": [
+        0.8107112300367092,
+        0.8119104539238059
+      ]
+    },
+    {
+      "number": 1,
+      "state": "COMPLETE",
+      "value": 0.80447958836274,
+      "params": {
+        "learning_rate": 0.0003145616317558388,
+        "weight_decay": 0.0008123245085588687,
+        "pos_weight": 46.22589001020831,
+        "dropout": 0.06370173320348284,
+        "width": 256,
+        "n_blocks": 2,
+        "hidden_factor": 1
+      },
+      "best_epochs": [
+        3,
+        12
+      ],
+      "fold_pr_auc": [
+        0.7975521322811564,
+        0.8114070444443237
+      ]
+    },
+    {
+      "number": 2,
+      "state": "COMPLETE",
+      "value": 0.8203310987223202,
+      "params": {
+        "learning_rate": 0.0012273661723331349,
+        "weight_decay": 2.62108787826544e-06,
+        "pos_weight": 3.839629299804171,
+        "dropout": 0.1099085529881075,
+        "width": 128,
+        "n_blocks": 2,
+        "hidden_factor": 1
+      },
+      "best_epochs": [
+        8,
+        12
+      ],
+      "fold_pr_auc": [
+        0.8178297043979065,
+        0.8228324930467341
+      ]
+    },
+    {
+      "number": 3,
+      "state": "COMPLETE",
+      "value": 0.8219579123610525,
+      "params": {
+        "learning_rate": 0.001215251334398902,
+        "weight_decay": 3.247673570627449e-06,
+        "pos_weight": 1.3492834268013245,
+        "dropout": 0.28466566117599995,
+        "width": 64,
+        "n_blocks": 1,
+        "hidden_factor": 1
+      },
+      "best_epochs": [
+        21,
+        12
+      ],
+      "fold_pr_auc": [
+        0.8257107973339214,
+        0.8182050273881836
+      ]
+    },
+    {
+      "number": 4,
+      "state": "COMPLETE",
+      "value": 0.8228680275703293,
+      "params": {
+        "learning_rate": 0.0003973374402029808,
+        "weight_decay": 3.058656666978529e-05,
+        "pos_weight": 1.1715937392307056,
+        "dropout": 0.2727961206236346,
+        "width": 128,
+        "n_blocks": 2,
+        "hidden_factor": 1
+      },
+      "best_epochs": [
+        21,
+        16
+      ],
+      "fold_pr_auc": [
+        0.8267167021329906,
+        0.8190193530076678
+      ]
+    },
+    {
+      "number": 5,
+      "state": "PRUNED",
+      "value": 0.8133535064082119,
+      "params": {
+        "learning_rate": 0.0027970864055344422,
+        "weight_decay": 0.00021154290797261214,
+        "pos_weight": 75.68292060167619,
+        "dropout": 0.26844820512829465,
+        "width": 128,
+        "n_blocks": 1,
+        "hidden_factor": 2
+      }
+    },
+    {
+      "number": 6,
+      "state": "PRUNED",
+      "value": 0.8163921984317086,
+      "params": {
+        "learning_rate": 0.0007341732292197032,
+        "weight_decay": 6.516990611177181e-06,
+        "pos_weight": 45.44383960336016,
+        "dropout": 0.10702599800807679,
+        "width": 128,
+        "n_blocks": 3,
+        "hidden_factor": 2
+      }
+    },
+    {
+      "number": 7,
+      "state": "RUNNING",
+      "value": null,
+      "params": {
+        "learning_rate": 0.001775685400639093,
+        "weight_decay": 3.9459088110999995e-06,
+        "pos_weight": 1.0257563974185648,
+        "dropout": 0.24463842853645024,
+        "width": 256,
+        "n_blocks": 1,
+        "hidden_factor": 1
+      }
+    },
+    {
+      "number": 8,
+      "state": "PRUNED",
+      "value": 0.8107112300367092,
+      "params": {
+        "learning_rate": 0.0007106591851092234,
+        "weight_decay": 0.0007114476009343421,
+        "pos_weight": 29.10635913133069,
+        "dropout": 0.17959754525911098,
+        "width": 64,
+        "n_blocks": 3,
+        "hidden_factor": 2
+      }
+    },
+    {
+      "number": 9,
+      "state": "PRUNED",
+      "value": 0.7975521322811564,
+      "params": {
+        "learning_rate": 0.0003145616317558388,
+        "weight_decay": 0.0008123245085588687,
+        "pos_weight": 46.22589001020831,
+        "dropout": 0.06370173320348284,
+        "width": 256,
+        "n_blocks": 2,
+        "hidden_factor": 1
+      }
+    },
+    {
+      "number": 10,
+      "state": "COMPLETE",
+      "value": 0.8203310987223202,
+      "params": {
+        "learning_rate": 0.0012273661723331349,
+        "weight_decay": 2.62108787826544e-06,
+        "pos_weight": 3.839629299804171,
+        "dropout": 0.1099085529881075,
+        "width": 128,
+        "n_blocks": 2,
+        "hidden_factor": 1
+      },
+      "best_epochs": [
+        8,
+        12
+      ],
+      "fold_pr_auc": [
+        0.8178297043979065,
+        0.8228324930467341
+      ]
+    }
+  ],
+  "minutes": 140.62631014982858,
+  "training_rows": "all fraud rows + 20% of legitimate rows; early stopping on 25% of the fold's legitimate validation rows"
+}

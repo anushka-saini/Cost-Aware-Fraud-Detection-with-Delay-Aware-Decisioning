@@ -1,0 +1,73 @@
+{
+  "question": "does weighting frauds by log(amount) lower the cost?",
+  "method": "Platt calibration and safe thresholds fitted on days 11-12; cost measured on day 13; paired bootstrap over day-13 rows",
+  "weighted_variant_config": {
+    "train_days": [
+      5,
+      6,
+      7
+    ],
+    "amount_weights": true,
+    "features": "v2"
+  },
+  "day_13": {
+    "v2_deployed": {
+      "pr_auc": {
+        "pr_auc": 0.8633789455066749,
+        "ci_low": 0.8237530764299125,
+        "ci_high": 0.898835480995564,
+        "n_bootstrap": 200
+      },
+      "operating_point": {
+        "t_review": 0.00014125375446227554,
+        "t_block": 0.785,
+        "total_cost": 10264.0,
+        "fraud_allowed": 0,
+        "fraud_allowed_amount": 0.0,
+        "legit_reviewed": 10196,
+        "legit_reviewed_pct": 0.025641928425923596,
+        "legit_blocked": 1,
+        "block_precision": 0.9945652173913043,
+        "block_recall": 0.7439024390243902,
+        "block_f1": 0.8511627906976743,
+        "n_fraud": 246,
+        "n_legit": 397630
+      },
+      "days_11_12_cost_at_these_thresholds": 23384.0
+    },
+    "amount_weights": {
+      "pr_auc": {
+        "pr_auc": 0.8528161442700768,
+        "ci_low": 0.8075240712118386,
+        "ci_high": 0.8945558767741801,
+        "n_bootstrap": 200
+      },
+      "operating_point": {
+        "t_review": 2.438796139537713e-05,
+        "t_block": 0.7943282347242822,
+        "total_cost": 27167.0,
+        "fraud_allowed": 0,
+        "fraud_allowed_amount": 0.0,
+        "legit_reviewed": 27102,
+        "legit_reviewed_pct": 0.06815884113371727,
+        "legit_blocked": 1,
+        "block_precision": 0.9946524064171123,
+        "block_recall": 0.7560975609756098,
+        "block_f1": 0.859122401847575,
+        "n_fraud": 246,
+        "n_legit": 397630
+      },
+      "days_11_12_cost_at_these_thresholds": 54280.0
+    }
+  },
+  "weighted_minus_v2_cost": {
+    "difference": 16903.0,
+    "ci_low": 16653.375,
+    "ci_high": 17143.825,
+    "std_error": 130.84835328650087,
+    "p_normal": 0.0,
+    "significant": true,
+    "n_bootstrap": 200
+  },
+  "kept": false
+}

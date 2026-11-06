@@ -1,0 +1,499 @@
+{
+  "family": "random_forest",
+  "label": "Random Forest",
+  "setup": {
+    "train_days": [
+      5,
+      6,
+      7
+    ],
+    "amount_weights": false,
+    "features": "v2"
+  },
+  "n_trials": 30,
+  "folds": [
+    [
+      [
+        5,
+        6,
+        7
+      ],
+      [
+        8,
+        9,
+        10
+      ]
+    ],
+    [
+      [
+        5,
+        6,
+        7,
+        8
+      ],
+      [
+        9,
+        10
+      ]
+    ]
+  ],
+  "best_fold_pr_auc": 0.8219784499238789,
+  "best_params": {
+    "n_estimators": 100,
+    "max_depth": 12,
+    "min_samples_leaf": 10,
+    "max_features": 0.9020729026752263,
+    "fraud_weight": 8.790310435545885
+  },
+  "trials": [
+    {
+      "number": 0,
+      "state": "COMPLETE",
+      "value": 0.7338026599205886,
+      "params": {
+        "n_estimators": 150,
+        "max_depth": 16,
+        "min_samples_leaf": 173,
+        "max_features": 0.7190609389379257,
+        "fraud_weight": 2.9380279387035344
+      },
+      "fold_pr_auc": [
+        0.7125212685888849,
+        0.7550840512522923
+      ]
+    },
+    {
+      "number": 1,
+      "state": "COMPLETE",
+      "value": 0.7019598266076899,
+      "params": {
+        "n_estimators": 100,
+        "max_depth": 4,
+        "min_samples_leaf": 294,
+        "max_features": 0.7207805082202461,
+        "fraud_weight": 133.1121608073688
+      },
+      "fold_pr_auc": [
+        0.702311741488714,
+        0.7016079117266657
+      ]
+    },
+    {
+      "number": 2,
+      "state": "COMPLETE",
+      "value": 0.753446793334203,
+      "params": {
+        "n_estimators": 100,
+        "max_depth": 16,
+        "min_samples_leaf": 258,
+        "max_features": 0.44863737747479326,
+        "fraud_weight": 3.511356313970406
+      },
+      "fold_pr_auc": [
+        0.7487882952548995,
+        0.7581052914135064
+      ]
+    },
+    {
+      "number": 3,
+      "state": "COMPLETE",
+      "value": 0.7694226574951026,
+      "params": {
+        "n_estimators": 100,
+        "max_depth": 7,
+        "min_samples_leaf": 76,
+        "max_features": 0.602361513049481,
+        "fraud_weight": 7.476312062252298
+      },
+      "fold_pr_auc": [
+        0.7701348629744588,
+        0.7687104520157464
+      ]
+    },
+    {
+      "number": 4,
+      "state": "COMPLETE",
+      "value": 0.7328049304877646,
+      "params": {
+        "n_estimators": 250,
+        "max_depth": 5,
+        "min_samples_leaf": 30,
+        "max_features": 0.5564532903055841,
+        "fraud_weight": 23.34586407601623
+      },
+      "fold_pr_auc": [
+        0.7318892549796245,
+        0.7337206059959048
+      ]
+    },
+    {
+      "number": 5,
+      "state": "PRUNED",
+      "value": 0.6682978402690223,
+      "params": {
+        "n_estimators": 250,
+        "max_depth": 6,
+        "min_samples_leaf": 73,
+        "max_features": 0.7146901982034297,
+        "fraud_weight": 1.378323745500718
+      }
+    },
+    {
+      "number": 6,
+      "state": "PRUNED",
+      "value": 0.6848794884737681,
+      "params": {
+        "n_estimators": 250,
+        "max_depth": 6,
+        "min_samples_leaf": 12,
+        "max_features": 0.9642198760773333,
+        "fraud_weight": 788.6714129990485
+      }
+    },
+    {
+      "number": 7,
+      "state": "COMPLETE",
+      "value": 0.7652344524106599,
+      "params": {
+        "n_estimators": 300,
+        "max_depth": 7,
+        "min_samples_leaf": 14,
+        "max_features": 0.7789631185585097,
+        "fraud_weight": 20.914981329035598
+      },
+      "fold_pr_auc": [
+        0.7719894098754589,
+        0.7584794949458609
+      ]
+    },
+    {
+      "number": 8,
+      "state": "COMPLETE",
+      "value": 0.8158594308818443,
+      "params": {
+        "n_estimators": 100,
+        "max_depth": 10,
+        "min_samples_leaf": 11,
+        "max_features": 0.9365242814551473,
+        "fraud_weight": 5.975027999960292
+      },
+      "fold_pr_auc": [
+        0.8175318559612046,
+        0.8141870058024842
+      ]
+    },
+    {
+      "number": 9,
+      "state": "COMPLETE",
+      "value": 0.762504619293911,
+      "params": {
+        "n_estimators": 250,
+        "max_depth": 8,
+        "min_samples_leaf": 75,
+        "max_features": 0.6826971955402957,
+        "fraud_weight": 3.585612610345396
+      },
+      "fold_pr_auc": [
+        0.7590478469387285,
+        0.7659613916490935
+      ]
+    },
+    {
+      "number": 10,
+      "state": "COMPLETE",
+      "value": 0.8200201524389774,
+      "params": {
+        "n_estimators": 100,
+        "max_depth": 13,
+        "min_samples_leaf": 15,
+        "max_features": 0.8051293389495864,
+        "fraud_weight": 34.75282161839683
+      },
+      "fold_pr_auc": [
+        0.8207690831067802,
+        0.8192712217711747
+      ]
+    },
+    {
+      "number": 11,
+      "state": "COMPLETE",
+      "value": 0.8219784499238789,
+      "params": {
+        "n_estimators": 100,
+        "max_depth": 12,
+        "min_samples_leaf": 10,
+        "max_features": 0.9020729026752263,
+        "fraud_weight": 8.790310435545885
+      },
+      "fold_pr_auc": [
+        0.8214453973781728,
+        0.822511502469585
+      ]
+    },
+    {
+      "number": 12,
+      "state": "COMPLETE",
+      "value": 0.8026584842349691,
+      "params": {
+        "n_estimators": 100,
+        "max_depth": 12,
+        "min_samples_leaf": 16,
+        "max_features": 0.760105282087275,
+        "fraud_weight": 166.25157879153616
+      },
+      "fold_pr_auc": [
+        0.8029140815677638,
+        0.8024028869021744
+      ]
+    },
+    {
+      "number": 13,
+      "state": "COMPLETE",
+      "value": 0.8155590474707609,
+      "params": {
+        "n_estimators": 150,
+        "max_depth": 15,
+        "min_samples_leaf": 26,
+        "max_features": 0.901248594624066,
+        "fraud_weight": 13.766157379784634
+      },
+      "fold_pr_auc": [
+        0.8143855739461604,
+        0.8167325209953614
+      ]
+    },
+    {
+      "number": 14,
+      "state": "COMPLETE",
+      "value": 0.8156153438396656,
+      "params": {
+        "n_estimators": 100,
+        "max_depth": 11,
+        "min_samples_leaf": 16,
+        "max_features": 0.6331208123587873,
+        "fraud_weight": 2.92677368621471
+      },
+      "fold_pr_auc": [
+        0.8163496565334925,
+        0.8148810311458387
+      ]
+    },
+    {
+      "number": 15,
+      "state": "COMPLETE",
+      "value": 0.8116715722321354,
+      "params": {
+        "n_estimators": 100,
+        "max_depth": 10,
+        "min_samples_leaf": 13,
+        "max_features": 0.9768404178851647,
+        "fraud_weight": 82.15791118890316
+      },
+      "fold_pr_auc": [
+        0.812626496300862,
+        0.8107166481634087
+      ]
+    },
+    {
+      "number": 16,
+      "state": "COMPLETE",
+      "value": 0.816403568972645,
+      "params": {
+        "n_estimators": 150,
+        "max_depth": 13,
+        "min_samples_leaf": 15,
+        "max_features": 0.5846343444516797,
+        "fraud_weight": 89.97395171539276
+      },
+      "fold_pr_auc": [
+        0.8164737643123213,
+        0.8163333736329685
+      ]
+    },
+    {
+      "number": 17,
+      "state": "COMPLETE",
+      "value": 0.8086493623685026,
+      "params": {
+        "n_estimators": 100,
+        "max_depth": 16,
+        "min_samples_leaf": 12,
+        "max_features": 0.7636855736232677,
+        "fraud_weight": 91.06379967959788
+      },
+      "fold_pr_auc": [
+        0.8101064964600062,
+        0.807192228276999
+      ]
+    },
+    {
+      "number": 18,
+      "state": "PRUNED",
+      "value": 0.8001693925689328,
+      "params": {
+        "n_estimators": 100,
+        "max_depth": 12,
+        "min_samples_leaf": 33,
+        "max_features": 0.9759862028093816,
+        "fraud_weight": 1.6444404468414136
+      }
+    },
+    {
+      "number": 19,
+      "state": "PRUNED",
+      "value": 0.7765328713220017,
+      "params": {
+        "n_estimators": 100,
+        "max_depth": 16,
+        "min_samples_leaf": 20,
+        "max_features": 0.9183956211821904,
+        "fraud_weight": 606.3651342979792
+      }
+    },
+    {
+      "number": 20,
+      "state": "PRUNED",
+      "value": 0.798859436946247,
+      "params": {
+        "n_estimators": 100,
+        "max_depth": 12,
+        "min_samples_leaf": 27,
+        "max_features": 0.9454665166149665,
+        "fraud_weight": 155.85972545888586
+      }
+    },
+    {
+      "number": 21,
+      "state": "COMPLETE",
+      "value": 0.8200430197700144,
+      "params": {
+        "n_estimators": 100,
+        "max_depth": 12,
+        "min_samples_leaf": 18,
+        "max_features": 0.5567607495063337,
+        "fraud_weight": 71.10693375880244
+      },
+      "fold_pr_auc": [
+        0.8207370382420173,
+        0.8193490012980114
+      ]
+    },
+    {
+      "number": 22,
+      "state": "PRUNED",
+      "value": 0.8083046348991424,
+      "params": {
+        "n_estimators": 100,
+        "max_depth": 15,
+        "min_samples_leaf": 31,
+        "max_features": 0.481130019938303,
+        "fraud_weight": 136.3739101955817
+      }
+    },
+    {
+      "number": 23,
+      "state": "PRUNED",
+      "value": 0.8048952387010113,
+      "params": {
+        "n_estimators": 100,
+        "max_depth": 8,
+        "min_samples_leaf": 16,
+        "max_features": 0.824967749002861,
+        "fraud_weight": 21.192011286199815
+      }
+    },
+    {
+      "number": 24,
+      "state": "COMPLETE",
+      "value": 0.8185769787748476,
+      "params": {
+        "n_estimators": 100,
+        "max_depth": 10,
+        "min_samples_leaf": 29,
+        "max_features": 0.5233676095944125,
+        "fraud_weight": 111.8988847440663
+      },
+      "fold_pr_auc": [
+        0.8192079828792702,
+        0.817945974670425
+      ]
+    },
+    {
+      "number": 25,
+      "state": "COMPLETE",
+      "value": 0.8163665791556921,
+      "params": {
+        "n_estimators": 100,
+        "max_depth": 12,
+        "min_samples_leaf": 26,
+        "max_features": 0.860645875570315,
+        "fraud_weight": 6.515915127990774
+      },
+      "fold_pr_auc": [
+        0.8151531345537699,
+        0.8175800237576143
+      ]
+    },
+    {
+      "number": 26,
+      "state": "PRUNED",
+      "value": 0.803995616441614,
+      "params": {
+        "n_estimators": 150,
+        "max_depth": 13,
+        "min_samples_leaf": 10,
+        "max_features": 0.8407550023025191,
+        "fraud_weight": 125.76268505109967
+      }
+    },
+    {
+      "number": 27,
+      "state": "COMPLETE",
+      "value": 0.8180451410266365,
+      "params": {
+        "n_estimators": 100,
+        "max_depth": 14,
+        "min_samples_leaf": 10,
+        "max_features": 0.789790214461421,
+        "fraud_weight": 28.451043493926413
+      },
+      "fold_pr_auc": [
+        0.8180820689120469,
+        0.8180082131412262
+      ]
+    },
+    {
+      "number": 28,
+      "state": "COMPLETE",
+      "value": 0.8198906464092242,
+      "params": {
+        "n_estimators": 100,
+        "max_depth": 14,
+        "min_samples_leaf": 12,
+        "max_features": 0.4951896896340877,
+        "fraud_weight": 54.933659320518174
+      },
+      "fold_pr_auc": [
+        0.8207073593663198,
+        0.8190739334521284
+      ]
+    },
+    {
+      "number": 29,
+      "state": "COMPLETE",
+      "value": 0.8174524564769732,
+      "params": {
+        "n_estimators": 100,
+        "max_depth": 15,
+        "min_samples_leaf": 14,
+        "max_features": 0.953272620486222,
+        "fraud_weight": 2.939680698446051
+      },
+      "fold_pr_auc": [
+        0.8170161980039802,
+        0.8178887149499662
+      ]
+    }
+  ],
+  "minutes": 325.55086702505747
+}

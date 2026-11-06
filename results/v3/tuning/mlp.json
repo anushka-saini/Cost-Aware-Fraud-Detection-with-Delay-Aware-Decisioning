@@ -1,0 +1,628 @@
+{
+  "family": "mlp",
+  "label": "MLP",
+  "setup": {
+    "train_days": [
+      5,
+      6,
+      7
+    ],
+    "amount_weights": false,
+    "features": "v2"
+  },
+  "n_trials": 30,
+  "folds": [
+    [
+      [
+        5,
+        6,
+        7
+      ],
+      [
+        8,
+        9,
+        10
+      ]
+    ],
+    [
+      [
+        5,
+        6,
+        7,
+        8
+      ],
+      [
+        9,
+        10
+      ]
+    ]
+  ],
+  "best_fold_pr_auc": 0.8221798874587136,
+  "best_params": {
+    "learning_rate": 0.0015236434479910521,
+    "weight_decay": 8.446116524319778e-06,
+    "pos_weight": 2.4800276044355605,
+    "dropout": 0.014886154088074262,
+    "width": 256,
+    "n_layers": 4,
+    "epochs": 13
+  },
+  "trials": [
+    {
+      "number": 0,
+      "state": "COMPLETE",
+      "value": 0.8109734539728543,
+      "params": {
+        "learning_rate": 0.0007106591851092234,
+        "weight_decay": 0.0007114476009343421,
+        "pos_weight": 29.10635913133069,
+        "dropout": 0.17959754525911098,
+        "width": 64,
+        "n_layers": 4
+      },
+      "best_epochs": [
+        29,
+        25
+      ],
+      "fold_pr_auc": [
+        0.81193154293894,
+        0.8100153650067685
+      ]
+    },
+    {
+      "number": 1,
+      "state": "COMPLETE",
+      "value": 0.7853807521943417,
+      "params": {
+        "learning_rate": 0.0011973917635685026,
+        "weight_decay": 0.000133112160807369,
+        "pos_weight": 1.0994335574766196,
+        "dropout": 0.29097295564859826,
+        "width": 64,
+        "n_layers": 2
+      },
+      "best_epochs": [
+        29,
+        29
+      ],
+      "fold_pr_auc": [
+        0.7822860252388166,
+        0.7884754791498667
+      ]
+    },
+    {
+      "number": 2,
+      "state": "COMPLETE",
+      "value": 0.8084010456496578,
+      "params": {
+        "learning_rate": 0.0006044543365247595,
+        "weight_decay": 3.752055855124284e-05,
+        "pos_weight": 7.309539835912911,
+        "dropout": 0.08736874205941257,
+        "width": 64,
+        "n_layers": 3
+      },
+      "best_epochs": [
+        29,
+        28
+      ],
+      "fold_pr_auc": [
+        0.8092137778751602,
+        0.8075883134241553
+      ]
+    },
+    {
+      "number": 3,
+      "state": "COMPLETE",
+      "value": 0.8139063604248268,
+      "params": {
+        "learning_rate": 0.0008574153197420803,
+        "weight_decay": 0.0002267398652378039,
+        "pos_weight": 2.5081156860452323,
+        "dropout": 0.15427033152408348,
+        "width": 256,
+        "n_layers": 2
+      },
+      "best_epochs": [
+        19,
+        18
+      ],
+      "fold_pr_auc": [
+        0.8153689955459552,
+        0.8124437253036983
+      ]
+    },
+    {
+      "number": 4,
+      "state": "COMPLETE",
+      "value": 0.8004782589939224,
+      "params": {
+        "learning_rate": 0.00034847597967739357,
+        "weight_decay": 0.0007025166339242157,
+        "pos_weight": 85.3618986286683,
+        "dropout": 0.24251920443493832,
+        "width": 256,
+        "n_layers": 3
+      },
+      "best_epochs": [
+        26,
+        14
+      ],
+      "fold_pr_auc": [
+        0.8056532179317621,
+        0.7953033000560827
+      ]
+    },
+    {
+      "number": 5,
+      "state": "PRUNED",
+      "value": 0.80753551268338,
+      "params": {
+        "learning_rate": 0.0003973374402029808,
+        "weight_decay": 3.058656666978529e-05,
+        "pos_weight": 1.1715937392307056,
+        "dropout": 0.2727961206236346,
+        "width": 128,
+        "n_layers": 3
+      }
+    },
+    {
+      "number": 6,
+      "state": "COMPLETE",
+      "value": 0.8066243753738473,
+      "params": {
+        "learning_rate": 0.00105640764164036,
+        "weight_decay": 3.5856126103453987e-06,
+        "pos_weight": 86.9299151113955,
+        "dropout": 0.23253984700833435,
+        "width": 64,
+        "n_layers": 4
+      },
+      "best_epochs": [
+        29,
+        22
+      ],
+      "fold_pr_auc": [
+        0.8102597538411465,
+        0.8029889969065483
+      ]
+    },
+    {
+      "number": 7,
+      "state": "COMPLETE",
+      "value": 0.8186573193127429,
+      "params": {
+        "learning_rate": 0.0003678017207756257,
+        "weight_decay": 3.87211803217458e-06,
+        "pos_weight": 1.231557172366602,
+        "dropout": 0.0975990992289793,
+        "width": 256,
+        "n_layers": 3
+      },
+      "best_epochs": [
+        29,
+        23
+      ],
+      "fold_pr_auc": [
+        0.8207688242556151,
+        0.8165458143698706
+      ]
+    },
+    {
+      "number": 8,
+      "state": "PRUNED",
+      "value": 0.7994552864910174,
+      "params": {
+        "learning_rate": 0.0005728695840313613,
+        "weight_decay": 4.247058562261871e-05,
+        "pos_weight": 1.9135880487692298,
+        "dropout": 0.2406590942262119,
+        "width": 128,
+        "n_layers": 2
+      }
+    },
+    {
+      "number": 9,
+      "state": "PRUNED",
+      "value": 0.7388506543188709,
+      "params": {
+        "learning_rate": 0.00030383889771994457,
+        "weight_decay": 0.0002795015916508333,
+        "pos_weight": 25.92475660475159,
+        "dropout": 0.21870215041229618,
+        "width": 64,
+        "n_layers": 2
+      }
+    },
+    {
+      "number": 10,
+      "state": "COMPLETE",
+      "value": 0.8170160538042104,
+      "params": {
+        "learning_rate": 0.0008209684761785146,
+        "weight_decay": 3.157013983073883e-06,
+        "pos_weight": 3.3303382090201783,
+        "dropout": 0.05645413733391353,
+        "width": 256,
+        "n_layers": 3
+      },
+      "best_epochs": [
+        25,
+        9
+      ],
+      "fold_pr_auc": [
+        0.8212793319089429,
+        0.8127527756994779
+      ]
+    },
+    {
+      "number": 11,
+      "state": "COMPLETE",
+      "value": 0.8183768206130071,
+      "params": {
+        "learning_rate": 0.00047932364409548005,
+        "weight_decay": 2.92746068491308e-06,
+        "pos_weight": 1.1524699827477818,
+        "dropout": 0.08823902885035066,
+        "width": 256,
+        "n_layers": 3
+      },
+      "best_epochs": [
+        29,
+        17
+      ],
+      "fold_pr_auc": [
+        0.8222598128599483,
+        0.8144938283660658
+      ]
+    },
+    {
+      "number": 12,
+      "state": "COMPLETE",
+      "value": 0.8191078688271531,
+      "params": {
+        "learning_rate": 0.00032707539618820916,
+        "weight_decay": 7.049888121404299e-06,
+        "pos_weight": 1.0711026338560492,
+        "dropout": 0.027817051871828133,
+        "width": 256,
+        "n_layers": 3
+      },
+      "best_epochs": [
+        28,
+        28
+      ],
+      "fold_pr_auc": [
+        0.8213332455122269,
+        0.8168824921420795
+      ]
+    },
+    {
+      "number": 13,
+      "state": "COMPLETE",
+      "value": 0.813784028816011,
+      "params": {
+        "learning_rate": 0.0003925119424532566,
+        "weight_decay": 2.0807272717033895e-06,
+        "pos_weight": 6.749341655912405,
+        "dropout": 0.07962540194790832,
+        "width": 256,
+        "n_layers": 3
+      },
+      "best_epochs": [
+        19,
+        14
+      ],
+      "fold_pr_auc": [
+        0.8166151450953085,
+        0.8109529125367133
+      ]
+    },
+    {
+      "number": 14,
+      "state": "COMPLETE",
+      "value": 0.8179939871400991,
+      "params": {
+        "learning_rate": 0.00030830156802667515,
+        "weight_decay": 8.36192412168189e-05,
+        "pos_weight": 1.2076550213957535,
+        "dropout": 0.057437295338075026,
+        "width": 256,
+        "n_layers": 3
+      },
+      "best_epochs": [
+        29,
+        23
+      ],
+      "fold_pr_auc": [
+        0.8201354185793585,
+        0.8158525557008397
+      ]
+    },
+    {
+      "number": 15,
+      "state": "COMPLETE",
+      "value": 0.8168329413039903,
+      "params": {
+        "learning_rate": 0.0004209638111091254,
+        "weight_decay": 9.132802121306858e-06,
+        "pos_weight": 2.733478972517019,
+        "dropout": 0.030088894034942568,
+        "width": 256,
+        "n_layers": 4
+      },
+      "best_epochs": [
+        10,
+        16
+      ],
+      "fold_pr_auc": [
+        0.8190135135415072,
+        0.8146523690664735
+      ]
+    },
+    {
+      "number": 16,
+      "state": "COMPLETE",
+      "value": 0.8151974892799976,
+      "params": {
+        "learning_rate": 0.0005695515301831995,
+        "weight_decay": 1.641840130043814e-05,
+        "pos_weight": 2.8497315567751103,
+        "dropout": 0.03339800913762067,
+        "width": 256,
+        "n_layers": 3
+      },
+      "best_epochs": [
+        15,
+        9
+      ],
+      "fold_pr_auc": [
+        0.8189834764656766,
+        0.8114115020943184
+      ]
+    },
+    {
+      "number": 17,
+      "state": "PRUNED",
+      "value": 0.809155487206627,
+      "params": {
+        "learning_rate": 0.0003181724861704486,
+        "weight_decay": 1.9298426629188033e-05,
+        "pos_weight": 4.819100193602971,
+        "dropout": 0.1074645437970102,
+        "width": 256,
+        "n_layers": 2
+      }
+    },
+    {
+      "number": 18,
+      "state": "COMPLETE",
+      "value": 0.8196408642026051,
+      "params": {
+        "learning_rate": 0.00030121203216563103,
+        "weight_decay": 5.902607892562629e-06,
+        "pos_weight": 1.6562053069874638,
+        "dropout": 0.0047075471805022515,
+        "width": 256,
+        "n_layers": 3
+      },
+      "best_epochs": [
+        28,
+        29
+      ],
+      "fold_pr_auc": [
+        0.8213735019921198,
+        0.8179082264130904
+      ]
+    },
+    {
+      "number": 19,
+      "state": "COMPLETE",
+      "value": 0.8190866980918128,
+      "params": {
+        "learning_rate": 0.0003215874429553192,
+        "weight_decay": 5.921328245980405e-06,
+        "pos_weight": 1.2132682481670212,
+        "dropout": 0.026885866872267773,
+        "width": 256,
+        "n_layers": 3
+      },
+      "best_epochs": [
+        28,
+        23
+      ],
+      "fold_pr_auc": [
+        0.8212031738133858,
+        0.8169702223702396
+      ]
+    },
+    {
+      "number": 20,
+      "state": "PRUNED",
+      "value": 0.8116034991214246,
+      "params": {
+        "learning_rate": 0.00037941606745826043,
+        "weight_decay": 2.62088254024784e-06,
+        "pos_weight": 5.434882090023084,
+        "dropout": 0.02137877140389908,
+        "width": 256,
+        "n_layers": 2
+      }
+    },
+    {
+      "number": 21,
+      "state": "COMPLETE",
+      "value": 0.8187404771955911,
+      "params": {
+        "learning_rate": 0.00030063167562094806,
+        "weight_decay": 2.0463369973901676e-06,
+        "pos_weight": 1.0365673040806467,
+        "dropout": 0.01988762189278853,
+        "width": 256,
+        "n_layers": 3
+      },
+      "best_epochs": [
+        29,
+        23
+      ],
+      "fold_pr_auc": [
+        0.8209762966873357,
+        0.8165046577038465
+      ]
+    },
+    {
+      "number": 22,
+      "state": "PRUNED",
+      "value": 0.8177911915993019,
+      "params": {
+        "learning_rate": 0.0005591828188303058,
+        "weight_decay": 1.1517282866777653e-05,
+        "pos_weight": 1.15606264672813,
+        "dropout": 0.004156226365071618,
+        "width": 256,
+        "n_layers": 2
+      }
+    },
+    {
+      "number": 23,
+      "state": "COMPLETE",
+      "value": 0.8192840908007835,
+      "params": {
+        "learning_rate": 0.0006311231023586376,
+        "weight_decay": 1.867966487267173e-06,
+        "pos_weight": 2.3688930462309394,
+        "dropout": 0.006314772492434165,
+        "width": 256,
+        "n_layers": 4
+      },
+      "best_epochs": [
+        10,
+        12
+      ],
+      "fold_pr_auc": [
+        0.8217446553987567,
+        0.8168235262028103
+      ]
+    },
+    {
+      "number": 24,
+      "state": "COMPLETE",
+      "value": 0.8197594165844606,
+      "params": {
+        "learning_rate": 0.0008113027505294476,
+        "weight_decay": 4.050798552916575e-06,
+        "pos_weight": 1.3756889283115135,
+        "dropout": 0.030354728010220804,
+        "width": 256,
+        "n_layers": 4
+      },
+      "best_epochs": [
+        10,
+        16
+      ],
+      "fold_pr_auc": [
+        0.8224434114821879,
+        0.8170754216867334
+      ]
+    },
+    {
+      "number": 25,
+      "state": "COMPLETE",
+      "value": 0.8161361072742159,
+      "params": {
+        "learning_rate": 0.0003001024746081285,
+        "weight_decay": 2.413705636697505e-06,
+        "pos_weight": 2.260904595177081,
+        "dropout": 0.010032285514653193,
+        "width": 256,
+        "n_layers": 4
+      },
+      "best_epochs": [
+        23,
+        10
+      ],
+      "fold_pr_auc": [
+        0.8225956121258248,
+        0.8096766024226071
+      ]
+    },
+    {
+      "number": 26,
+      "state": "PRUNED",
+      "value": 0.8189913107211922,
+      "params": {
+        "learning_rate": 0.00045576958512908285,
+        "weight_decay": 1.7898940385410353e-06,
+        "pos_weight": 1.2849164120640943,
+        "dropout": 0.023938482338774988,
+        "width": 256,
+        "n_layers": 4
+      }
+    },
+    {
+      "number": 27,
+      "state": "COMPLETE",
+      "value": 0.8197176188763603,
+      "params": {
+        "learning_rate": 0.0007709269988420867,
+        "weight_decay": 9.96736052358534e-06,
+        "pos_weight": 1.7386476448330785,
+        "dropout": 0.025085267927894513,
+        "width": 256,
+        "n_layers": 4
+      },
+      "best_epochs": [
+        10,
+        16
+      ],
+      "fold_pr_auc": [
+        0.8215763379518011,
+        0.8178588998009195
+      ]
+    },
+    {
+      "number": 28,
+      "state": "COMPLETE",
+      "value": 0.8193070350665081,
+      "params": {
+        "learning_rate": 0.0008022353420205708,
+        "weight_decay": 7.3523442965730284e-06,
+        "pos_weight": 2.122930921856298,
+        "dropout": 0.05071992392410391,
+        "width": 256,
+        "n_layers": 4
+      },
+      "best_epochs": [
+        8,
+        16
+      ],
+      "fold_pr_auc": [
+        0.8217734666412743,
+        0.8168406034917419
+      ]
+    },
+    {
+      "number": 29,
+      "state": "COMPLETE",
+      "value": 0.8221798874587136,
+      "params": {
+        "learning_rate": 0.0015236434479910521,
+        "weight_decay": 8.446116524319778e-06,
+        "pos_weight": 2.4800276044355605,
+        "dropout": 0.014886154088074262,
+        "width": 256,
+        "n_layers": 4
+      },
+      "best_epochs": [
+        10,
+        16
+      ],
+      "fold_pr_auc": [
+        0.8247514868045199,
+        0.8196082881129074
+      ]
+    }
+  ],
+  "minutes": 186.03032876650494,
+  "training_rows": "all fraud rows + 20% of legitimate rows; early stopping on 25% of the fold's legitimate validation rows"
+}

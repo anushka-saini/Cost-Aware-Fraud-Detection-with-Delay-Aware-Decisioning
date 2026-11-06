@@ -1,0 +1,125 @@
+{
+  "evaluated_on": "days 11-13 (5-seed averages)",
+  "lightgbm_settings": "V2 settings (not tuned)",
+  "steps": [
+    {
+      "step": "v2_deployed",
+      "config": {
+        "train_days": [
+          5,
+          6,
+          7
+        ],
+        "amount_weights": false,
+        "features": "v2"
+      },
+      "pr_auc": 0.8749360628025855
+    },
+    {
+      "step": "more_training_data",
+      "config": {
+        "train_days": [
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "amount_weights": false,
+        "features": "v2"
+      },
+      "compared_with": "v2_deployed",
+      "pr_auc": 0.8728820599856688,
+      "paired_test": {
+        "metric": "pr_auc",
+        "difference": -0.0020540028169167,
+        "ci_low": -0.012186675642754293,
+        "ci_high": 0.004477634214391075,
+        "p_two_sided": 0.67,
+        "significant": false
+      },
+      "kept": false
+    },
+    {
+      "step": "amount_weights",
+      "config": {
+        "train_days": [
+          5,
+          6,
+          7
+        ],
+        "amount_weights": true,
+        "features": "v2"
+      },
+      "compared_with": "v2_deployed",
+      "pr_auc": 0.8696555478310872,
+      "paired_test": {
+        "metric": "pr_auc",
+        "difference": -0.005280514971498285,
+        "ci_low": -0.017386941551777228,
+        "ci_high": 0.0022408995906904906,
+        "p_two_sided": 0.3,
+        "significant": false
+      },
+      "kept": false
+    },
+    {
+      "step": "recipient_profile_features",
+      "config": {
+        "train_days": [
+          5,
+          6,
+          7
+        ],
+        "amount_weights": false,
+        "features": "v3"
+      },
+      "compared_with": "v2_deployed",
+      "pr_auc": 0.8735877818647645,
+      "paired_test": {
+        "metric": "pr_auc",
+        "difference": -0.0013482809378210225,
+        "ci_low": -0.002818591028013234,
+        "ci_high": 0.00013680269516390967,
+        "p_two_sided": 0.11,
+        "significant": false
+      },
+      "kept": false
+    }
+  ],
+  "chosen": {
+    "train_days": [
+      5,
+      6,
+      7
+    ],
+    "amount_weights": false,
+    "features": "v2"
+  },
+  "chosen_step": "v2_deployed",
+  "balance_check": {
+    "data_setup": {
+      "train_days": [
+        5,
+        6,
+        7
+      ],
+      "amount_weights": false
+    },
+    "pr_auc": {
+      "v2": 0.8749360628025855,
+      "v2_no_balance": 0.47406722168987625,
+      "v3": 0.8735877818647645,
+      "v3_no_balance": 0.47483021173832707
+    },
+    "v3_no_balance_minus_v2_no_balance": {
+      "metric": "pr_auc",
+      "difference": 0.0007629900484508179,
+      "ci_low": -0.0037585525133736657,
+      "ci_high": 0.0048343951465929565,
+      "p_two_sided": 0.69,
+      "significant": false
+    }
+  }
+}

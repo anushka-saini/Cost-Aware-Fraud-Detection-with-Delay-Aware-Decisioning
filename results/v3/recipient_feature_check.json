@@ -1,0 +1,15 @@
+{
+  "tested_in_ladder": {
+    "recipient_transfer_share": "share of the recipient's earlier incoming transactions that were TRANSFERs",
+    "recipient_hours_since_previous": "hours since the recipient's previous incoming transaction (-1 when there is none)"
+  },
+  "tested_feature_columns": [
+    "recipient_transfer_share",
+    "recipient_hours_since_previous"
+  ],
+  "planned_but_not_tested": {
+    "fan_in_24h_and_7d": "distinct senders to the recipient in the last 24h / 7d. Not added: with no repeated sender-recipient pairs it is identical to the existing destination_transactions_last_24h / _last_7d features"
+  },
+  "rows_checked": 6362620,
+  "repeated_sender_recipient_pairs": 0
+}

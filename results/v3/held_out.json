@@ -1,0 +1,137 @@
+{
+  "days": [
+    14,
+    15,
+    16
+  ],
+  "n_rows": 1202642,
+  "n_fraud": 822,
+  "decision_rule": "V3 replaces V2 only if its days 14-16 PR-AUC is significantly higher (paired bootstrap, 95%) AND its cost at the approved thresholds is not significantly higher than V2's at its deployed thresholds. Otherwise V2 stays deployed.",
+  "v3": {
+    "model": "lightgbm",
+    "calibration": "platt",
+    "pr_auc": {
+      "pr_auc": 0.8730114132414951,
+      "ci_low": 0.8473532825701808,
+      "ci_high": 0.8927410893581731,
+      "n_bootstrap": 200
+    },
+    "roc_auc": {
+      "roc_auc": 0.9989501334573626,
+      "ci_low": 0.9987032764759286,
+      "ci_high": 0.9991847762811534,
+      "n_bootstrap": 200
+    },
+    "operating_point": {
+      "t_review": 0.00031622776601683794,
+      "t_block": 0.71,
+      "total_cost": 32586.0,
+      "fraud_allowed": 0,
+      "fraud_allowed_amount": 0.0,
+      "fraud_reviewed": 186,
+      "fraud_blocked": 636,
+      "legit_reviewed": 32385,
+      "legit_reviewed_pct": 0.026946630943069677,
+      "legit_blocked": 3,
+      "block_precision": 0.9953051643192489,
+      "block_recall": 0.7737226277372263,
+      "block_f1": 0.8706365503080084
+    }
+  },
+  "v2_deployed": {
+    "pr_auc": {
+      "pr_auc": 0.8632112761543816,
+      "ci_low": 0.838383150424152,
+      "ci_high": 0.8835015665251021,
+      "n_bootstrap": 200
+    },
+    "roc_auc": {
+      "roc_auc": 0.9988589275041532,
+      "ci_low": 0.9985780587764315,
+      "ci_high": 0.9990970076227312,
+      "n_bootstrap": 200
+    },
+    "operating_point": {
+      "t_review": 0.00014609192171701344,
+      "t_block": 0.775,
+      "total_cost": 33744.0,
+      "fraud_allowed": 0,
+      "fraud_allowed_amount": 0.0,
+      "fraud_reviewed": 189,
+      "fraud_blocked": 633,
+      "legit_reviewed": 33540,
+      "legit_reviewed_pct": 0.02790767336206753,
+      "legit_blocked": 3,
+      "block_precision": 0.9952830188679245,
+      "block_recall": 0.7700729927007299,
+      "block_f1": 0.868312757201646
+    }
+  },
+  "v3_minus_v2": {
+    "pr_auc": {
+      "metric": "pr_auc",
+      "difference": 0.00980013708711347,
+      "ci_low": 0.005706777312411812,
+      "ci_high": 0.014929015938636223,
+      "p_two_sided": 0.0,
+      "std_error": 0.0022233336688566156,
+      "p_normal": 1.0439838708471515e-05,
+      "significant": true
+    },
+    "roc_auc": {
+      "metric": "roc_auc",
+      "difference": 9.120595320943892e-05,
+      "ci_low": 3.87127874987292e-07,
+      "ci_high": 0.00018704485958664362,
+      "p_two_sided": 0.04,
+      "std_error": 5.086861339265027e-05,
+      "p_normal": 0.07297754683344969,
+      "significant": true
+    },
+    "cost": {
+      "difference": -1158.0,
+      "ci_low": -1286.1,
+      "ci_high": -1026.925,
+      "std_error": 61.59446538309385,
+      "p_normal": 7.496250487921845e-79,
+      "significant": true,
+      "n_bootstrap": 200
+    }
+  },
+  "baselines": {
+    "block_nothing": {
+      "t_review": 2.0,
+      "t_block": 2.0,
+      "total_cost": 1362518395.67,
+      "fraud_allowed": 822,
+      "fraud_allowed_amount": 1362518395.67,
+      "fraud_reviewed": 0,
+      "fraud_blocked": 0,
+      "legit_reviewed": 0,
+      "legit_reviewed_pct": 0.0,
+      "legit_blocked": 0,
+      "block_precision": 0.0,
+      "block_recall": 0.0,
+      "block_f1": 0.0
+    },
+    "review_everything": {
+      "t_review": 0.0,
+      "t_block": 2.0,
+      "total_cost": 1202642.0,
+      "fraud_allowed": 0,
+      "fraud_allowed_amount": 0.0,
+      "fraud_reviewed": 822,
+      "fraud_blocked": 0,
+      "legit_reviewed": 1201820,
+      "legit_reviewed_pct": 1.0,
+      "legit_blocked": 0,
+      "block_precision": 0.0,
+      "block_recall": 0.0,
+      "block_f1": 0.0
+    }
+  },
+  "pr_auc_significantly_higher": true,
+  "cost_significantly_higher": false,
+  "deploy_v3": true,
+  "verdict": "V3 is better on held-out: deploy V3."
+}

@@ -1,0 +1,1446 @@
+{
+  "evaluated_on": "days 11-13; hyperparameters chosen on folds inside days 5-10",
+  "setup": {
+    "train_days": [
+      5,
+      6,
+      7
+    ],
+    "amount_weights": false,
+    "features": "v2"
+  },
+  "main_lightgbm": "lightgbm",
+  "tuning_vs_v2_settings": {
+    "metric": "pr_auc",
+    "difference": 0.007102120858114791,
+    "ci_low": 0.004006380331457654,
+    "ci_high": 0.01029214778396982,
+    "p_two_sided": 0.0,
+    "std_error": 0.0016399780696588627,
+    "p_normal": 1.4869048742956743e-05,
+    "significant": true
+  },
+  "proposed_v3": "lightgbm",
+  "proposed_v3_vs_v2_deployed": {
+    "metric": "pr_auc",
+    "difference": 0.007102120858114791,
+    "ci_low": 0.004006380331457654,
+    "ci_high": 0.01029214778396982,
+    "p_two_sided": 0.0,
+    "std_error": 0.0016399780696588627,
+    "p_normal": 1.4869048742956743e-05,
+    "significant": true,
+    "p_holm": 6.55305727044876e-05,
+    "significant_after_holm": true
+  },
+  "significance_rule": "paired bootstrap with 200 resamples; p-value from the bootstrap standard error; Holm correction across all models within each comparison; significant when the Holm-adjusted p < 0.05",
+  "stacking_note": "the stacker is fitted on days 11-12 and judged on day 13 only",
+  "cost_note": "operating_point: thresholds chosen and cost measured on days 11-13 (in sample). day_13.operating_point: calibration and thresholds fitted on days 11-12, cost on day 13 (out of sample).",
+  "leaderboard": {
+    "v2_deployed": {
+      "pr_auc": {
+        "pr_auc": 0.8749360628025855,
+        "ci_low": 0.8587530985187442,
+        "ci_high": 0.8945060427040009,
+        "n_bootstrap": 200
+      },
+      "roc_auc": {
+        "roc_auc": 0.9989109721543751,
+        "ci_low": 0.9986492131771448,
+        "ci_high": 0.9991860527144001,
+        "n_bootstrap": 200
+      },
+      "seed_pr_auc": {
+        "values": [
+          0.8713148294079915,
+          0.8580450459409785,
+          0.8740924412495427,
+          0.8714993203611597,
+          0.8607806067550412
+        ],
+        "mean": 0.8671464487429427,
+        "std": 0.006448708053148418,
+        "min": 0.8580450459409785,
+        "max": 0.8740924412495427
+      },
+      "calibration": "platt",
+      "operating_point": {
+        "t_review": 0.00014609192171701317,
+        "t_block": 0.775,
+        "total_cost": 33839.0,
+        "fraud_allowed": 0,
+        "legit_reviewed_pct": 0.028598433449686034,
+        "legit_blocked": 7,
+        "block_precision": 0.9884297520661157,
+        "block_recall": 0.7608142493638677,
+        "block_f1": 0.8598130841121495
+      },
+      "day_13": {
+        "pr_auc": {
+          "pr_auc": 0.8633789455066749,
+          "ci_low": 0.8237530764299125,
+          "ci_high": 0.898835480995564,
+          "n_bootstrap": 200
+        },
+        "operating_point": {
+          "t_review": 0.00014125375446227554,
+          "t_block": 0.785,
+          "total_cost": 10264.0,
+          "fraud_allowed": 0,
+          "fraud_allowed_amount": 0.0,
+          "legit_reviewed": 10196,
+          "legit_reviewed_pct": 0.025641928425923596,
+          "legit_blocked": 1,
+          "block_precision": 0.9945652173913043,
+          "block_recall": 0.7439024390243902,
+          "block_f1": 0.8511627906976743,
+          "n_fraud": 246,
+          "n_legit": 397630
+        },
+        "days_11_12_cost_at_these_thresholds": 23384.0
+      },
+      "label": "V2 deployed (LightGBM, days 5-7)",
+      "tests_on": "days 11-13",
+      "vs_main_lightgbm": {
+        "metric": "pr_auc",
+        "difference": -0.007102120858114791,
+        "ci_low": -0.010292147783969818,
+        "ci_high": -0.004006380331457654,
+        "p_two_sided": 0.0,
+        "std_error": 0.0016399780696588627,
+        "p_normal": 1.4869048742956743e-05,
+        "significant": true,
+        "p_holm": 7.434524371478371e-05,
+        "significant_after_holm": true
+      },
+      "vs_v2_deployed": {
+        "metric": "pr_auc",
+        "difference": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.0,
+        "p_two_sided": 1.0,
+        "std_error": 0.0,
+        "p_normal": 1.0,
+        "significant": false
+      },
+      "roc_vs_main_lightgbm": {
+        "metric": "roc_auc",
+        "difference": -0.00010757786180104478,
+        "ci_low": -0.0002065882725808349,
+        "ci_high": -9.531665123127462e-06,
+        "p_two_sided": 0.05,
+        "std_error": 5.3827526985305625e-05,
+        "p_normal": 0.04565533922996527,
+        "significant": true,
+        "p_holm": 0.1826213569198611,
+        "significant_after_holm": false
+      },
+      "verdict_vs_main_lightgbm": "significantly worse",
+      "verdict_vs_v2_deployed": "reference"
+    },
+    "lightgbm_v2_settings": {
+      "pr_auc": {
+        "pr_auc": 0.8749360628025855,
+        "ci_low": 0.8587530985187442,
+        "ci_high": 0.8945060427040009,
+        "n_bootstrap": 200
+      },
+      "roc_auc": {
+        "roc_auc": 0.9989109721543751,
+        "ci_low": 0.9986492131771448,
+        "ci_high": 0.9991860527144001,
+        "n_bootstrap": 200
+      },
+      "seed_pr_auc": {
+        "values": [
+          0.8713148294079915,
+          0.8580450459409785,
+          0.8740924412495427,
+          0.8714993203611597,
+          0.8607806067550412
+        ],
+        "mean": 0.8671464487429427,
+        "std": 0.006448708053148418,
+        "min": 0.8580450459409785,
+        "max": 0.8740924412495427
+      },
+      "calibration": "platt",
+      "operating_point": {
+        "t_review": 0.00014609192171701317,
+        "t_block": 0.775,
+        "total_cost": 33839.0,
+        "fraud_allowed": 0,
+        "legit_reviewed_pct": 0.028598433449686034,
+        "legit_blocked": 7,
+        "block_precision": 0.9884297520661157,
+        "block_recall": 0.7608142493638677,
+        "block_f1": 0.8598130841121495
+      },
+      "day_13": {
+        "pr_auc": {
+          "pr_auc": 0.8633789455066749,
+          "ci_low": 0.8237530764299125,
+          "ci_high": 0.898835480995564,
+          "n_bootstrap": 200
+        },
+        "operating_point": {
+          "t_review": 0.00014125375446227554,
+          "t_block": 0.785,
+          "total_cost": 10264.0,
+          "fraud_allowed": 0,
+          "fraud_allowed_amount": 0.0,
+          "legit_reviewed": 10196,
+          "legit_reviewed_pct": 0.025641928425923596,
+          "legit_blocked": 1,
+          "block_precision": 0.9945652173913043,
+          "block_recall": 0.7439024390243902,
+          "block_f1": 0.8511627906976743,
+          "n_fraud": 246,
+          "n_legit": 397630
+        },
+        "days_11_12_cost_at_these_thresholds": 23384.0,
+        "cost_minus_v2_deployed": {
+          "difference": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.0,
+          "std_error": 0.0,
+          "p_normal": 1.0,
+          "significant": false,
+          "n_bootstrap": 200
+        }
+      },
+      "label": "LightGBM, V2 settings, V3 data setup",
+      "tests_on": "days 11-13",
+      "vs_main_lightgbm": {
+        "metric": "pr_auc",
+        "difference": -0.007102120858114791,
+        "ci_low": -0.010292147783969818,
+        "ci_high": -0.004006380331457654,
+        "p_two_sided": 0.0,
+        "std_error": 0.0016399780696588627,
+        "p_normal": 1.4869048742956743e-05,
+        "significant": true,
+        "p_holm": 7.434524371478371e-05,
+        "significant_after_holm": true
+      },
+      "vs_v2_deployed": {
+        "metric": "pr_auc",
+        "difference": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.0,
+        "p_two_sided": 1.0,
+        "std_error": 0.0,
+        "p_normal": 1.0,
+        "significant": false,
+        "p_holm": 1.0,
+        "significant_after_holm": false
+      },
+      "roc_vs_main_lightgbm": {
+        "metric": "roc_auc",
+        "difference": -0.00010757786180104478,
+        "ci_low": -0.0002065882725808349,
+        "ci_high": -9.531665123127462e-06,
+        "p_two_sided": 0.05,
+        "std_error": 5.3827526985305625e-05,
+        "p_normal": 0.04565533922996527,
+        "significant": true,
+        "p_holm": 0.1826213569198611,
+        "significant_after_holm": false
+      },
+      "verdict_vs_main_lightgbm": "significantly worse",
+      "verdict_vs_v2_deployed": "comparable"
+    },
+    "logreg": {
+      "pr_auc": {
+        "pr_auc": 0.7837833044966521,
+        "ci_low": 0.7598190037207371,
+        "ci_high": 0.8113039272503311,
+        "n_bootstrap": 200
+      },
+      "roc_auc": {
+        "roc_auc": 0.9957149215139287,
+        "ci_low": 0.9927678763367461,
+        "ci_high": 0.9976485425552841,
+        "n_bootstrap": 200
+      },
+      "seed_pr_auc": {
+        "values": [
+          0.7837833044966521,
+          0.7837833044966521,
+          0.7837833044966521,
+          0.7837833044966521,
+          0.7837833044966521
+        ],
+        "mean": 0.7837833044966521,
+        "std": 0.0,
+        "min": 0.7837833044966521,
+        "max": 0.7837833044966521
+      },
+      "calibration": "isotonic",
+      "operating_point": {
+        "t_review": 0.0001472211998527788,
+        "t_block": 0.67,
+        "total_cost": 85838.91,
+        "fraud_allowed": 7,
+        "legit_reviewed_pct": 0.05226343295200387,
+        "legit_blocked": 25,
+        "block_precision": 0.9547101449275363,
+        "block_recall": 0.6704834605597965,
+        "block_f1": 0.7877428998505233
+      },
+      "day_13": {
+        "pr_auc": {
+          "pr_auc": 0.7547294359357856,
+          "ci_low": 0.70478595780403,
+          "ci_high": 0.8089462999309145,
+          "n_bootstrap": 200
+        },
+        "operating_point": {
+          "t_review": 3.1622776601683795e-05,
+          "t_block": 0.485,
+          "total_cost": 51458.659999999996,
+          "fraud_allowed": 4,
+          "fraud_allowed_amount": 32274.659999999996,
+          "legit_reviewed": 19083,
+          "legit_reviewed_pct": 0.04799185172144959,
+          "legit_blocked": 2,
+          "block_precision": 0.9869281045751634,
+          "block_recall": 0.6138211382113821,
+          "block_f1": 0.7568922305764411,
+          "n_fraud": 246,
+          "n_legit": 397630
+        },
+        "days_11_12_cost_at_these_thresholds": 56897.03,
+        "cost_minus_v2_deployed": {
+          "difference": 41194.659999999996,
+          "ci_low": 10035.71,
+          "ci_high": 78999.76825000001,
+          "std_error": 17719.413277008232,
+          "p_normal": 0.02008094219485701,
+          "significant": true,
+          "n_bootstrap": 200
+        }
+      },
+      "label": "Logistic regression",
+      "tests_on": "days 11-13",
+      "vs_main_lightgbm": {
+        "metric": "pr_auc",
+        "difference": -0.09825487916404818,
+        "ci_low": -0.1163436324987235,
+        "ci_high": -0.08633068959407986,
+        "p_two_sided": 0.0,
+        "std_error": 0.008074096196897263,
+        "p_normal": 4.537891751042998e-34,
+        "significant": true,
+        "p_holm": 4.537891751042998e-33,
+        "significant_after_holm": true
+      },
+      "vs_v2_deployed": {
+        "metric": "pr_auc",
+        "difference": -0.09115275830593339,
+        "ci_low": -0.10975551604099246,
+        "ci_high": -0.07900355068857437,
+        "p_two_sided": 0.0,
+        "std_error": 0.00807682487436088,
+        "p_normal": 1.5437793570434064e-29,
+        "significant": true,
+        "p_holm": 1.5437793570434065e-28,
+        "significant_after_holm": true
+      },
+      "roc_vs_main_lightgbm": {
+        "metric": "roc_auc",
+        "difference": -0.0033036285022474132,
+        "ci_low": -0.006193075670851297,
+        "ci_high": -0.0014884406125935832,
+        "p_two_sided": 0.0,
+        "std_error": 0.0012343748183811945,
+        "p_normal": 0.00744271723952385,
+        "significant": true,
+        "p_holm": 0.03721358619761925,
+        "significant_after_holm": true
+      },
+      "verdict_vs_main_lightgbm": "significantly worse",
+      "verdict_vs_v2_deployed": "significantly worse"
+    },
+    "random_forest": {
+      "pr_auc": {
+        "pr_auc": 0.8007986253524982,
+        "ci_low": 0.7770534162613513,
+        "ci_high": 0.8281222723780906,
+        "n_bootstrap": 200
+      },
+      "roc_auc": {
+        "roc_auc": 0.996868571409225,
+        "ci_low": 0.9962750178261403,
+        "ci_high": 0.9975170317049943,
+        "n_bootstrap": 200
+      },
+      "seed_pr_auc": {
+        "values": [
+          0.7958537210022048,
+          0.8051297478897175,
+          0.7959948219358606,
+          0.8109808136433073,
+          0.793450224331007
+        ],
+        "mean": 0.8002818657604195,
+        "std": 0.006672750292252446,
+        "min": 0.793450224331007,
+        "max": 0.8109808136433073
+      },
+      "calibration": "isotonic",
+      "operating_point": {
+        "t_review": 1e-07,
+        "t_block": 0.755,
+        "total_cost": 58075.0,
+        "fraud_allowed": 0,
+        "legit_reviewed_pct": 0.04923054934752592,
+        "legit_blocked": 2,
+        "block_precision": 0.9966159052453468,
+        "block_recall": 0.7493638676844784,
+        "block_f1": 0.8554829339143065
+      },
+      "day_13": {
+        "pr_auc": {
+          "pr_auc": 0.7775792303288,
+          "ci_low": 0.7329021324224921,
+          "ci_high": 0.8305740275599047,
+          "n_bootstrap": 200
+        },
+        "operating_point": {
+          "t_review": 9.090840194062231e-05,
+          "t_block": 0.17,
+          "total_cost": 20448.0,
+          "fraud_allowed": 0,
+          "fraud_allowed_amount": 0.0,
+          "legit_reviewed": 20380,
+          "legit_reviewed_pct": 0.051253678042401225,
+          "legit_blocked": 0,
+          "block_precision": 1.0,
+          "block_recall": 0.7235772357723578,
+          "block_f1": 0.839622641509434,
+          "n_fraud": 246,
+          "n_legit": 397630
+        },
+        "days_11_12_cost_at_these_thresholds": 44117.0,
+        "cost_minus_v2_deployed": {
+          "difference": 10184.0,
+          "ci_low": 9974.475,
+          "ci_high": 10391.825,
+          "std_error": 112.70592755275847,
+          "p_normal": 0.0,
+          "significant": true,
+          "n_bootstrap": 200
+        }
+      },
+      "label": "Random Forest",
+      "tests_on": "days 11-13",
+      "vs_main_lightgbm": {
+        "metric": "pr_auc",
+        "difference": -0.08123955830820206,
+        "ci_low": -0.09796452309636142,
+        "ci_high": -0.06613451861331865,
+        "p_two_sided": 0.0,
+        "std_error": 0.007794492349642234,
+        "p_normal": 1.9535352980994597e-25,
+        "significant": true,
+        "p_holm": 1.5628282384795677e-24,
+        "significant_after_holm": true
+      },
+      "vs_v2_deployed": {
+        "metric": "pr_auc",
+        "difference": -0.07413743745008727,
+        "ci_low": -0.08870799817915674,
+        "ci_high": -0.059713496769409735,
+        "p_two_sided": 0.0,
+        "std_error": 0.0074745804451742635,
+        "p_normal": 3.4553952996814603e-23,
+        "significant": true,
+        "p_holm": 3.1098557697133143e-22,
+        "significant_after_holm": true
+      },
+      "roc_vs_main_lightgbm": {
+        "metric": "roc_auc",
+        "difference": -0.0021499786069510973,
+        "ci_low": -0.0025116420213373626,
+        "ci_high": -0.0017420693052491276,
+        "p_two_sided": 0.0,
+        "std_error": 0.0001902532232923569,
+        "p_normal": 1.3030086287955334e-29,
+        "significant": true,
+        "p_holm": 1.3030086287955333e-28,
+        "significant_after_holm": true
+      },
+      "verdict_vs_main_lightgbm": "significantly worse",
+      "verdict_vs_v2_deployed": "significantly worse"
+    },
+    "lightgbm": {
+      "pr_auc": {
+        "pr_auc": 0.8820381836607003,
+        "ci_low": 0.8663272091115998,
+        "ci_high": 0.9018763577656377,
+        "n_bootstrap": 200
+      },
+      "roc_auc": {
+        "roc_auc": 0.9990185500161761,
+        "ci_low": 0.9987734980683841,
+        "ci_high": 0.9992523414799883,
+        "n_bootstrap": 200
+      },
+      "seed_pr_auc": {
+        "values": [
+          0.8798715790849692,
+          0.8761336855735761,
+          0.8812611377992025,
+          0.8795800758119477,
+          0.8788210274185645
+        ],
+        "mean": 0.879133501137652,
+        "std": 0.0016951435929268284,
+        "min": 0.8761336855735761,
+        "max": 0.8812611377992025
+      },
+      "calibration": "isotonic",
+      "operating_point": {
+        "t_review": 1e-07,
+        "t_block": 0.84,
+        "total_cost": 30070.0,
+        "fraud_allowed": 0,
+        "legit_reviewed_pct": 0.025416670565885886,
+        "legit_blocked": 3,
+        "block_precision": 0.9950819672131147,
+        "block_recall": 0.772264631043257,
+        "block_f1": 0.8696275071633238
+      },
+      "day_13": {
+        "pr_auc": {
+          "pr_auc": 0.8687689860275798,
+          "ci_low": 0.8298148744522578,
+          "ci_high": 0.9058035959989198,
+          "n_bootstrap": 200
+        },
+        "operating_point": {
+          "t_review": 0.0002511886431509582,
+          "t_block": 0.715,
+          "total_cost": 9826.0,
+          "fraud_allowed": 0,
+          "fraud_allowed_amount": 0.0,
+          "legit_reviewed": 9764,
+          "legit_reviewed_pct": 0.024555491285868772,
+          "legit_blocked": 0,
+          "block_precision": 1.0,
+          "block_recall": 0.7479674796747967,
+          "block_f1": 0.855813953488372,
+          "n_fraud": 246,
+          "n_legit": 397630
+        },
+        "days_11_12_cost_at_these_thresholds": 22655.0,
+        "cost_minus_v2_deployed": {
+          "difference": -438.0,
+          "ci_low": -502.025,
+          "ci_high": -372.975,
+          "std_error": 33.05233211577448,
+          "p_normal": 4.4102392075862146e-40,
+          "significant": true,
+          "n_bootstrap": 200
+        }
+      },
+      "label": "LightGBM",
+      "tests_on": "days 11-13",
+      "vs_main_lightgbm": {
+        "metric": "pr_auc",
+        "difference": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.0,
+        "p_two_sided": 1.0,
+        "std_error": 0.0,
+        "p_normal": 1.0,
+        "significant": false
+      },
+      "vs_v2_deployed": {
+        "metric": "pr_auc",
+        "difference": 0.007102120858114791,
+        "ci_low": 0.004006380331457654,
+        "ci_high": 0.01029214778396982,
+        "p_two_sided": 0.0,
+        "std_error": 0.0016399780696588627,
+        "p_normal": 1.4869048742956743e-05,
+        "significant": true,
+        "p_holm": 6.55305727044876e-05,
+        "significant_after_holm": true
+      },
+      "roc_vs_main_lightgbm": {
+        "metric": "roc_auc",
+        "difference": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.0,
+        "p_two_sided": 1.0,
+        "std_error": 0.0,
+        "p_normal": 1.0,
+        "significant": false
+      },
+      "verdict_vs_main_lightgbm": "reference",
+      "verdict_vs_v2_deployed": "significantly better"
+    },
+    "catboost": {
+      "pr_auc": {
+        "pr_auc": 0.8822498992134888,
+        "ci_low": 0.8664313047945282,
+        "ci_high": 0.9017733372145834,
+        "n_bootstrap": 200
+      },
+      "roc_auc": {
+        "roc_auc": 0.9990627705715842,
+        "ci_low": 0.9988282965037335,
+        "ci_high": 0.9993050577524635,
+        "n_bootstrap": 200
+      },
+      "seed_pr_auc": {
+        "values": [
+          0.8818442082658327,
+          0.8819230863591794,
+          0.8820626720095217,
+          0.8808715081761034,
+          0.8819020504817641
+        ],
+        "mean": 0.8817207050584802,
+        "std": 0.0004306214431001259,
+        "min": 0.8808715081761034,
+        "max": 0.8820626720095217
+      },
+      "calibration": "platt",
+      "operating_point": {
+        "t_review": 0.0002511886431509582,
+        "t_block": 0.8,
+        "total_cost": 31748.0,
+        "fraud_allowed": 0,
+        "legit_reviewed_pct": 0.026845060908640018,
+        "legit_blocked": 3,
+        "block_precision": 0.9950900163666121,
+        "block_recall": 0.7735368956743003,
+        "block_f1": 0.870436649964209
+      },
+      "day_13": {
+        "pr_auc": {
+          "pr_auc": 0.8701730163676249,
+          "ci_low": 0.8305776381941568,
+          "ci_high": 0.9057751160202449,
+          "n_bootstrap": 200
+        },
+        "operating_point": {
+          "t_review": 0.0002511886431509582,
+          "t_block": 0.89,
+          "total_cost": 9691.0,
+          "fraud_allowed": 0,
+          "fraud_allowed_amount": 0.0,
+          "legit_reviewed": 9629,
+          "legit_reviewed_pct": 0.02421597967960164,
+          "legit_blocked": 0,
+          "block_precision": 1.0,
+          "block_recall": 0.7479674796747967,
+          "block_f1": 0.855813953488372,
+          "n_fraud": 246,
+          "n_legit": 397630
+        },
+        "days_11_12_cost_at_these_thresholds": 22060.0,
+        "cost_minus_v2_deployed": {
+          "difference": -573.0,
+          "ci_low": -640.075,
+          "ci_high": -507.95,
+          "std_error": 36.53887549050399,
+          "p_normal": 2.0105884139227415e-55,
+          "significant": true,
+          "n_bootstrap": 200
+        }
+      },
+      "label": "CatBoost",
+      "tests_on": "days 11-13",
+      "vs_main_lightgbm": {
+        "metric": "pr_auc",
+        "difference": 0.00021171555278853837,
+        "ci_low": -0.0016207895222854261,
+        "ci_high": 0.0019268210946331746,
+        "p_two_sided": 0.85,
+        "std_error": 0.0009083429352318414,
+        "p_normal": 0.8157001556510809,
+        "significant": false,
+        "p_holm": 0.8157001556510809,
+        "significant_after_holm": false
+      },
+      "vs_v2_deployed": {
+        "metric": "pr_auc",
+        "difference": 0.007313836410903329,
+        "ci_low": 0.003936409097350635,
+        "ci_high": 0.01050868472104885,
+        "p_two_sided": 0.0,
+        "std_error": 0.001678129779042621,
+        "p_normal": 1.310611454089752e-05,
+        "significant": true,
+        "p_holm": 6.55305727044876e-05,
+        "significant_after_holm": true
+      },
+      "roc_vs_main_lightgbm": {
+        "metric": "roc_auc",
+        "difference": 4.422055540809211e-05,
+        "ci_low": -2.2779089343805124e-05,
+        "ci_high": 0.00011536618358697348,
+        "p_two_sided": 0.23,
+        "std_error": 3.634029886989656e-05,
+        "p_normal": 0.2236627297278323,
+        "significant": false,
+        "p_holm": 0.4473254594556646,
+        "significant_after_holm": false
+      },
+      "verdict_vs_main_lightgbm": "comparable",
+      "verdict_vs_v2_deployed": "significantly better"
+    },
+    "xgboost": {
+      "pr_auc": {
+        "pr_auc": 0.8797852974474376,
+        "ci_low": 0.8643756044860497,
+        "ci_high": 0.900374012693644,
+        "n_bootstrap": 200
+      },
+      "roc_auc": {
+        "roc_auc": 0.9989994008179954,
+        "ci_low": 0.9987456273201555,
+        "ci_high": 0.9992502524790426,
+        "n_bootstrap": 200
+      },
+      "seed_pr_auc": {
+        "values": [
+          0.8795943503208501,
+          0.879980294388117,
+          0.8795489616743097,
+          0.8796774439005908,
+          0.8795002384396596
+        ],
+        "mean": 0.8796602577447054,
+        "std": 0.00017032650931217758,
+        "min": 0.8795002384396596,
+        "max": 0.879980294388117
+      },
+      "calibration": "platt",
+      "operating_point": {
+        "t_review": 1.138469305134981e-05,
+        "t_block": 0.865,
+        "total_cost": 57000.0,
+        "fraud_allowed": 0,
+        "legit_reviewed_pct": 0.04832961702294187,
+        "legit_blocked": 3,
+        "block_precision": 0.9951060358890701,
+        "block_recall": 0.7760814249363868,
+        "block_f1": 0.8720514653323803
+      },
+      "day_13": {
+        "pr_auc": {
+          "pr_auc": 0.8650852270816889,
+          "ci_low": 0.827498323888339,
+          "ci_high": 0.902662976237851,
+          "n_bootstrap": 200
+        },
+        "operating_point": {
+          "t_review": 1.064848739933118e-05,
+          "t_block": 0.865,
+          "total_cost": 18380.0,
+          "fraud_allowed": 0,
+          "fraud_allowed_amount": 0.0,
+          "legit_reviewed": 18321,
+          "legit_reviewed_pct": 0.04607549732163066,
+          "legit_blocked": 0,
+          "block_precision": 1.0,
+          "block_recall": 0.7601626016260162,
+          "block_f1": 0.8637413394919168,
+          "n_fraud": 246,
+          "n_legit": 397630
+        },
+        "days_11_12_cost_at_these_thresholds": 38897.0,
+        "cost_minus_v2_deployed": {
+          "difference": 8116.0,
+          "ci_low": 7960.875,
+          "ci_high": 8289.025,
+          "std_error": 91.89138825907955,
+          "p_normal": 0.0,
+          "significant": true,
+          "n_bootstrap": 200
+        }
+      },
+      "label": "XGBoost",
+      "tests_on": "days 11-13",
+      "vs_main_lightgbm": {
+        "metric": "pr_auc",
+        "difference": -0.0022528862132626948,
+        "ci_low": -0.004566634015188825,
+        "ci_high": -0.00026298319346434995,
+        "p_two_sided": 0.01,
+        "std_error": 0.001100501542524265,
+        "p_normal": 0.04064385126242432,
+        "significant": true,
+        "p_holm": 0.08128770252484864,
+        "significant_after_holm": false
+      },
+      "vs_v2_deployed": {
+        "metric": "pr_auc",
+        "difference": 0.004849234644852096,
+        "ci_low": 0.0017452658105596515,
+        "ci_high": 0.008207172032059843,
+        "p_two_sided": 0.0,
+        "std_error": 0.0016995491031180155,
+        "p_normal": 0.004327486978331107,
+        "significant": true,
+        "p_holm": 0.012982460934993322,
+        "significant_after_holm": true
+      },
+      "roc_vs_main_lightgbm": {
+        "metric": "roc_auc",
+        "difference": -1.9149198180690163e-05,
+        "ci_low": -8.465623541489275e-05,
+        "ci_high": 2.7618367631626624e-05,
+        "p_two_sided": 0.55,
+        "std_error": 2.8507173809009818e-05,
+        "p_normal": 0.5017539391786735,
+        "significant": false,
+        "p_holm": 0.5017539391786735,
+        "significant_after_holm": false
+      },
+      "verdict_vs_main_lightgbm": "comparable",
+      "verdict_vs_v2_deployed": "significantly better"
+    },
+    "mlp": {
+      "pr_auc": {
+        "pr_auc": 0.852885552681594,
+        "ci_low": 0.8341438876498761,
+        "ci_high": 0.8764451279392615,
+        "n_bootstrap": 200
+      },
+      "roc_auc": {
+        "roc_auc": 0.9981688563004143,
+        "ci_low": 0.9976946455284083,
+        "ci_high": 0.99862671752939,
+        "n_bootstrap": 200
+      },
+      "seed_pr_auc": {
+        "values": [
+          0.845977617993049,
+          0.85082729866118,
+          0.8495344652440677,
+          0.8496444457909684,
+          0.8460299174195126
+        ],
+        "mean": 0.8484027490217555,
+        "std": 0.002010603081045554,
+        "min": 0.845977617993049,
+        "max": 0.85082729866118
+      },
+      "calibration": "platt",
+      "operating_point": {
+        "t_review": 1.4010439480425169e-05,
+        "t_block": 0.855,
+        "total_cost": 101249.0,
+        "fraud_allowed": 0,
+        "legit_reviewed_pct": 0.08591950820494977,
+        "legit_blocked": 6,
+        "block_precision": 0.9894179894179894,
+        "block_recall": 0.7137404580152672,
+        "block_f1": 0.8292682926829269
+      },
+      "day_13": {
+        "pr_auc": {
+          "pr_auc": 0.836167938610578,
+          "ci_low": 0.7940998974181274,
+          "ci_high": 0.8764099399443082,
+          "n_bootstrap": 200
+        },
+        "operating_point": {
+          "t_review": 1.4479887455840126e-05,
+          "t_block": 0.915,
+          "total_cost": 32805.0,
+          "fraud_allowed": 0,
+          "fraud_allowed_amount": 0.0,
+          "legit_reviewed": 32726,
+          "legit_reviewed_pct": 0.08230264316072732,
+          "legit_blocked": 0,
+          "block_precision": 1.0,
+          "block_recall": 0.6788617886178862,
+          "block_f1": 0.8087167070217918,
+          "n_fraud": 246,
+          "n_legit": 397630
+        },
+        "days_11_12_cost_at_these_thresholds": 68557.0,
+        "cost_minus_v2_deployed": {
+          "difference": 22541.0,
+          "ci_low": 22271.925,
+          "ci_high": 22819.85,
+          "std_error": 148.2048955172412,
+          "p_normal": 0.0,
+          "significant": true,
+          "n_bootstrap": 200
+        }
+      },
+      "label": "MLP",
+      "tests_on": "days 11-13",
+      "vs_main_lightgbm": {
+        "metric": "pr_auc",
+        "difference": -0.029152630979106253,
+        "ci_low": -0.036618602738584916,
+        "ci_high": -0.022087310529215566,
+        "p_two_sided": 0.0,
+        "std_error": 0.004042520900460794,
+        "p_normal": 5.533970226139174e-13,
+        "significant": true,
+        "p_holm": 3.320382135683504e-12,
+        "significant_after_holm": true
+      },
+      "vs_v2_deployed": {
+        "metric": "pr_auc",
+        "difference": -0.022050510120991462,
+        "ci_low": -0.02932621865314946,
+        "ci_high": -0.01450049739671459,
+        "p_two_sided": 0.0,
+        "std_error": 0.00408953291550988,
+        "p_normal": 6.97016113833647e-08,
+        "significant": true,
+        "p_holm": 4.1820966830018826e-07,
+        "significant_after_holm": true
+      },
+      "roc_vs_main_lightgbm": {
+        "metric": "roc_auc",
+        "difference": -0.0008496937157618234,
+        "ci_low": -0.0011658682721957774,
+        "ci_high": -0.0005902185878421673,
+        "p_two_sided": 0.0,
+        "std_error": 0.00014271282777596133,
+        "p_normal": 2.6187381610157167e-09,
+        "significant": true,
+        "p_holm": 1.8331167127110017e-08,
+        "significant_after_holm": true
+      },
+      "verdict_vs_main_lightgbm": "significantly worse",
+      "verdict_vs_v2_deployed": "significantly worse"
+    },
+    "resnet": {
+      "pr_auc": {
+        "pr_auc": 0.8256316186084638,
+        "ci_low": 0.8037381414371892,
+        "ci_high": 0.8514324992968402,
+        "n_bootstrap": 200
+      },
+      "roc_auc": {
+        "roc_auc": 0.9976492042972386,
+        "ci_low": 0.9970886692643955,
+        "ci_high": 0.9982142687522509,
+        "n_bootstrap": 200
+      },
+      "seed_pr_auc": {
+        "values": [
+          0.820431116803265,
+          0.8103434969116322,
+          0.8337033571342729,
+          0.817044154185399,
+          0.826773758591715
+        ],
+        "mean": 0.8216591767252568,
+        "std": 0.008025863233989218,
+        "min": 0.8103434969116322,
+        "max": 0.8337033571342729
+      },
+      "calibration": "platt",
+      "operating_point": {
+        "t_review": 0.00011861118518722686,
+        "t_block": 0.825,
+        "total_cost": 66653.9,
+        "fraud_allowed": 2,
+        "legit_reviewed_pct": 0.05606368289904538,
+        "legit_blocked": 6,
+        "block_precision": 0.9890510948905109,
+        "block_recall": 0.6895674300254453,
+        "block_f1": 0.8125937031484258
+      },
+      "day_13": {
+        "pr_auc": {
+          "pr_auc": 0.8166858530680671,
+          "ci_low": 0.7777887246136836,
+          "ci_high": 0.8624296043064239,
+          "n_bootstrap": 200
+        },
+        "operating_point": {
+          "t_review": 0.00011871845488240155,
+          "t_block": 0.815,
+          "total_cost": 20330.0,
+          "fraud_allowed": 0,
+          "fraud_allowed_amount": 0.0,
+          "legit_reviewed": 20249,
+          "legit_reviewed_pct": 0.050924226039282754,
+          "legit_blocked": 0,
+          "block_precision": 1.0,
+          "block_recall": 0.6707317073170732,
+          "block_f1": 0.8029197080291971,
+          "n_fraud": 246,
+          "n_legit": 397630
+        },
+        "days_11_12_cost_at_these_thresholds": 44482.9,
+        "cost_minus_v2_deployed": {
+          "difference": 10066.0,
+          "ci_low": 9891.75,
+          "ci_high": 10301.25,
+          "std_error": 108.41015071889935,
+          "p_normal": 0.0,
+          "significant": true,
+          "n_bootstrap": 200
+        }
+      },
+      "label": "ResNet-MLP",
+      "tests_on": "days 11-13",
+      "vs_main_lightgbm": {
+        "metric": "pr_auc",
+        "difference": -0.05640656505223651,
+        "ci_low": -0.0676351983595791,
+        "ci_high": -0.04809974352945679,
+        "p_two_sided": 0.0,
+        "std_error": 0.005206877344532793,
+        "p_normal": 2.3992275425356456e-27,
+        "significant": true,
+        "p_holm": 2.1593047882820809e-26,
+        "significant_after_holm": true
+      },
+      "vs_v2_deployed": {
+        "metric": "pr_auc",
+        "difference": -0.04930444419412172,
+        "ci_low": -0.05947450881653255,
+        "ci_high": -0.040310130281374514,
+        "p_two_sided": 0.0,
+        "std_error": 0.005213788017818385,
+        "p_normal": 3.182727555243317e-21,
+        "significant": true,
+        "p_holm": 2.5461820441946537e-20,
+        "significant_after_holm": true
+      },
+      "roc_vs_main_lightgbm": {
+        "metric": "roc_auc",
+        "difference": -0.0013693457189375424,
+        "ci_low": -0.0016702379777517623,
+        "ci_high": -0.001030081540113553,
+        "p_two_sided": 0.0,
+        "std_error": 0.00018232200357639285,
+        "p_normal": 5.886171326099732e-14,
+        "significant": true,
+        "p_holm": 5.297554193489758e-13,
+        "significant_after_holm": true
+      },
+      "verdict_vs_main_lightgbm": "significantly worse",
+      "verdict_vs_v2_deployed": "significantly worse"
+    },
+    "ft_transformer": {
+      "pr_auc": {
+        "pr_auc": 0.8431946938308702,
+        "ci_low": 0.8238571007878726,
+        "ci_high": 0.870091501921177,
+        "n_bootstrap": 200
+      },
+      "roc_auc": {
+        "roc_auc": 0.9981649099983247,
+        "ci_low": 0.9977236023646439,
+        "ci_high": 0.9986416489792468,
+        "n_bootstrap": 200
+      },
+      "seed_pr_auc": {
+        "values": [
+          0.8331784936553419,
+          0.8324778907119907,
+          0.8362646877789469,
+          0.8401352188027966,
+          0.8196607367891969
+        ],
+        "mean": 0.8323434055476545,
+        "std": 0.0068942636065680175,
+        "min": 0.8196607367891969,
+        "max": 0.8401352188027966
+      },
+      "calibration": "isotonic",
+      "operating_point": {
+        "t_review": 1e-07,
+        "t_block": 0.835,
+        "total_cost": 50098.0,
+        "fraud_allowed": 0,
+        "legit_reviewed_pct": 0.04238805766987764,
+        "legit_blocked": 3,
+        "block_precision": 0.9943502824858758,
+        "block_recall": 0.6717557251908397,
+        "block_f1": 0.8018223234624147
+      },
+      "day_13": {
+        "pr_auc": {
+          "pr_auc": 0.8213640687923001,
+          "ci_low": 0.7788964125811032,
+          "ci_high": 0.8661078690610664,
+          "n_bootstrap": 200
+        },
+        "operating_point": {
+          "t_review": 0.0,
+          "t_block": 0.87,
+          "total_cost": 397721.0,
+          "fraud_allowed": 0,
+          "fraud_allowed_amount": 0.0,
+          "legit_reviewed": 397627,
+          "legit_reviewed_pct": 0.9999924552976385,
+          "legit_blocked": 3,
+          "block_precision": 0.9823529411764705,
+          "block_recall": 0.6788617886178862,
+          "block_f1": 0.8028846153846154,
+          "n_fraud": 246,
+          "n_legit": 397630
+        },
+        "days_11_12_cost_at_these_thresholds": 778015.0,
+        "cost_minus_v2_deployed": {
+          "difference": 387457.0,
+          "ci_low": 387272.875,
+          "ci_high": 387632.175,
+          "std_error": 96.8071652109538,
+          "p_normal": 0.0,
+          "significant": true,
+          "n_bootstrap": 200
+        }
+      },
+      "label": "FT-Transformer",
+      "tests_on": "days 11-13",
+      "vs_main_lightgbm": {
+        "metric": "pr_auc",
+        "difference": -0.0388434898298301,
+        "ci_low": -0.04736877021452386,
+        "ci_high": -0.030755246703458857,
+        "p_two_sided": 0.0,
+        "std_error": 0.004552096216245695,
+        "p_normal": 1.424780787062038e-17,
+        "significant": true,
+        "p_holm": 9.973465509434266e-17,
+        "significant_after_holm": true
+      },
+      "vs_v2_deployed": {
+        "metric": "pr_auc",
+        "difference": -0.03174136897171531,
+        "ci_low": -0.040231477388878514,
+        "ci_high": -0.022727152086532258,
+        "p_two_sided": 0.0,
+        "std_error": 0.0046112522553106204,
+        "p_normal": 5.8416137824886385e-12,
+        "significant": true,
+        "p_holm": 4.089129647742047e-11,
+        "significant_after_holm": true
+      },
+      "roc_vs_main_lightgbm": {
+        "metric": "roc_auc",
+        "difference": -0.0008536400178513759,
+        "ci_low": -0.0011039985125354894,
+        "ci_high": -0.0006023393129591047,
+        "p_two_sided": 0.0,
+        "std_error": 0.00012227212915766117,
+        "p_normal": 2.9209340582271235e-12,
+        "significant": true,
+        "p_holm": 2.3367472465816988e-11,
+        "significant_after_holm": true
+      },
+      "verdict_vs_main_lightgbm": "significantly worse",
+      "verdict_vs_v2_deployed": "significantly worse"
+    },
+    "tabm": {
+      "pr_auc": {
+        "pr_auc": 0.6713102752871237,
+        "ci_low": 0.6417730027963011,
+        "ci_high": 0.6990353414571499,
+        "n_bootstrap": 200
+      },
+      "roc_auc": {
+        "roc_auc": 0.9923299646612004,
+        "ci_low": 0.9886898095310408,
+        "ci_high": 0.9952771224416544,
+        "n_bootstrap": 200
+      },
+      "seed_pr_auc": {
+        "values": [
+          0.6684431417245099,
+          0.6707041604208923,
+          0.6731465712601826,
+          0.6671094618927771,
+          0.6716089476618372
+        ],
+        "mean": 0.6702024565920398,
+        "std": 0.0021706929793620187,
+        "min": 0.6671094618927771,
+        "max": 0.6731465712601826
+      },
+      "calibration": "isotonic",
+      "operating_point": {
+        "t_review": 7.079457843841373e-06,
+        "t_block": 0.645,
+        "total_cost": 256544.8,
+        "fraud_allowed": 3,
+        "legit_reviewed_pct": 0.21702515379229553,
+        "legit_blocked": 19,
+        "block_precision": 0.9545454545454546,
+        "block_recall": 0.5076335877862596,
+        "block_f1": 0.6627906976744187
+      },
+      "day_13": {
+        "pr_auc": {
+          "pr_auc": 0.6053558075607658,
+          "ci_low": 0.5508156404919531,
+          "ci_high": 0.6627660405434901,
+          "n_bootstrap": 200
+        },
+        "operating_point": {
+          "t_review": 9.615369324157133e-07,
+          "t_block": 0.68,
+          "total_cost": 68860.28,
+          "fraud_allowed": 1,
+          "fraud_allowed_amount": 493.28,
+          "legit_reviewed": 68190,
+          "legit_reviewed_pct": 0.1714910846767095,
+          "legit_blocked": 6,
+          "block_precision": 0.9423076923076923,
+          "block_recall": 0.3983739837398374,
+          "block_f1": 0.56,
+          "n_fraud": 246,
+          "n_legit": 397630
+        },
+        "days_11_12_cost_at_these_thresholds": 129426.18,
+        "cost_minus_v2_deployed": {
+          "difference": 58596.28,
+          "ci_low": 57736.925,
+          "ci_high": 59759.697,
+          "std_error": 564.2410115701689,
+          "p_normal": 0.0,
+          "significant": true,
+          "n_bootstrap": 200
+        }
+      },
+      "label": "TabM",
+      "tests_on": "days 11-13",
+      "vs_main_lightgbm": {
+        "metric": "pr_auc",
+        "difference": -0.21072790837357658,
+        "ci_low": -0.23554570281089715,
+        "ci_high": -0.18956019668229093,
+        "p_two_sided": 0.0,
+        "std_error": 0.01214641157524789,
+        "p_normal": 2.007611847531366e-67,
+        "significant": true,
+        "p_holm": 2.2083730322845025e-66,
+        "significant_after_holm": true
+      },
+      "vs_v2_deployed": {
+        "metric": "pr_auc",
+        "difference": -0.2036257875154618,
+        "ci_low": -0.22829267180324925,
+        "ci_high": -0.18251728757700705,
+        "p_two_sided": 0.0,
+        "std_error": 0.012239624881859389,
+        "p_normal": 3.7848576871815658e-62,
+        "significant": true,
+        "p_holm": 4.163343455899722e-61,
+        "significant_after_holm": true
+      },
+      "roc_vs_main_lightgbm": {
+        "metric": "roc_auc",
+        "difference": -0.00668858535497574,
+        "ci_low": -0.010293603464262122,
+        "ci_high": -0.0038672089403965207,
+        "p_two_sided": 0.0,
+        "std_error": 0.001738659700891538,
+        "p_normal": 0.00011958377669026016,
+        "significant": true,
+        "p_holm": 0.000717502660141561,
+        "significant_after_holm": true
+      },
+      "verdict_vs_main_lightgbm": "significantly worse",
+      "verdict_vs_v2_deployed": "significantly worse"
+    },
+    "autoencoder": {
+      "pr_auc": {
+        "pr_auc": 0.0541297651736455,
+        "ci_low": 0.04619632318539326,
+        "ci_high": 0.06277016049462276,
+        "n_bootstrap": 200
+      },
+      "roc_auc": {
+        "roc_auc": 0.9790574624164461,
+        "ci_low": 0.9768204292063494,
+        "ci_high": 0.980777180139341,
+        "n_bootstrap": 200
+      },
+      "seed_pr_auc": {
+        "values": [
+          0.13543152668159,
+          0.03116121370320225,
+          0.028941720624121016,
+          0.13168282700742043,
+          0.04342395101232247
+        ],
+        "mean": 0.07412824780573123,
+        "std": 0.0487880388781817,
+        "min": 0.028941720624121016,
+        "max": 0.13543152668159
+      },
+      "calibration": "isotonic",
+      "operating_point": {
+        "t_review": 1e-07,
+        "t_block": 0.275,
+        "total_cost": 204478.0,
+        "fraud_allowed": 0,
+        "legit_reviewed_pct": 0.17328867522112826,
+        "legit_blocked": 0,
+        "block_precision": 0.0,
+        "block_recall": 0.0,
+        "block_f1": 0.0
+      },
+      "day_13": {
+        "pr_auc": {
+          "pr_auc": 0.0801151896461327,
+          "ci_low": 0.057701574164188786,
+          "ci_high": 0.10844815166098991,
+          "n_bootstrap": 200
+        },
+        "operating_point": {
+          "t_review": 0.0,
+          "t_block": 0.345,
+          "total_cost": 397876.0,
+          "fraud_allowed": 0,
+          "fraud_allowed_amount": 0.0,
+          "legit_reviewed": 397630,
+          "legit_reviewed_pct": 1.0,
+          "legit_blocked": 0,
+          "block_precision": 0.0,
+          "block_recall": 0.0,
+          "block_f1": 0.0,
+          "n_fraud": 246,
+          "n_legit": 397630
+        },
+        "days_11_12_cost_at_these_thresholds": 778359.0,
+        "cost_minus_v2_deployed": {
+          "difference": 387612.0,
+          "ci_low": 387424.925,
+          "ci_high": 387777.725,
+          "std_error": 94.75547159391337,
+          "p_normal": 0.0,
+          "significant": true,
+          "n_bootstrap": 200
+        }
+      },
+      "label": "Autoencoder (no labels, from V2)",
+      "tests_on": "days 11-13",
+      "vs_main_lightgbm": {
+        "metric": "pr_auc",
+        "difference": -0.8279084184870548,
+        "ci_low": -0.8463899386348233,
+        "ci_high": -0.8080592514251977,
+        "p_two_sided": 0.0,
+        "std_error": 0.010067165511334927,
+        "p_normal": 0.0,
+        "significant": true,
+        "p_holm": 0.0,
+        "significant_after_holm": true
+      },
+      "vs_v2_deployed": {
+        "metric": "pr_auc",
+        "difference": -0.82080629762894,
+        "ci_low": -0.8405142782507025,
+        "ci_high": -0.7990296061790517,
+        "p_two_sided": 0.0,
+        "std_error": 0.010333801601368231,
+        "p_normal": 0.0,
+        "significant": true,
+        "p_holm": 0.0,
+        "significant_after_holm": true
+      },
+      "roc_vs_main_lightgbm": {
+        "metric": "roc_auc",
+        "difference": -0.019961087599730032,
+        "ci_low": -0.022296193577783802,
+        "ci_high": -0.018130230222514154,
+        "p_two_sided": 0.0,
+        "std_error": 0.0009825605403554311,
+        "p_normal": 9.402574340018421e-92,
+        "significant": true,
+        "p_holm": 1.0342831774020263e-90,
+        "significant_after_holm": true
+      },
+      "verdict_vs_main_lightgbm": "significantly worse",
+      "verdict_vs_v2_deployed": "significantly worse"
+    },
+    "stacked": {
+      "day_13": {
+        "pr_auc": {
+          "pr_auc": 0.8728016759920668,
+          "ci_low": 0.8339006839974905,
+          "ci_high": 0.9075882745617425,
+          "n_bootstrap": 200
+        },
+        "operating_point": {
+          "t_review": 8.480950746041154e-05,
+          "t_block": 0.9,
+          "total_cost": 11735.0,
+          "fraud_allowed": 0,
+          "fraud_allowed_amount": 0.0,
+          "legit_reviewed": 11671,
+          "legit_reviewed_pct": 0.029351407086990418,
+          "legit_blocked": 0,
+          "block_precision": 1.0,
+          "block_recall": 0.7398373983739838,
+          "block_f1": 0.8504672897196263,
+          "n_fraud": 246,
+          "n_legit": 397630
+        },
+        "days_11_12_cost_at_these_thresholds": 26318.0,
+        "cost_minus_v2_deployed": {
+          "difference": 1471.0,
+          "ci_low": 1374.825,
+          "ci_high": 1576.075,
+          "std_error": 52.35061901790454,
+          "p_normal": 1.0075848450853004e-173,
+          "significant": true,
+          "n_bootstrap": 200
+        }
+      },
+      "members": [
+        "lightgbm",
+        "catboost",
+        "xgboost",
+        "mlp"
+      ],
+      "stacker_coefficients": {
+        "lightgbm": 0.2653220243750273,
+        "catboost": 0.31460509822268884,
+        "xgboost": 0.2280635310178995,
+        "mlp": 0.3638116475534755
+      },
+      "note": "fitted on days 11-12; judged on day 13 only, so it has no days 11-13 numbers",
+      "label": "Stacked ensemble",
+      "vs_main_lightgbm": {
+        "metric": "pr_auc",
+        "difference": 0.004032689964487024,
+        "ci_low": 0.0007671498086122472,
+        "ci_high": 0.007585558855466302,
+        "p_two_sided": 0.01,
+        "std_error": 0.0018103873228976638,
+        "p_normal": 0.025911950872533344,
+        "significant": true,
+        "p_holm": 0.07773585261760003,
+        "significant_after_holm": false
+      },
+      "vs_v2_deployed": {
+        "metric": "pr_auc",
+        "difference": 0.009422730485391884,
+        "ci_low": 0.0017254958487999046,
+        "ci_high": 0.016521455943548476,
+        "p_two_sided": 0.03,
+        "std_error": 0.003674894266610831,
+        "p_normal": 0.010344908135171433,
+        "significant": true,
+        "p_holm": 0.020689816270342866,
+        "significant_after_holm": true
+      },
+      "tests_on": "day 13",
+      "verdict_vs_main_lightgbm": "comparable",
+      "verdict_vs_v2_deployed": "significantly better"
+    }
+  }
+}
