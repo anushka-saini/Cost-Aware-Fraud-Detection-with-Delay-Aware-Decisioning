@@ -117,3 +117,98 @@ def build_summary(deployed_family: str = "lightgbm") -> dict:
     if "phase7_latency" in metrics:
         out["latency"] = {k: metrics["phase7_latency"][k] for k in ("endpoint", "setup", "sequential", "concurrent")}
     return out
+
+
+# ---------------------------------------------------------------------------
+# Version 3 (the Model lab page)
+# ---------------------------------------------------------------------------
+
+V3_SECTIONS = ["v3_validation", "v3_phase2_decisions", "v3_held_out"]
+KIND = {"logreg": "linear", "random_forest": "trees", "lightgbm": "trees", "catboost": "trees", "xgboost": "trees",
+        "lightgbm_v2_settings": "trees", "v2_deployed": "trees", "mlp": "neural", "resnet": "neural",
+        "ft_transformer": "neural", "tabm": "neural", "autoencoder": "no labels", "stacked": "ensemble"}
+
+
+def _test(t: dict | None) -> dict | None:
+    if not t:
+        return None
+    keys = ("difference", "ci_low", "ci_high", "p_holm", "significant_after_holm", "significant")
+    return {k: t[k] for k in keys if k in t}
+
+
+def _leaderboard_row(key: str, row: dict) -> dict:
+    day_13 = row.get("day_13", {})
+    return {
+        "key": key, "label": row["label"], "kind": KIND.get(key, "other"), "tests_on": row.get("tests_on"),
+        "pr_auc": row.get("pr_auc"), "roc_auc": row.get("roc_auc"),
+        "seed_mean": (row.get("seed_pr_auc") or {}).get("mean"), "seed_std": (row.get("seed_pr_auc") or {}).get("std"),
+        "day_13_pr_auc": day_13.get("pr_auc"),
+        "day_13_cost": (day_13.get("operating_point") or {}).get("total_cost"),
+        "day_13_fraud_allowed": (day_13.get("operating_point") or {}).get("fraud_allowed"),
+        "day_13_cost_vs_v2": _test(day_13.get("cost_minus_v2_deployed")),
+        "vs_v3": _test(row.get("vs_main_lightgbm")), "vs_v2": _test(row.get("vs_v2_deployed")),
+        "verdict_vs_v3": row["verdict_vs_main_lightgbm"], "verdict_vs_v2": row["verdict_vs_v2_deployed"],
+    }
+
+
+def build_v3_summary() -> dict:
+    """Leaderboard, Phase 2 choices, the held-out result, the V1 -> V2 -> V3
+    history and the curves, all read from results/metrics.json."""
+    metrics = load_metrics()
+    missing = [s for s in V3_SECTIONS if s not in metrics]
+    if missing:
+        return {"available": False, "missing_sections": missing}
+
+    validation, phase2, held = (metrics[s] for s in V3_SECTIONS)
+    v3_key = validation["proposed_v3"]
+    point_keys = ("t_review", "t_block", "total_cost", "fraud_allowed", "legit_reviewed_pct", "legit_blocked",
+                  "block_precision", "block_recall")
+
+    history = []
+    v1 = metrics.get("v1_reported")
+    if v1:
+        old = v1["models"][v1["deployed"]]
+        history.append({"version": "V1", "model": old["label"], "pr_auc": old["pr_auc"], "ci_low": old["ci_low"],
+                        "ci_high": old["ci_high"], "total_cost": old["total_cost"],
+                        "fraud_allowed": old["fraud_allowed"], "legit_blocked": old["legit_blocked"],
+                        "honest": False, "note": v1["warning"], "source": v1["_source"]})
+    for version, side in (("V2", "v2_deployed"), ("V3", "v3")):
+        result = held[side]
+        history.append({"version": version, "model": "LightGBM, 5 seeds", "honest": True,
+                        **{k: result["pr_auc"][k] for k in ("pr_auc", "ci_low", "ci_high")},
+                        **{k: result["operating_point"][k] for k in ("total_cost", "fraud_allowed", "legit_blocked")},
+                        "note": "held-out days scored once, after every choice was made on earlier days",
+                        "source": held["_source"]})
+
+    curves = metrics.get("v3_curves")
+    return {
+        "available": True,
+        "v3_key": v3_key,
+        "validation": {
+            "evaluated_on": validation["evaluated_on"], "significance_rule": validation["significance_rule"],
+            "stacking_note": validation["stacking_note"], "setup": validation["setup"],
+            "leaderboard": [_leaderboard_row(k, r) for k, r in validation["leaderboard"].items()],
+        },
+        "phase2": {
+            "calibration": phase2["calibration"]["method"],
+            "isotonic_rejected_because": phase2["calibration"].get("isotonic_rejected_because"),
+            "threshold_rule": phase2["threshold_rule"],
+            "point": {k: phase2["safe_point"][k] for k in point_keys},
+            "odds_factor_to_cliff": phase2["cliff_safe"]["odds_factor_to_cliff"],
+            "baselines": {k: phase2["baselines"][k]["total_cost"] for k in phase2["baselines"]},
+        },
+        "held_out": {
+            "days": held["days"], "n_rows": held["n_rows"], "n_fraud": held["n_fraud"],
+            "decision_rule": held["decision_rule"], "verdict": held["verdict"], "deploy_v3": held["deploy_v3"],
+            "v3": {"pr_auc": held["v3"]["pr_auc"], "roc_auc": held["v3"]["roc_auc"],
+                   **{k: held["v3"]["operating_point"][k] for k in point_keys}},
+            "v2": {"pr_auc": held["v2_deployed"]["pr_auc"], "roc_auc": held["v2_deployed"]["roc_auc"],
+                   **{k: held["v2_deployed"]["operating_point"][k] for k in point_keys}},
+            "difference": {k: _test(v) for k, v in held["v3_minus_v2"].items()},
+            "baselines": {k: held["baselines"][k]["total_cost"] for k in held["baselines"]},
+        },
+        "history": history,
+        "curves": None if not curves else {k: curves[k] for k in ("curves_on", "calibration_on", "pr_note",
+                                                                  "roc_note", "curves", "calibration")},
+        "sources": {s: metrics[s]["_source"] for s in [*V3_SECTIONS, "v3_curves", "v1_reported"] if s in metrics},
+    }

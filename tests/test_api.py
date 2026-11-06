@@ -131,7 +131,7 @@ def test_login_and_roles(client, analyst, admin):
 
 
 @pytest.mark.parametrize("path", ["/cases", "/audit", "/models", "/monitoring/drift", "/overview", "/labels",
-                                  "/simulator/scores"])
+                                  "/simulator/scores", "/results/v3", "/explainability"])
 def test_operations_endpoints_require_a_token(client, path):
     assert client.get(path).status_code == 401
     assert client.get(path, headers={"Authorization": "Bearer not-a-token"}).status_code == 401
@@ -158,7 +158,9 @@ def test_review_tier_opens_a_case_with_full_detail(client, analyst, case_id):
     detail = client.get(f"/cases/{case_id}", headers=analyst).json()
     assert detail["status"] == "open" and detail["tier"] == "REVIEW"
     assert detail["transaction"]["name_dest"] == "C_TEST"
-    assert detail["scores"]["anomaly_score"] is not None
+    # Only a model with an anomaly detector (V2) gives an anomaly score; V3 sends null.
+    has_detector = get_scorer().autoencoder is not None
+    assert (detail["scores"]["anomaly_score"] is not None) == has_detector
     assert {c["feature"] for c in detail["explanation"]["contributions"]} == EXPLAINED_INPUTS()
     assert not any(reason.startswith("this not being") for reason in detail["reasons"])
     assert any(e["action"] == "assessment.review" for e in detail["audit_trail"])
@@ -261,6 +263,37 @@ def test_monitoring_and_overview(client, analyst):
     overview = client.get("/overview", headers=analyst).json()
     assert overview["kpis"]["scored_total"] == 1 and overview["kpis"]["active_model"]["version"]
     assert sum(sum(b[t] for t in ("ALLOW", "REVIEW", "BLOCK")) for b in overview["tier_mix"]) == 1
+
+
+def test_model_lab_numbers_come_from_metrics_json(client, analyst):
+    from fraud.results import load_metrics
+
+    lab = client.get("/results/v3", headers=analyst).json()
+    if not lab["available"]:
+        pytest.skip("the V3 result sections have not been produced")
+    metrics = load_metrics()
+    held = metrics["v3_held_out"]
+    assert lab["held_out"]["v3"]["pr_auc"] == held["v3"]["pr_auc"]
+    assert lab["held_out"]["v3"]["total_cost"] == held["v3"]["operating_point"]["total_cost"]
+    assert lab["held_out"]["deploy_v3"] == held["deploy_v3"]
+    assert [h["version"] for h in lab["history"]][-2:] == ["V2", "V3"]
+    rows = {r["key"]: r for r in lab["validation"]["leaderboard"]}
+    assert rows.keys() == metrics["v3_validation"]["leaderboard"].keys()
+    assert rows[lab["v3_key"]]["verdict_vs_v3"] == "reference"
+
+
+def test_demo_scenarios_get_the_decision_they_were_picked_for(client, analyst):
+    from fraud.service.core import get_scorer
+
+    data = client.get("/explainability", headers=analyst).json()
+    scorer = get_scorer()
+    if not data["scenarios"] or scorer.version != "v3":
+        pytest.skip("scenarios are built for V3 by scripts/v3_explainability.py")
+    for scenario in data["scenarios"]:
+        body = {k: v for k, v in scenario["features"].items() if k not in ("hour_sin", "hour_cos")}
+        result = client.post("/explain", json={**body, "step": scenario["transaction"]["step"]}).json()
+        assert scorer.tier(result["fraud_probability"]) == scenario["expected_tier"], scenario["id"]
+        assert result["contributions"]
 
 
 def test_audit_log_search_and_csv_export(client, analyst, case_id):

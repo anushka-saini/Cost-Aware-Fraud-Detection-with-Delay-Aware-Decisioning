@@ -55,6 +55,7 @@ STARTED_AT = time.time()
 
 VALIDATION_METRICS_PATH = PROJECT_ROOT / "api" / "validation_metrics.json"
 DEMO_SAMPLE_PATH = PROJECT_ROOT / "demo_sample.csv"
+SCENARIOS_PATH = PROJECT_ROOT / "api" / "data" / "scenarios.json"
 CASE_SORTS = {
     "risk": AnalystCase.fraud_probability.desc(),
     "amount": AnalystCase.amount.desc(),
@@ -543,6 +544,13 @@ def overview(db: Session = Depends(get_db), user: User = Depends(any_user)):
         mix.append({"from": start + 1, "to": start + len(chunk),
                     **{tier: chunk.count(tier) for tier in ("ALLOW", "REVIEW", "BLOCK")}})
 
+    # Transactions scored in each of the last 24 hours, oldest first (for the sparkline).
+    since = last_day()
+    stamps = db.execute(select(Assessment.created_at).where(Assessment.created_at >= since)).scalars().all()
+    by_hour = [0] * 24
+    for stamp in stamps:
+        by_hour[min(23, int((_aware(stamp) - since).total_seconds() // 3600))] += 1
+
     alerts = [{"source": "drift", "period": r["period"], **a} for r in reports for a in r["alerts"]]
     notable = ["assessment.block", "case.escalate", "model.activate", "thresholds.propose"]
     recent = db.scalars(select(AuditLog).where(AuditLog.action.in_(notable)).order_by(AuditLog.id.desc()).limit(10)).all()
@@ -556,7 +564,7 @@ def overview(db: Session = Depends(get_db), user: User = Depends(any_user)):
             "override_rate": live["override_rate"],
             "active_model": {"name": scorer.name, "version": scorer.version}, "drift_status": drift,
         },
-        "tier_mix": mix, "drift_alerts": alerts, "recent_events": [_audit_row(e) for e in recent],
+        "scored_by_hour": by_hour, "tier_mix": mix, "drift_alerts": alerts, "recent_events": [_audit_row(e) for e in recent],
     }
 
 
@@ -635,6 +643,28 @@ def results_summary(user: User = Depends(any_user)):
     from fraud.reporting import build_summary
     family = (get_scorer().bundle.get("protocol") or {}).get("family", "lightgbm")
     return build_summary(deployed_family=family)
+
+
+@router.get("/results/v3", tags=["results"])
+def results_v3(user: User = Depends(any_user)):
+    """Version 3: leaderboard, Phase 2 choices, held-out result and curves, for the Model lab page."""
+    from fraud.reporting import build_v3_summary
+    return build_v3_summary()
+
+
+@router.get("/explainability", tags=["results"])
+def explainability(user: User = Depends(any_user)):
+    """What the deployed model pays attention to overall (from results/metrics.json) and the guided
+    demo scenarios (real held-out transactions, from api/data/scenarios.json).
+    Both are built by scripts/v3_explainability.py."""
+    from fraud.results import load_metrics
+    section = load_metrics().get("v3_explainability")
+    scenarios = json.loads(SCENARIOS_PATH.read_text(encoding="utf-8")) if SCENARIOS_PATH.is_file() else None
+    return {
+        "global": section,
+        "scenarios": scenarios["scenarios"] if scenarios else [],
+        "scenarios_source": scenarios["_source"] if scenarios else None,
+    }
 
 
 @router.get("/demo-sample/random", tags=["results"])
