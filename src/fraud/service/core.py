@@ -206,11 +206,13 @@ def assessment_response(a: Assessment, extra: dict | None = None) -> dict:
         "tier": a.tier, "reasons": a.reasons,
         "thresholds_used": {"t_review": a.t_review, "t_block": a.t_block},
         "model": {"name": a.model_name, "version": a.model_version},
+        # Always present so clients see the same shape for every model. A model
+        # without an anomaly detector (V3) sends anomaly_score = null.
+        "anomaly_score": a.anomaly_score,
+        "supervised_tier": a.supervised_tier or a.tier,
+        "model_stale": bool(getattr(a, "model_stale", a.fallback_applied)),
+        "fallback_applied": bool(a.fallback_applied),
     }
-    if a.anomaly_score is not None:
-        body.update(anomaly_score=a.anomaly_score, supervised_tier=a.supervised_tier,
-                    model_stale=bool(getattr(a, "model_stale", a.fallback_applied)),
-                    fallback_applied=a.fallback_applied)
     return {**body, **(extra or {})}
 
 
