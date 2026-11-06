@@ -8,10 +8,10 @@
     ],
     "reference": "train (days 5-7)",
     "n_rows": 1228723,
-    "created_at": "2026-10-09T18:05:42+00:00",
+    "created_at": "2026-11-06T00:33:33+00:00",
     "model": {
       "name": "fraud_scorer",
-      "version": "v2"
+      "version": "v3"
     },
     "status": "warning",
     "thresholds": {
@@ -126,31 +126,33 @@
       {
         "name": "model_score",
         "kind": "score",
-        "psi": 0.000596236677903852,
-        "level": "ok"
-      },
-      {
-        "name": "anomaly_score",
-        "kind": "score",
-        "psi": 0.010623389421671396,
+        "psi": 0.0015878064292866034,
         "level": "ok"
       }
     ],
     "rates": [
       {
         "name": "review_rate",
-        "observed": 0.02892433852056159,
-        "expected": 0.028739155015791912,
-        "band_low": 0.014369577507895956,
-        "band_high": 0.057478310031583824,
+        "observed": 0.027849238599749495,
+        "expected": 0.02762968284398951,
+        "band_low": 0.013814841421994755,
+        "band_high": 0.05525936568797902,
         "level": "ok"
       },
       {
         "name": "block_rate",
-        "observed": 0.0004866841428051725,
-        "expected": 0.0005143529991880875,
-        "band_low": 0.0002571764995940437,
-        "band_high": 0.001028705998376175,
+        "observed": 0.0004931949674580845,
+        "expected": 0.0005194540206676387,
+        "band_low": 0.0002597270103338194,
+        "band_high": 0.0010389080413352775,
+        "level": "ok"
+      },
+      {
+        "name": "novelty_share",
+        "observed": 0.006848573681781818,
+        "expected": 0.010000000000000009,
+        "band_low": 0.0050000000000000044,
+        "band_high": 0.020000000000000018,
         "level": "ok"
       }
     ],
@@ -172,10 +174,10 @@
     ],
     "reference": "train (days 5-7)",
     "n_rows": 1176235,
-    "created_at": "2026-10-09T18:05:44+00:00",
+    "created_at": "2026-11-06T00:33:34+00:00",
     "model": {
       "name": "fraud_scorer",
-      "version": "v2"
+      "version": "v3"
     },
     "status": "alert",
     "thresholds": {
@@ -290,31 +292,33 @@
       {
         "name": "model_score",
         "kind": "score",
-        "psi": 0.002048326100409429,
-        "level": "ok"
-      },
-      {
-        "name": "anomaly_score",
-        "kind": "score",
-        "psi": 0.012243771224917224,
+        "psi": 0.0018759688239730003,
         "level": "ok"
       }
     ],
     "rates": [
       {
         "name": "review_rate",
-        "observed": 0.028739155015791912,
-        "expected": 0.028739155015791912,
-        "band_low": 0.014369577507895956,
-        "band_high": 0.057478310031583824,
+        "observed": 0.02762968284398951,
+        "expected": 0.02762968284398951,
+        "band_low": 0.013814841421994755,
+        "band_high": 0.05525936568797902,
         "level": "ok"
       },
       {
         "name": "block_rate",
-        "observed": 0.0005143529991880875,
-        "expected": 0.0005143529991880875,
-        "band_low": 0.0002571764995940437,
-        "band_high": 0.001028705998376175,
+        "observed": 0.0005194540206676387,
+        "expected": 0.0005194540206676387,
+        "band_low": 0.0002597270103338194,
+        "band_high": 0.0010389080413352775,
+        "level": "ok"
+      },
+      {
+        "name": "novelty_share",
+        "observed": 0.010000552610660286,
+        "expected": 0.010000000000000009,
+        "band_low": 0.0050000000000000044,
+        "band_high": 0.020000000000000018,
         "level": "ok"
       }
     ],
@@ -342,10 +346,10 @@
     ],
     "reference": "train (days 5-7)",
     "n_rows": 1202642,
-    "created_at": "2026-10-09T18:05:44+00:00",
+    "created_at": "2026-11-06T00:33:35+00:00",
     "model": {
       "name": "fraud_scorer",
-      "version": "v2"
+      "version": "v3"
     },
     "status": "alert",
     "thresholds": {
@@ -460,31 +464,33 @@
       {
         "name": "model_score",
         "kind": "score",
-        "psi": 0.0008915216306168014,
-        "level": "ok"
-      },
-      {
-        "name": "anomaly_score",
-        "kind": "score",
-        "psi": 0.018090864269586403,
+        "psi": 0.002287943330209092,
         "level": "ok"
       }
     ],
     "rates": [
       {
         "name": "review_rate",
-        "observed": 0.028045752601356014,
-        "expected": 0.028739155015791912,
-        "band_low": 0.014369577507895956,
-        "band_high": 0.057478310031583824,
+        "observed": 0.027082872542286068,
+        "expected": 0.02762968284398951,
+        "band_low": 0.013814841421994755,
+        "band_high": 0.05525936568797902,
         "level": "ok"
       },
       {
         "name": "block_rate",
-        "observed": 0.0005288356801109557,
-        "expected": 0.0005143529991880875,
-        "band_low": 0.0002571764995940437,
-        "band_high": 0.001028705998376175,
+        "observed": 0.0005313301880360074,
+        "expected": 0.0005194540206676387,
+        "band_low": 0.0002597270103338194,
+        "band_high": 0.0010389080413352775,
+        "level": "ok"
+      },
+      {
+        "name": "novelty_share",
+        "observed": 0.007193329353207355,
+        "expected": 0.010000000000000009,
+        "band_low": 0.0050000000000000044,
+        "band_high": 0.020000000000000018,
         "level": "ok"
       }
     ],

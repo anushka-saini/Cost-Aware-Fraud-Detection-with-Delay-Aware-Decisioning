@@ -1,10 +1,10 @@
-eval_1: status warning; review rate 0.0289, block rate 0.00049; flagged: destination_transactions_last_7d (warning, 0.176)
-eval_2: status alert; review rate 0.0287, block rate 0.00051; flagged: destination_transactions_last_24h (alert, 0.262), destination_transactions_last_7d (warning, 0.164)
-held_out: status alert; review rate 0.0280, block rate 0.00053; flagged: destination_transactions_last_24h (alert, 0.408), destination_transactions_last_7d (alert, 0.535)
-stress baseline: PR-AUC 0.8632, cost 33,744, fraud allowed 0
-  multiply 1.5: PR-AUC 0.8639, cost 33,998, fraud allowed 0, legit reviewed 2.81%, PSI alert: False
-  add 500: PR-AUC 0.6959, cost 69,751,524, fraud allowed 157, legit reviewed 0.60%, PSI alert: True
-  add 1000: PR-AUC 0.6945, cost 70,017,450, fraud allowed 158, legit reviewed 0.61%, PSI alert: True
-  add 2500: PR-AUC 0.6916, cost 70,282,017, fraud allowed 159, legit reviewed 0.63%, PSI alert: True
-  add 5000: PR-AUC 0.6866, cost 70,282,609, fraud allowed 159, legit reviewed 0.68%, PSI alert: True
-  add 10000: PR-AUC 0.6758, cost 70,220,381, fraud allowed 159, legit reviewed 0.80%, PSI alert: True
+eval_1: status warning; review rate 0.0278, block rate 0.00049; flagged: destination_transactions_last_7d (warning, 0.176)
+eval_2: status alert; review rate 0.0276, block rate 0.00052; flagged: destination_transactions_last_24h (alert, 0.262), destination_transactions_last_7d (warning, 0.164)
+held_out: status alert; review rate 0.0271, block rate 0.00053; flagged: destination_transactions_last_24h (alert, 0.408), destination_transactions_last_7d (alert, 0.535)
+stress baseline: PR-AUC 0.8730, cost 32,586, fraud allowed 0
+  multiply 1.5: PR-AUC 0.8725, cost 32,938, fraud allowed 0, legit reviewed 2.72%, PSI alert: False
+  add 500: PR-AUC 0.8448, cost 15,141,745, fraud allowed 113, legit reviewed 0.14%, PSI alert: True
+  add 1000: PR-AUC 0.8449, cost 15,141,760, fraud allowed 113, legit reviewed 0.14%, PSI alert: True
+  add 2500: PR-AUC 0.8445, cost 15,141,784, fraud allowed 113, legit reviewed 0.14%, PSI alert: True
+  add 5000: PR-AUC 0.8434, cost 15,141,866, fraud allowed 113, legit reviewed 0.15%, PSI alert: True
+  add 10000: PR-AUC 0.8411, cost 15,441,223, fraud allowed 114, legit reviewed 0.16%, PSI alert: True

@@ -1,0 +1,10 @@
+eval_1: status warning; review rate 0.0289, block rate 0.00049; flagged: destination_transactions_last_7d (warning, 0.176)
+eval_2: status alert; review rate 0.0287, block rate 0.00051; flagged: destination_transactions_last_24h (alert, 0.262), destination_transactions_last_7d (warning, 0.164)
+held_out: status alert; review rate 0.0280, block rate 0.00053; flagged: destination_transactions_last_24h (alert, 0.408), destination_transactions_last_7d (alert, 0.535)
+stress baseline: PR-AUC 0.8632, cost 33,744, fraud allowed 0
+  multiply 1.5: PR-AUC 0.8639, cost 33,998, fraud allowed 0, legit reviewed 2.81%, PSI alert: False
+  add 500: PR-AUC 0.6959, cost 69,751,524, fraud allowed 157, legit reviewed 0.60%, PSI alert: True
+  add 1000: PR-AUC 0.6945, cost 70,017,450, fraud allowed 158, legit reviewed 0.61%, PSI alert: True
+  add 2500: PR-AUC 0.6916, cost 70,282,017, fraud allowed 159, legit reviewed 0.63%, PSI alert: True
+  add 5000: PR-AUC 0.6866, cost 70,282,609, fraud allowed 159, legit reviewed 0.68%, PSI alert: True
+  add 10000: PR-AUC 0.6758, cost 70,220,381, fraud allowed 159, legit reviewed 0.80%, PSI alert: True
