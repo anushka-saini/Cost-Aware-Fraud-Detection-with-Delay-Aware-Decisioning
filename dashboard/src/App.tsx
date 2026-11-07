@@ -1,44 +1,28 @@
 import { useQuery } from '@tanstack/react-query'
-import { Activity, ClipboardList, Gauge, LayoutDashboard, LogOut, Moon, Radio, ScrollText, ShieldCheck, SlidersHorizontal, Sun, Trophy } from 'lucide-react'
-import type { ComponentType } from 'react'
+import { LogOut, ShieldCheck } from 'lucide-react'
 import { NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom'
-import { LevelBadge } from './components/common'
+import CommandPalette from './components/CommandPalette'
+import TopBar from './components/TopBar'
 import { Button, Skeleton } from './components/ui'
-import { api, type Role } from './lib/api'
-import { useAuth, useTheme } from './lib/auth'
+import { api } from './lib/api'
+import { useAuth } from './lib/auth'
+import { NAV } from './lib/nav'
 import { cn } from './lib/utils'
+import About from './pages/About'
 import AuditLog from './pages/AuditLog'
 import CaseDetail from './pages/CaseDetail'
+import Explainability from './pages/Explainability'
 import LiveFeed from './pages/LiveFeed'
 import Login from './pages/Login'
-import ModelComparison from './pages/ModelComparison'
+import ModelLab from './pages/ModelLab'
 import Monitoring from './pages/Monitoring'
 import Overview from './pages/Overview'
 import ReviewQueue from './pages/ReviewQueue'
 import Simulator from './pages/Simulator'
-
-interface NavItem { to: string; label: string; icon: ComponentType<{ className?: string }>; roles: Role[] }
-
-// Analysts work transactions; admins also own the model and its thresholds.
-const NAV: { heading: string; items: NavItem[] }[] = [
-  { heading: 'Operations', items: [
-    { to: '/', label: 'Overview', icon: LayoutDashboard, roles: ['analyst', 'admin'] },
-    { to: '/live', label: 'Live feed', icon: Radio, roles: ['analyst', 'admin'] },
-    { to: '/queue', label: 'Review queue', icon: ClipboardList, roles: ['analyst', 'admin'] },
-  ] },
-  { heading: 'Model', items: [
-    { to: '/simulator', label: 'Threshold simulator', icon: SlidersHorizontal, roles: ['analyst', 'admin'] },
-    { to: '/monitoring', label: 'Monitoring', icon: Activity, roles: ['admin'] },
-    { to: '/models', label: 'Model comparison', icon: Trophy, roles: ['admin'] },
-  ] },
-  { heading: 'Governance', items: [
-    { to: '/audit', label: 'Audit log', icon: ScrollText, roles: ['analyst', 'admin'] },
-  ] },
-]
+import Status from './pages/Status'
 
 function Shell() {
   const { user, signOut } = useAuth()
-  const { dark, toggle } = useTheme()
   const overview = useQuery({ queryKey: ['overview'], queryFn: api.overview, refetchInterval: 15_000 })
   const kpis = overview.data?.kpis
   const role = user!.role
@@ -75,44 +59,36 @@ function Shell() {
             )
           })}
         </nav>
-        <div className="space-y-2 border-t p-3 text-xs">
-          <div className="flex items-center justify-between gap-2">
-            <span className="inline-flex items-center gap-1 text-muted"><Gauge className="h-3.5 w-3.5" />Model</span>
-            {kpis ? <span className="tabular font-medium">{kpis.active_model.version}</span> : <Skeleton className="h-4 w-8" />}
+        <div className="flex items-center justify-between gap-2 border-t p-3 text-xs">
+          <div className="min-w-0">
+            <div className="truncate font-medium">{user!.username}</div>
+            <div className="text-muted capitalize">{role}</div>
           </div>
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-muted">Drift</span>
-            {kpis ? <LevelBadge level={kpis.drift_status} /> : <Skeleton className="h-4 w-14" />}
-          </div>
-          <div className="flex items-center justify-between gap-2 pt-1">
-            <div className="min-w-0">
-              <div className="truncate font-medium">{user!.username}</div>
-              <div className="text-muted capitalize">{role}</div>
-            </div>
-            <div className="flex gap-1">
-              <Button variant="ghost" size="icon" onClick={toggle} aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}>
-                {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-              </Button>
-              <Button variant="ghost" size="icon" onClick={signOut} aria-label="Sign out"><LogOut className="h-4 w-4" /></Button>
-            </div>
-          </div>
+          <Button variant="ghost" size="icon" onClick={signOut} aria-label="Sign out"><LogOut className="h-4 w-4" /></Button>
         </div>
       </aside>
-      <main className="min-w-0 flex-1 px-6 py-5">
-        <div className="mx-auto max-w-[1400px]">
-          <Routes>
-            <Route path="/" element={<Overview />} />
-            <Route path="/live" element={<LiveFeed />} />
-            <Route path="/queue" element={<ReviewQueue />} />
-            <Route path="/cases/:id" element={<CaseDetail />} />
-            <Route path="/simulator" element={<Simulator />} />
-            <Route path="/audit" element={<AuditLog />} />
-            {role === 'admin' && <Route path="/monitoring" element={<Monitoring />} />}
-            {role === 'admin' && <Route path="/models" element={<ModelComparison />} />}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </div>
-      </main>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <TopBar role={role} />
+        <main className="min-w-0 flex-1 px-6 py-5">
+          <div className="mx-auto max-w-[1400px]">
+            <Routes>
+              <Route path="/" element={<Overview />} />
+              <Route path="/live" element={<LiveFeed />} />
+              <Route path="/queue" element={<ReviewQueue />} />
+              <Route path="/cases/:id" element={<CaseDetail />} />
+              <Route path="/simulator" element={<Simulator />} />
+              <Route path="/explain" element={<Explainability />} />
+              <Route path="/audit" element={<AuditLog />} />
+              <Route path="/status" element={<Status />} />
+              <Route path="/about" element={<About />} />
+              {role === 'admin' && <Route path="/monitoring" element={<Monitoring />} />}
+              {role === 'admin' && <Route path="/models" element={<ModelLab />} />}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </div>
+        </main>
+      </div>
+      <CommandPalette role={role} />
     </div>
   )
 }

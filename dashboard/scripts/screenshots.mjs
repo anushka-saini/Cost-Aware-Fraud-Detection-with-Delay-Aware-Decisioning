@@ -7,6 +7,9 @@
 //
 // It signs in as the admin, replays some of the live feed so the pages have
 // data, makes a few review decisions, and captures each page.
+//
+// Start the API in demo mode, so the login page shows the demo accounts:
+//     FRAUD_DEMO_MODE=true uvicorn fraud.service.app:app --port 8000
 
 import { mkdirSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
@@ -91,9 +94,15 @@ await shot('06b-threshold-simulator-held-out')
 await go('/monitoring', 'table')
 await shot('07-monitoring')
 await go('/models', 'table')
-await shot('08-model-comparison')
+await shot('08-model-lab')
 await go('/audit', 'tbody tr')
 await shot('09-audit-log', false)
+await go('/explain?scenario=wrongful_block', '[aria-label="Feature contributions"]')
+await shot('13-explainability')
+await go('/status', 'h1')
+await shot('14-status', false)
+await go('/about', 'table')
+await shot('15-about')
 
 // Dark mode, two representative pages
 await page.click('button[aria-label="Switch to dark mode"]')
