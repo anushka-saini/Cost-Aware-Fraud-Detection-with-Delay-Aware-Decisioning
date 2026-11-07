@@ -2,8 +2,8 @@ import { useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router-dom'
 import { Async, EmptyState, Legend, Note, PageHeader, TierBadge } from '@/components/common'
 import { ShapWaterfall } from '@/components/ShapWaterfall'
-import { Card, CardBody, CardHeader, Table, Td } from '@/components/ui'
-import { api, type ExplainabilityData, type FeatureImportance, type Scenario, type Tier } from '@/lib/api'
+import { Card, CardBody, CardHeader, Table, Td, Th } from '@/components/ui'
+import { api, type BreakdownRow, type ExplainabilityData, type FeatureImportance, type Scenario, type Tier } from '@/lib/api'
 import { cn, fmt } from '@/lib/utils'
 
 // Short names for the model's inputs.
@@ -167,6 +167,60 @@ function Scenarios({ data }: { data: ExplainabilityData }) {
   )
 }
 
+// Where V3 catches fraud on the held-out days (scripts/v3_breakdown.py).
+const TYPE_NAME: Record<string, string> = {
+  CASH_IN: 'Cash-in', CASH_OUT: 'Cash-out', DEBIT: 'Debit', PAYMENT: 'Payment', TRANSFER: 'Transfer',
+}
+
+function BreakdownTable({ title, rows, groupLabel }: { title: string; rows: BreakdownRow[]; groupLabel: (r: BreakdownRow) => React.ReactNode }) {
+  return (
+    <div className="min-w-0">
+      <h3 className="mb-1 text-[13px] font-medium">{title}</h3>
+      <div className="overflow-x-auto">
+        <Table>
+          <thead><tr>
+            <Th>Group</Th><Th className="text-right">Transactions</Th><Th className="text-right">Fraud</Th>
+            <Th className="text-right">Recall</Th><Th className="text-right">Blocked at once</Th>
+            <Th className="text-right">Review rate</Th><Th className="text-right">Block rate</Th>
+          </tr></thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr key={r.group}>
+                <Td>{groupLabel(r)}</Td>
+                <Td className="tabular text-right text-secondary">{fmt.int(r.n_rows)}</Td>
+                <Td className="tabular text-right">{fmt.int(r.n_fraud)}</Td>
+                <Td className="tabular text-right">{r.recall == null ? <span className="text-muted">no fraud</span> : fmt.pct(r.recall, 1)}</Td>
+                <Td className="tabular text-right">{r.block_recall == null ? '–' : fmt.pct(r.block_recall, 1)}</Td>
+                <Td className="tabular text-right">{fmt.pct(r.review_rate)}</Td>
+                <Td className="tabular text-right">{fmt.pct(r.block_rate, 3)}</Td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </div>
+    </div>
+  )
+}
+
+function Breakdown({ data }: { data: NonNullable<ExplainabilityData['breakdown']> }) {
+  return (
+    <Card>
+      <CardHeader title={`Where V3 catches fraud: days ${data.days[0]}–${data.days[data.days.length - 1]}`}
+        description={`${fmt.int(data.n_rows)} held-out transactions, ${data.n_fraud} fraud, split by type and by amount. This describes the existing held-out result; nothing was tuned.`} />
+      <CardBody className="space-y-5 pt-2">
+        <BreakdownTable title="By transaction type" rows={data.by_type} groupLabel={(r) => TYPE_NAME[r.group] ?? r.group} />
+        <BreakdownTable title="By amount quartile" rows={data.by_amount_quartile}
+          groupLabel={(r) => <>{r.group} <span className="text-xs text-muted">{fmt.int(r.amount_from)} to {fmt.int(r.amount_to)}</span></>} />
+        <p className="text-xs text-muted">
+          Recall: share of fraud sent to review or blocked. Blocked at once: share of fraud blocked without waiting for a person.
+          Review and block rates: share of all transactions in the group. Quartiles are of {data.quartiles_of}. Fraud only happens in cash-outs and transfers.
+          Check: {data.check}. Source: {data._source}.
+        </p>
+      </CardBody>
+    </Card>
+  )
+}
+
 export default function Explainability() {
   const query = useQuery({ queryKey: ['explainability'], queryFn: api.explainability, staleTime: Infinity })
   return (
@@ -179,6 +233,7 @@ export default function Explainability() {
             <Scenarios data={data} />
             {data.global ? <Overall data={data.global} />
               : <Note tone="warning">The overall importance has not been computed. Run scripts/v3_explainability.py.</Note>}
+            {data.breakdown && <Breakdown data={data.breakdown} />}
           </div>
         )}
       </Async>
