@@ -132,10 +132,20 @@ def audit(db: Session, actor: str, role: str, action: str, entity_type: str, ent
 # Scoring
 # ---------------------------------------------------------------------------
 
+def _reasons(scorer: Scorer, row: pd.DataFrame, scored) -> list[str]:
+    """Plain-English reasons for a flagged transaction.
+
+    Callers work these out before writing anything to the database. The first
+    explanation after a start imports SHAP, which takes several seconds; doing
+    it while holding SQLite's write lock made other requests fail with
+    "database is locked" (found by scripts/benchmark_api.py).
+    """
+    return scorer.top_reasons(row) if scored["tier"] != "ALLOW" else []
+
+
 def _record(db: Session, scorer: Scorer, row: pd.DataFrame, scored, *, amount: float, features: dict,
-            transaction: Transaction | None, actor: str) -> Assessment:
+            transaction: Transaction | None, actor: str, reasons: list[str]) -> Assessment:
     tier = scored["tier"]
-    reasons = scorer.top_reasons(row) if tier != "ALLOW" else []
     if scored["fallback_applied"]:
         reasons = ["this transaction looking unlike ordinary traffic (the fraud model's labels are out of date, "
                    "so the anomaly detector is being relied on)"]
@@ -175,6 +185,7 @@ def score_raw(db: Session, txn: dict, *, source: str = "scored", true_label: int
     )
     row = to_model_frame([features], scorer.base_columns)
     scored = scorer.score_frame(row, current_day=int(txn["step"]) // 24).iloc[0]
+    reasons = _reasons(scorer, row, scored)         # before any database write
     transaction = Transaction(
         step=txn["step"], type=txn["type"], amount=txn["amount"], name_orig=txn.get("nameOrig"),
         name_dest=txn["nameDest"], old_balance_orig=txn["oldbalanceOrg"], new_balance_orig=txn["newbalanceOrig"],
@@ -184,7 +195,7 @@ def score_raw(db: Session, txn: dict, *, source: str = "scored", true_label: int
     db.add(transaction)
     db.flush()
     return _record(db, scorer, row, scored, amount=txn["amount"], features=features, transaction=transaction,
-                   actor=actor)
+                   actor=actor, reasons=reasons)
 
 
 def score_features(db: Session, payload: dict, actor: str = "scoring-api") -> Assessment:
@@ -197,7 +208,8 @@ def score_features(db: Session, payload: dict, actor: str = "scoring-api") -> As
     row = to_model_frame([row_dict], scorer.base_columns)
     scored = scorer.score_frame(row, current_day=step // 24 if step is not None else None).iloc[0]
     features = {c: row_dict[c] for c in scorer.base_columns}
-    return _record(db, scorer, row, scored, amount=payload["amount"], features=features, transaction=None, actor=actor)
+    return _record(db, scorer, row, scored, amount=payload["amount"], features=features, transaction=None, actor=actor,
+                   reasons=_reasons(scorer, row, scored))
 
 
 def assessment_response(a: Assessment, extra: dict | None = None) -> dict:
