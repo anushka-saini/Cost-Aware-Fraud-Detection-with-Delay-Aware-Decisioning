@@ -7,6 +7,7 @@ import { Button, Card, CardBody, CardHeader, Dialog, Slider, Textarea } from '@/
 import { api, type SimulatorData } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { CostModel, LOG_MIN, toPosition, toThreshold, type Outcome } from '@/lib/simulator'
+import { useToast } from '@/lib/toast'
 import { cn, fmt } from '@/lib/utils'
 
 type Split = 'eval_2' | 'held_out'
@@ -44,6 +45,7 @@ function Figure({ label, value, delta, higherIsBetter = false, sub }: { label: s
 
 function Workbench({ data, split }: { data: SimulatorData; split: Split }) {
   const { user } = useAuth()
+  const toast = useToast()
   const deployed = data.deployed
   const model = useMemo(() => new CostModel(data), [data])
   const [review, setReview] = useState(toPosition(deployed.t_review))
@@ -80,7 +82,7 @@ function Workbench({ data, split }: { data: SimulatorData; split: Split }) {
       projected: { total_cost: now.totalCost, fraud_allowed: now.fraudAllowed, legit_reviewed_pct: now.legitReviewedPct, legit_blocked: now.legitBlocked,
         block_precision: now.blockPrecision, block_recall: now.blockRecall },
     }),
-    onSuccess: () => setRationale(''),
+    onSuccess: () => { toast('Proposal written to the audit log. Production thresholds are unchanged.'); setRationale('') },
   })
 
   return (

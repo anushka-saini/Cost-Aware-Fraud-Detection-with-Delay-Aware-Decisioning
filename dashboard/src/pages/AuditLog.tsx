@@ -4,6 +4,7 @@ import { Fragment, useEffect, useState } from 'react'
 import { EmptyState, ErrorState, LoadingState, PageHeader } from '@/components/common'
 import { Button, Card, Input, Select, Table, Td, Th } from '@/components/ui'
 import { api } from '@/lib/api'
+import { useToast } from '@/lib/toast'
 import { fmt } from '@/lib/utils'
 
 const PAGE = 100
@@ -26,6 +27,7 @@ export default function AuditLog() {
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(0)
   const [open, setOpen] = useState<number | null>(null)
+  const toast = useToast()
   const filters = { action: action || undefined, actor: actor || undefined, q: search || undefined }
   const query = useQuery({ queryKey: ['audit', filters, page], queryFn: () => api.audit({ ...filters, limit: PAGE, offset: page * PAGE }), placeholderData: keepPreviousData })
   useEffect(() => setPage(0), [action, actor, search])
@@ -39,6 +41,7 @@ export default function AuditLog() {
       link.download = 'audit_log.csv'
       link.click()
       URL.revokeObjectURL(url)
+      toast('Audit log downloaded')
     },
   })
   const total = query.data?.total ?? 0
