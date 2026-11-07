@@ -2,14 +2,16 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { ArrowDown, Check, CornerUpRight, Search, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { EmptyState, ErrorState, LoadingState, PageHeader, StatusBadge } from '@/components/common'
 import { Button, Card, Dialog, Input, Kbd, Select, Table, Td, Textarea, Th } from '@/components/ui'
 import { api, type CaseRow } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
+import { useToast } from '@/lib/toast'
 import { cn, fmt, sentence } from '@/lib/utils'
 
 type Action = 'approve' | 'decline' | 'escalate'
+const DONE: Record<Action, string> = { approve: 'approved', decline: 'declined', escalate: 'escalated' }
 const ACTION_LABEL: Record<Action, string> = { approve: 'Approve', decline: 'Decline', escalate: 'Escalate' }
 const ACTION_HELP: Record<Action, string> = {
   approve: 'The transaction is legitimate. It is recorded as a not-fraud label for retraining.',
@@ -31,11 +33,13 @@ export default function ReviewQueue() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const toast = useToast()
   const [status, setStatus] = useState('open')
   const [sort, setSort] = useState('risk')
   const [type, setType] = useState('')
   const [minAmount, setMinAmount] = useState('')
   const [search, setSearch] = useState('')
+  const [searchParams] = useSearchParams()
   const [page, setPage] = useState(0)
   const [cursor, setCursor] = useState(0)
   const [selected, setSelected] = useState<Set<number>>(new Set())
@@ -47,13 +51,20 @@ export default function ReviewQueue() {
   const query = useQuery({ queryKey: ['cases', params], queryFn: () => api.cases(params), placeholderData: keepPreviousData, refetchInterval: 10_000 })
   const cases = useMemo(() => query.data?.cases ?? [], [query.data])
 
+  // A search from the top bar or the command palette arrives as ?q=, and looks across every status.
+  const linkedSearch = searchParams.get('q')
+  useEffect(() => { if (linkedSearch) { setSearch(linkedSearch); setStatus('all') } }, [linkedSearch])
+
   useEffect(() => { setPage(0); setCursor(0); setSelected(new Set()) }, [status, sort, type, minAmount, search])
   useEffect(() => { if (cursor >= cases.length) setCursor(Math.max(0, cases.length - 1)) }, [cases.length, cursor])
 
   const decide = useMutation({
     mutationFn: ({ action, ids, text }: { action: Action; ids: number[]; text: string }) =>
       ids.length === 1 ? api.decide(ids[0], action, text).then(() => ({ decided: ids, failed: [] })) : api.decideMany(ids, action, text),
-    onSuccess: () => {
+    onSuccess: (result, { action }) => {
+      const n = result.decided.length
+      toast(`${n} ${n === 1 ? 'case' : 'cases'} ${DONE[action]}`)
+      if (result.failed.length) toast(`${result.failed.length} could not be changed: ${result.failed[0].error}`, 'error')
       setPending(null); setNote(''); setSelected(new Set())
       queryClient.invalidateQueries({ queryKey: ['cases'] })
       queryClient.invalidateQueries({ queryKey: ['overview'] })
