@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { Pause, Play, RotateCcw, Square } from 'lucide-react'
+import { Pause, Play, RotateCcw, Square, TriangleAlert } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { EmptyState, Kpi, Note, PageHeader, TierBadge } from '@/components/common'
@@ -115,6 +115,14 @@ export default function LiveFeed() {
           <Button onClick={() => start(true)} disabled={status === 'connecting'}><RotateCcw className="h-4 w-4" />Restart</Button>
         </>} />
 
+      <div role="note" className="mb-4 flex items-start gap-2.5 rounded-md border border-review/40 bg-review-soft px-3 py-2.5 text-review-ink">
+        <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+        <div className="text-[13px]">
+          <div className="font-semibold">Demo replay: fraud oversampled; rates are not real-world.</div>
+          <div>About 1.2% of replayed rows are fraud, against 0.07% on the real held-out days, so a short demo contains some fraud. The review, block and catch rates below describe this replay, not live traffic.</div>
+        </div>
+      </div>
+
       <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-5">
         <Kpi label="Scored in this session" value={fmt.int(total)}
           hint={progress.total ? `position ${fmt.int(progress.position)} of ${fmt.int(progress.total)}` : 'not started'} />
@@ -124,9 +132,6 @@ export default function LiveFeed() {
         <Kpi label="Real fraud caught" value={`${fraud.flagged} of ${fraud.seen}`} hint="known only because this is a replay" />
       </div>
 
-      <div className="mb-3">
-        <Note>The replay oversamples fraud (about 1.2% of rows against a true rate of 0.07%) so that a short demo contains fraud. Rates on this page are not the model's real-world rates.</Note>
-      </div>
       {error && <div className="mb-3"><Note tone="warning">{error}</Note></div>}
 
       <Card>
