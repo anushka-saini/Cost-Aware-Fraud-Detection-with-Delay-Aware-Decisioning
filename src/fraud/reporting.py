@@ -181,6 +181,8 @@ def build_v3_summary() -> dict:
                         "source": held["_source"]})
 
     curves = metrics.get("v3_curves")
+    rules = metrics.get("rule_baselines")
+    gate = metrics.get("retraining_gate")
     return {
         "available": True,
         "v3_key": v3_key,
@@ -210,5 +212,11 @@ def build_v3_summary() -> dict:
         "history": history,
         "curves": None if not curves else {k: curves[k] for k in ("curves_on", "calibration_on", "pr_note",
                                                                   "roc_note", "curves", "calibration")},
-        "sources": {s: metrics[s]["_source"] for s in [*V3_SECTIONS, "v3_curves", "v1_reported"] if s in metrics},
+        "rules": None if not rules else {k: rules[k] for k in ("design_days", "how_rules_were_made", "tier_rule",
+                                                               "cut_off_search", "rules", "best_rule",
+                                                               "best_rule_chosen_by", "v3", "caveat")},
+        "retraining": None if not gate else {"latest": gate["latest"], "runs_in_log": gate["runs_in_log"],
+                                             "gate_rule": gate["gate_rule"]},
+        "sources": {s: metrics[s]["_source"] for s in [*V3_SECTIONS, "v3_curves", "v1_reported", "rule_baselines",
+                                                       "retraining_gate"] if s in metrics},
     }

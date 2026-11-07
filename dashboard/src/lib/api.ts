@@ -24,6 +24,7 @@ export interface ServiceStatus {
   monitoring: { period: string; status: string; checked_at: string } | null
   activity: { transactions_scored_last_24h: number; open_cases: number } | null
   demo_accounts: DemoAccount[] | null
+  demo_reset: { every_hours: number; last_reset_at: string | null; next_reset_at: string | null } | null
 }
 
 export interface CaseRow {
@@ -229,7 +230,36 @@ export interface HistoryRow {
   version: string; model: string; pr_auc: number; ci_low: number; ci_high: number; total_cost: number
   fraud_allowed: number; legit_blocked: number; honest: boolean; note: string; source: string
 }
+// The latest run of the retraining job (scripts/retrain.py).
+export interface RetrainingGate {
+  gate_rule: string; runs_in_log: number
+  latest: {
+    run_at: string; as_of_day: number; label_maturity_days: number; last_fully_labelled_day: number
+    train_days: number[]; validation_days: number[]; n_train_rows: number; n_train_fraud: number
+    feedback: { feedback_labels_found?: number; matured_feedback_labels: number; labels_changed: number }
+    champion: { name: string; version: string; trained_through_day: number; validation_pr_auc: number }
+    challenger: { validation_pr_auc: number; calibration: string; t_review: number; t_block: number }
+    pr_auc_difference: number; ci_low: number; ci_high: number
+    decision: 'promote' | 'keep'; reason: string; registered_version: string | null
+  }
+}
 export interface CalibrationBin { from: number; to: number; n: number; n_fraud: number; mean_predicted: number; observed_rate: number }
+// Rule baselines (scripts/rule_baselines.py): one block of measures per set of days.
+export interface RuleResult {
+  n_rows: number; n_fraud: number; recall: number | null; precision: number | null; total_cost: number
+  fraud_allowed: number; fraud_allowed_amount: number; review_rate: number; block_rate: number
+  legit_blocked: number; legit_reviewed_pct: number
+}
+export interface RuleRow {
+  key: string; label: string; description: string; tier: string
+  design_days: RuleResult; days_11_13: RuleResult; days_14_16: RuleResult
+}
+export interface RuleBaselines {
+  design_days: number[]; how_rules_were_made: string; tier_rule: string
+  cut_off_search: { cut_off: number; candidate_rule: string }
+  rules: RuleRow[]; best_rule: string; best_rule_chosen_by: string; caveat: string
+  v3: { days_11_13: RuleResult & { note: string }; days_14_16: RuleResult & { note: string } }
+}
 export interface V3Summary {
   available: boolean; missing_sections?: string[]
   v3_key: string
@@ -248,6 +278,8 @@ export interface V3Summary {
     curves: Record<string, { label: string; pr: { recall: number; precision: number }[]; roc: { fpr: number; tpr: number }[] }>
     calibration: Record<string, { label: string; bins: CalibrationBin[]; brier: number; ece: number; mean_predicted: number; base_rate: number }>
   }
+  rules: RuleBaselines | null
+  retraining: RetrainingGate | null
   sources: Record<string, string>
 }
 
@@ -259,8 +291,15 @@ export interface Scenario {
     oldbalanceOrg: number; newbalanceOrig: number; oldbalanceDest: number; newbalanceDest: number }
   features: Record<string, number | boolean>
 }
+export interface BreakdownRow {
+  group: string; n_rows: number; n_fraud: number; recall: number | null; block_recall: number | null
+  fraud_allowed: number; review_rate: number; block_rate: number; legit_blocked: number
+  amount_from?: number; amount_to?: number
+}
 export interface ExplainabilityData {
   global: null | { _source: string; days: number[]; n_fraud: number; n_legit_sample: number; units: string; model: { name: string; version: string }; features: FeatureImportance[] }
+  breakdown: null | { _source: string; days: number[]; n_rows: number; n_fraud: number; what_this_is: string; check: string
+    quartiles_of: string; by_type: BreakdownRow[]; by_amount_quartile: BreakdownRow[] }
   scenarios: Scenario[]; scenarios_source: string | null
 }
 export type ExplainResult = Explanation & { fraud_probability: number; raw_score: number }

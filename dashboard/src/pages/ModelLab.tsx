@@ -1,12 +1,15 @@
 import { useQuery } from '@tanstack/react-query'
 import { ArrowDown, ArrowUp, Equal, Trophy } from 'lucide-react'
+import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import {
   CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Scatter, ScatterChart, Tooltip, XAxis, YAxis,
 } from 'recharts'
 import { Async, ChartTooltip, Legend, Note, PageHeader } from '@/components/common'
 import { Card, CardBody, CardHeader, Table, Td, Th } from '@/components/ui'
-import { api, type HeldOutSide, type LeaderboardRow, type Test, type V3Summary, type Verdict } from '@/lib/api'
+import {
+  api, type HeldOutSide, type LeaderboardRow, type RetrainingGate, type RuleBaselines, type Test, type V3Summary, type Verdict,
+} from '@/lib/api'
 import { cn, fmt, sentence } from '@/lib/utils'
 import V2Study from './ModelComparison'
 
@@ -204,6 +207,71 @@ function Leaderboard({ data }: { data: V3Summary }) {
 }
 
 // ---------------------------------------------------------------------------
+// Rule baselines: what hand-written rules would do on the same days
+// ---------------------------------------------------------------------------
+
+const RULE_DAYS = [
+  { id: 'days_14_16', label: 'Days 14–16 (held-out)' },
+  { id: 'days_11_13', label: 'Days 11–13' },
+] as const
+
+function RuleBaselinesCard({ rules }: { rules: RuleBaselines }) {
+  const [days, setDays] = useState<(typeof RULE_DAYS)[number]['id']>('days_14_16')
+  const v3 = rules.v3[days]
+  const rows = [
+    ...rules.rules.map((r) => ({ key: r.key, label: r.label, description: r.description, tier: r.tier, result: r[days] })),
+    { key: 'v3', label: 'V3 (the model)', description: v3.note, tier: 'by probability', result: v3 },
+  ]
+  return (
+    <Card>
+      <CardHeader title="Leaderboard: rule baselines against V3"
+        description={`What simple hand-written rules would do. ${sentence(rules.how_rules_were_made)}.`}
+        action={
+          <div className="inline-flex rounded-md border bg-surface p-0.5" role="tablist" aria-label="Which days">
+            {RULE_DAYS.map((d) => (
+              <button key={d.id} role="tab" aria-selected={days === d.id} onClick={() => setDays(d.id)}
+                className={cn('rounded px-2.5 py-1 text-xs', days === d.id ? 'bg-surface-2 font-medium' : 'text-secondary hover:text-text')}>
+                {d.label}
+              </button>
+            ))}
+          </div>
+        } />
+      <CardBody className="space-y-2 overflow-x-auto pt-2">
+        <Table>
+          <thead><tr>
+            <Th>Rule</Th><Th>Hits go to</Th><Th className="text-right">Total cost</Th><Th className="text-right">Frauds let through</Th>
+            <Th className="text-right">Recall</Th><Th className="text-right">Precision</Th><Th className="text-right">Review rate</Th><Th className="text-right">Block rate</Th>
+          </tr></thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr key={r.key} className={cn(r.key === 'v3' && 'bg-surface-2')}>
+                <Td className="font-medium">
+                  {r.label}
+                  {r.key === rules.best_rule && <span className="ml-2 rounded border px-1 text-[10px] font-semibold tracking-wide text-secondary uppercase">Best rule</span>}
+                  <div className="max-w-sm text-[11px] font-normal text-muted">{r.description}</div>
+                </Td>
+                <Td className="text-secondary">{r.tier.charAt(0) + r.tier.slice(1).toLowerCase()}</Td>
+                <Td className="tabular text-right font-medium">{fmt.money(r.result.total_cost)}</Td>
+                <Td className="tabular text-right">{fmt.int(r.result.fraud_allowed)} <span className="text-muted">of {fmt.int(r.result.n_fraud)}</span></Td>
+                <Td className="tabular text-right">{fmt.pct(r.result.recall)}</Td>
+                <Td className="tabular text-right">{fmt.pct(r.result.precision)}</Td>
+                <Td className="tabular text-right">{fmt.pct(r.result.review_rate)}</Td>
+                <Td className="tabular text-right">{fmt.pct(r.result.block_rate, 3)}</Td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+        <p className="text-xs text-muted">
+          Recall: share of fraud sent to review or blocked. Precision: share of reviewed or blocked transactions that were fraud.
+          {' '}{sentence(rules.tier_rule)}. Large-amount cut-off: {fmt.money(rules.cut_off_search.cut_off)}, the one that gave the rule engine its lowest cost on days {rules.design_days[0]}–{rules.design_days[rules.design_days.length - 1]}.
+          {' '}Best rule: {sentence(rules.best_rule_chosen_by)}. {sentence(rules.caveat)}.
+        </p>
+      </CardBody>
+    </Card>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Curves
 // ---------------------------------------------------------------------------
 
@@ -363,14 +431,60 @@ function Choices({ data }: { data: V3Summary }) {
   )
 }
 
+// ---------------------------------------------------------------------------
+// Retraining gate: the latest run of scripts/retrain.py
+// ---------------------------------------------------------------------------
+
+const span = (days: number[]) => `days ${days[0]}–${days[days.length - 1]}`
+
+function RetrainingCard({ gate }: { gate: RetrainingGate }) {
+  const r = gate.latest
+  const promote = r.decision === 'promote'
+  const feedbackFound = r.feedback.feedback_labels_found
+  return (
+    <Card>
+      <CardHeader title="Retraining gate: the latest run"
+        description={`Run ${fmt.time(r.run_at)}, as if before day ${r.as_of_day}. ${sentence(gate.gate_rule)}.`} />
+      <CardBody className="space-y-3 pt-2">
+        <div className={cn('rounded-md border px-3 py-2 text-[13px] font-medium',
+          promote ? 'border-allow/30 bg-allow-soft text-allow-ink' : 'border-review/40 bg-review-soft text-review-ink')}>
+          Gate decision: {promote ? 'the challenger would replace the serving model' : `keep ${r.champion.version}`}. {sentence(r.reason)}.
+          {promote && !r.registered_version && ' It was not registered: the job was run without --promote.'}
+          {r.registered_version && ` Registered as ${r.registered_version}.`}
+        </div>
+        <dl className="grid gap-x-6 gap-y-3 text-[13px] md:grid-cols-3">
+          <div><dt className="text-xs text-muted">Labels it could use</dt>
+            <dd>{r.label_maturity_days}-day maturity, so labels up to day {r.last_fully_labelled_day}</dd>
+            <dd className="text-secondary">
+              {feedbackFound != null && <>{fmt.int(feedbackFound)} analyst labels in the database, </>}
+              {fmt.int(r.feedback.matured_feedback_labels)} old enough to use
+            </dd></div>
+          <div><dt className="text-xs text-muted">Challenger</dt>
+            <dd>{r.champion.version}'s settings, retrained on {span(r.train_days)}</dd>
+            <dd className="text-secondary">{fmt.int(r.n_train_rows)} rows, {fmt.int(r.n_train_fraud)} fraud</dd></div>
+          <div><dt className="text-xs text-muted">Judged on {span(r.validation_days)} (PR-AUC)</dt>
+            <dd className="tabular">challenger {r.challenger.validation_pr_auc.toFixed(4)} · champion {r.champion.validation_pr_auc.toFixed(4)}</dd>
+            <dd className="tabular text-secondary">difference {fmt.signed(r.pr_auc_difference)} ({fmt.signed(r.ci_low)} to {fmt.signed(r.ci_high)})</dd></div>
+        </dl>
+        <p className="text-xs text-muted">
+          The champion is the serving model ({r.champion.name} {r.champion.version}, trained up to day {r.champion.trained_through_day}).
+          Every run is appended to results/retraining_log.json ({gate.runs_in_log} so far); the latest is copied to results/metrics.json.
+        </p>
+      </CardBody>
+    </Card>
+  )
+}
+
 function Body({ data }: { data: V3Summary }) {
   return (
     <div className="space-y-4">
       <History data={data} />
       <HeldOut data={data} />
       <Leaderboard data={data} />
+      {data.rules && <RuleBaselinesCard rules={data.rules} />}
       {data.curves && <Curves data={data} />}
       <Choices data={data} />
+      {data.retraining && <RetrainingCard gate={data.retraining} />}
       <p className="text-xs text-muted">
         Every figure on this page is read from results/metrics.json. Sources: {Object.entries(data.sources).map(([section, source]) => `${section} (${source})`).join('; ')}.
       </p>
