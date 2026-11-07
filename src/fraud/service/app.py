@@ -13,6 +13,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from fraud import __version__
 from fraud.service.core import follow_active_version, get_scorer, request_id_var
+from fraud.service.demo import reset_demo_if_due
 from fraud.service.middleware import (
     RateLimitMiddleware,
     RequestContextMiddleware,
@@ -72,7 +73,8 @@ def create_app() -> FastAPI:
                                                       "request_id": request_id_var.get()})
 
     # With several workers, each one follows the active model version in the database.
-    app.include_router(router, dependencies=[Depends(follow_active_version)])
+    # In the public demo, visitors' work is cleared once a day.
+    app.include_router(router, dependencies=[Depends(follow_active_version), Depends(reset_demo_if_due)])
     app.include_router(stream_router)
     return app
 

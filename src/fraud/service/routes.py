@@ -47,6 +47,7 @@ from fraud.service.db import (
     get_db,
     now,
 )
+from fraud.service.demo import refuse_in_demo, reset_schedule
 from fraud.service.security import admin_only, any_user, create_token, verify_password
 from fraud.service.settings import DEMO_ADMIN_PASSWORD, DEMO_ANALYST_PASSWORD, get_service_settings
 
@@ -129,6 +130,7 @@ def service_status(db: Session = Depends(get_db)):
         "monitoring": monitoring,
         "activity": activity,
         "demo_accounts": demo_accounts,
+        "demo_reset": reset_schedule(db) if database_ok else None,
     }
 
 
@@ -254,8 +256,7 @@ def models(db: Session = Depends(get_db), user: User = Depends(any_user)):
 @router.post("/models/rollback", tags=["models"])
 def rollback(body: schemas.RollbackRequest, db: Session = Depends(get_db), user: User = Depends(admin_only)):
     """Switch the serving model to another registered version (default: the one before the active one)."""
-    if get_service_settings().demo_mode:
-        raise HTTPException(403, "Switching the model is turned off in the public demo")
+    refuse_in_demo("Switching the model")
     versions = list_versions(get_service_settings().model_name)
     current = get_scorer().version
     target = body.version
@@ -513,7 +514,8 @@ def simulator_scores(split: str = Query(default="eval_2", pattern="^(eval_2|held
 def propose_thresholds(body: schemas.ThresholdProposal, db: Session = Depends(get_db),
                        user: User = Depends(admin_only)):
     """Record a proposed threshold change. This never changes the serving
-    thresholds: a proposal is an audit-log entry for a later reviewed release."""
+    thresholds: a proposal is an audit-log entry for a later reviewed release.
+    That is also why it stays open in the public demo."""
     if body.t_review > body.t_block:
         raise HTTPException(422, "t_review must not exceed t_block")
     scorer = get_scorer()
@@ -656,12 +658,14 @@ def results_v3(user: User = Depends(any_user)):
 def explainability(user: User = Depends(any_user)):
     """What the deployed model pays attention to overall (from results/metrics.json) and the guided
     demo scenarios (real held-out transactions, from api/data/scenarios.json).
-    Both are built by scripts/v3_explainability.py."""
+    Both are built by scripts/v3_explainability.py. Also where V3 catches fraud
+    on the held-out days, by type and amount (scripts/v3_breakdown.py)."""
     from fraud.results import load_metrics
-    section = load_metrics().get("v3_explainability")
+    metrics = load_metrics()
     scenarios = json.loads(SCENARIOS_PATH.read_text(encoding="utf-8")) if SCENARIOS_PATH.is_file() else None
     return {
-        "global": section,
+        "global": metrics.get("v3_explainability"),
+        "breakdown": metrics.get("v3_breakdown"),
         "scenarios": scenarios["scenarios"] if scenarios else [],
         "scenarios_source": scenarios["_source"] if scenarios else None,
     }

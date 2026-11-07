@@ -18,9 +18,12 @@ class ServiceSettings(BaseSettings):
     # start with unsafe settings (see settings_problems below).
     environment: str = "development"
 
-    # Public demo: the login page shows the demo accounts, and admin actions
-    # that would change the system for every visitor (model rollback) are off.
+    # Public demo: the login page shows the demo accounts, admin actions that
+    # would change the system for every visitor (model rollback) are off, and
+    # visitors' work is cleared every demo_reset_hours (0 turns the reset off).
+    # See fraud/service/demo.py.
     demo_mode: bool = False
+    demo_reset_hours: float = 24
 
     # With several workers the database is prepared once, before they start
     # (python -m fraud.service.setup), so each worker must skip it.

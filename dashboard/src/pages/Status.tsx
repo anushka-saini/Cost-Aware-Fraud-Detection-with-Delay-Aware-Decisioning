@@ -92,11 +92,17 @@ export default function Status() {
                   <div>
                     <Row label="Worker process">{s.worker_pid}</Row>
                     <Row label="Last checked">{fmt.time(s.checked_at)}</Row>
+                    {s.demo_reset?.next_reset_at && <Row label="Demo data reset">{fmt.time(s.demo_reset.next_reset_at)}</Row>}
                   </div>
                 </CardBody>
               </Card>
 
-              {s.demo_mode && <Note>Demo mode is on: model rollback is turned off so visitors can't change the model for everyone.</Note>}
+              {s.demo_mode && (
+                <Note>
+                  Demo mode is on. Model rollback is turned off so visitors can't change the model for everyone, and threshold proposals are only written to the audit log.
+                  {s.demo_reset && <> Cases, decisions, replayed transactions and the audit log are cleared every {s.demo_reset.every_hours} hours.</>}
+                </Note>
+              )}
             </div>
           )
         })()}
