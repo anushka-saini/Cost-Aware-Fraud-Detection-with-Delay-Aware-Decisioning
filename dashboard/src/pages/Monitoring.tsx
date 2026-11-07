@@ -12,6 +12,11 @@ const CELL: Record<Level, string> = {
   unknown: 'text-muted',
 }
 const PERIOD_LABEL: Record<string, string> = { eval_1: 'Days 8–10', eval_2: 'Days 11–13', held_out: 'Days 14–16' }
+const RATE_LABEL: Record<string, string> = {
+  review_rate: 'Sent to review',
+  block_rate: 'Blocked',
+  novelty_share: 'Unusual transactions (novelty detector)',
+}
 
 // Features (rows) by period (columns). The number is always shown; the tint
 // only repeats what the number and the threshold already say.
@@ -91,6 +96,16 @@ function ChampionChallenger({ rolling }: { rolling: NonNullable<ResultsSummary['
   )
 }
 
+// The stress-test sentence, from the numbers rather than written by hand.
+function stressSummary(stress: NonNullable<ResultsSummary['stress_test']>) {
+  const failing = stress.scenarios.filter((s) => s.fraud_allowed > 0)
+  if (!failing.length) return 'No shift tested lets fraud through.'
+  const counts = failing.map((s) => s.fraud_allowed)
+  const low = Math.min(...counts), high = Math.max(...counts)
+  const smallest = Math.min(...failing.filter((s) => s.kind === 'add').map((s) => s.value))
+  return `Adding ${fmt.int(smallest)} or more to both features lets ${low === high ? low : `${low} to ${high}`} frauds through that the unshifted model catches.`
+}
+
 export default function Monitoring() {
   const drift = useQuery({ queryKey: ['drift'], queryFn: api.drift, refetchInterval: 30_000 })
   const summary = useQuery({ queryKey: ['summary'], queryFn: api.summary, staleTime: Infinity })
@@ -125,7 +140,7 @@ export default function Monitoring() {
                       </div>
                       <div className="mt-3">
                         <Note>
-                          Two recipient-activity counts drift steadily, while the model score and the anomaly score barely move. The model makes little use of
+                          Two recipient-activity counts drift steadily, while the model's own score barely moves. The model makes little use of
                           those two features, so these alerts are a prompt to look, not a sign the model is failing.
                         </Note>
                       </div>
@@ -135,7 +150,8 @@ export default function Monitoring() {
 
               {data.reports.length > 0 && (
                 <Card>
-                  <CardHeader title="Operating rates by period" description="Alert when a rate leaves 0.5× to 2× the rate observed on days 11–13, where the thresholds were set." />
+                  <CardHeader title="Operating rates by period"
+                    description="Alert when a rate leaves 0.5× to 2× its expected value. Review and block rates are expected to match days 11–13, where the thresholds were set. The novelty detector (the autoencoder, used only for monitoring since V3) flags the 1% most unusual transactions of its training days, so about 1% is expected." />
                   <CardBody className="pt-2">
                     <Table>
                       <thead><tr><Th>Period</Th><Th>Rate</Th><Th className="text-right">Observed</Th><Th className="text-right">Expected band</Th><Th /></tr></thead>
@@ -143,7 +159,7 @@ export default function Monitoring() {
                         {data.reports.flatMap((r) => r.rates.map((rate) => (
                           <tr key={`${r.period}-${rate.name}`}>
                             <Td className="text-secondary">{PERIOD_LABEL[r.period] ?? r.period}</Td>
-                            <Td>{rate.name === 'review_rate' ? 'Sent to review' : rate.name === 'block_rate' ? 'Blocked' : rate.name}</Td>
+                            <Td>{RATE_LABEL[rate.name] ?? rate.name}</Td>
                             <Td className="tabular text-right">{fmt.pct(rate.observed, 3)}</Td>
                             <Td className="tabular text-right text-secondary">{rate.band_low === undefined ? '–' : `${fmt.pct(rate.band_low, 3)} to ${fmt.pct(rate.band_high, 3)}`}</Td>
                             <Td className="text-right"><LevelBadge level={rate.level} /></Td>
@@ -190,7 +206,7 @@ export default function Monitoring() {
                     </Table>
                     <div className="mt-3">
                       <Note tone="warning">
-                        A constant offset in these two features lets about a fifth of fraud through. In every such scenario the PSI alert fires and the review rate
+                        {stressSummary(data.stress_test)} In every such scenario the PSI alert fires and the review rate
                         falls far below its band, so the failure would be visible here before it was visible in losses.
                       </Note>
                     </div>
@@ -200,7 +216,7 @@ export default function Monitoring() {
               {data.rolling && (
                 <Card>
                   <CardHeader title="Champion / challenger history"
-                    description="Replay of daily retraining on days 11–16. A retrained model replaces the serving one only when it is significantly better on the most recent fully labelled day." />
+                    description="Replay of daily retraining on days 11–16. A retrained model replaces the serving one only when it is significantly better on the most recent fully labelled day. This study was run with the V2 setup in October 2026 and was not repeated for V3." />
                   <CardBody><ChampionChallenger rolling={data.rolling} /></CardBody>
                 </Card>
               )}

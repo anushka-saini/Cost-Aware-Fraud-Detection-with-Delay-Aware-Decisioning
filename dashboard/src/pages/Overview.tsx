@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import { Async, ChartTooltip, EmptyState, Kpi, Legend, LevelBadge, PageHeader } from '@/components/common'
+import { Async, ChartTooltip, EmptyState, Kpi, Legend, LevelBadge, PageHeader, Sparkline } from '@/components/common'
 import { Card, CardBody, CardHeader, Table, Td, Th } from '@/components/ui'
 import { api } from '@/lib/api'
 import { fmt } from '@/lib/utils'
@@ -20,6 +20,23 @@ const EVENT_LABEL: Record<string, string> = {
   'thresholds.propose': 'Threshold change proposed',
 }
 
+// Cost avoided on the held-out days: what blocking nothing would have cost,
+// minus what V3 cost at its thresholds. Both figures are read from
+// results/metrics.json (scripts/v3_phase3.py).
+function CostAvoided() {
+  const query = useQuery({ queryKey: ['results-v3'], queryFn: api.v3, staleTime: Infinity })
+  const held = query.data?.available ? query.data.held_out : null
+  if (!held) return <Kpi label="Cost avoided vs blocking nothing" value="–" hint={query.isPending ? 'loading…' : 'held-out results not available'} />
+  const nothing = held.baselines.block_nothing
+  return (
+    <Kpi label="Cost avoided vs blocking nothing" value={<span className="text-lg">{fmt.money(nothing - held.v3.total_cost)}</span>}
+      hint={<>Held-out days {held.days[0]}–{held.days[held.days.length - 1]}: blocking nothing {fmt.money(nothing)} minus V3's {fmt.int(held.v3.total_cost)}.{' '}
+        <Link to="/models" className="text-accent hover:underline">Model lab</Link></>} />
+  )
+}
+
+const share = (part: number, whole: number) => (whole ? part / whole : null)
+
 export default function Overview() {
   const query = useQuery({ queryKey: ['overview'], queryFn: api.overview, refetchInterval: 15_000 })
 
@@ -27,17 +44,24 @@ export default function Overview() {
     <>
       <PageHeader title="Overview" description="What the scoring service has done, what is waiting for a person, and whether the model's inputs still look like its training data." />
       <Async query={query} rows={6}>
-        {({ kpis, tier_mix, drift_alerts, recent_events }) => (
+        {({ kpis, scored_by_hour, tier_mix, drift_alerts, recent_events }) => {
+          const batchTotal = (b: (typeof tier_mix)[number]) => b.ALLOW + b.REVIEW + b.BLOCK
+          return (
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
-              <Kpi label="Scored, last 24 hours" value={fmt.int(kpis.scored_last_24h)} hint={`${fmt.int(kpis.scored_total)} in total`} />
-              <Kpi label="Block rate" value={fmt.pct(kpis.block_rate)} hint="of transactions scored in the last 24 hours" />
+              <Kpi label="Scored, last 24 hours" value={fmt.int(kpis.scored_last_24h)} hint={`${fmt.int(kpis.scored_total)} in total; line: per hour`}>
+                <Sparkline values={scored_by_hour} label="Transactions scored per hour, last 24 hours" format={(v) => `${fmt.int(v)} scored in this hour`} />
+              </Kpi>
+              <Kpi label="Block rate" value={fmt.pct(kpis.block_rate)} hint="last 24 hours; line: per batch of scored transactions">
+                <Sparkline values={tier_mix.map((b) => share(b.BLOCK, batchTotal(b)))} label="Block rate per batch" format={(v) => `${fmt.pct(v)} blocked in this batch`} />
+              </Kpi>
               <Kpi label="Review queue" value={fmt.int(kpis.review_queue)}
                 hint={kpis.review_queue ? `oldest waiting ${fmt.duration(kpis.oldest_open_case_seconds)}` : 'nothing waiting'}>
                 {kpis.escalated > 0 && <div className="mt-1 text-xs text-review-ink">{kpis.escalated} escalated to an admin</div>}
+                <Sparkline values={tier_mix.map((b) => share(b.REVIEW, batchTotal(b)))} label="Share sent to review per batch" format={(v) => `${fmt.pct(v)} sent to review in this batch`} />
               </Kpi>
               <Kpi label="Override rate" value={fmt.pct(kpis.override_rate, 1)} hint="customers who proceeded after a warning" />
-              <Kpi label="Active model" value={kpis.active_model.version} hint={kpis.active_model.name} />
+              <CostAvoided />
               <Kpi label="Drift status" value={<LevelBadge level={kpis.drift_status} />}
                 hint={<Link to="/monitoring" className="text-accent hover:underline">{drift_alerts.length} flagged inputs</Link>} />
             </div>
@@ -75,7 +99,7 @@ export default function Overview() {
                 <CardBody className="pt-2">
                   {drift_alerts.length === 0 ? <EmptyState title="No drift alerts" /> : (
                     <Table>
-                      <thead><tr><Th>Input and period</Th><Th className="text-right">PSI</Th><Th /></tr></thead>
+                      <thead><tr><Th>Input and period</Th><Th className="text-right">PSI</Th></tr></thead>
                       <tbody>
                         {drift_alerts.map((a) => (
                           <tr key={`${a.period}-${a.name}`}>
@@ -83,8 +107,10 @@ export default function Overview() {
                               <div className="font-mono text-xs break-all">{a.name}</div>
                               <div className="text-xs text-muted">{a.period.replace('_', ' ')}</div>
                             </Td>
-                            <Td className="tabular text-right">{a.value.toFixed(3)}</Td>
-                            <Td className="text-right"><LevelBadge level={a.level} /></Td>
+                            <Td className="text-right">
+                              <div className="tabular">{a.value.toFixed(3)}</div>
+                              <div className="mt-1"><LevelBadge level={a.level} /></div>
+                            </Td>
                           </tr>
                         ))}
                       </tbody>
@@ -121,7 +147,8 @@ export default function Overview() {
               </CardBody>
             </Card>
           </div>
-        )}
+          )
+        }}
       </Async>
     </>
   )

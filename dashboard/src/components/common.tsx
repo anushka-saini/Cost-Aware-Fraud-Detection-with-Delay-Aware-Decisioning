@@ -147,3 +147,27 @@ export const Note = ({ children, tone = 'neutral' }: { children: ReactNode; tone
   <div className={cn('rounded-md border px-3 py-2 text-[13px]',
     tone === 'warning' ? 'border-review/40 bg-review-soft text-review-ink' : 'bg-surface-2 text-secondary')}>{children}</div>
 )
+
+// A small trend line for a KPI tile. Hovering a point shows its value.
+export function Sparkline({ values, label, format = String }: { values: (number | null)[]; label: string; format?: (v: number) => string }) {
+  const points = values.map((v, i) => ({ v, i })).filter((p): p is { v: number; i: number } => p.v != null)
+  if (points.length < 2) return null
+  const width = 120, height = 28, pad = 3
+  const max = Math.max(...points.map((p) => p.v)), min = Math.min(...points.map((p) => p.v))
+  const x = (i: number) => pad + (i / (values.length - 1)) * (width - 2 * pad)
+  const y = (v: number) => (max === min ? height / 2 : pad + (1 - (v - min) / (max - min)) * (height - 2 * pad))
+  const last = points[points.length - 1]
+  const step = (width - 2 * pad) / Math.max(1, values.length - 1)
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} className="mt-2 h-7 w-full" preserveAspectRatio="none" role="img" aria-label={label}>
+      <polyline points={points.map((p) => `${x(p.i)},${y(p.v)}`).join(' ')} fill="none" stroke="var(--series-1)" strokeWidth={1.5}
+        vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
+      <circle cx={x(last.i)} cy={y(last.v)} r={2.5} fill="var(--series-1)" />
+      {points.map((p) => (
+        <rect key={p.i} x={x(p.i) - step / 2} y={0} width={step} height={height} fill="transparent">
+          <title>{format(p.v)}</title>
+        </rect>
+      ))}
+    </svg>
+  )
+}
