@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { Async, Legend, Note, PageHeader } from '@/components/common'
+import { Async, Legend, Note } from '@/components/common'
 import { Card, CardBody, CardHeader, Table, Td, Th } from '@/components/ui'
 import { api, type ModelSummary, type ResultsSummary } from '@/lib/api'
 import { cn, fmt } from '@/lib/utils'
@@ -30,7 +30,7 @@ function IntervalChart({ models }: { models: ModelSummary[] }) {
         <div key={m.key} className="grid grid-cols-[11rem_1fr_12rem] items-center gap-3 border-t py-2 text-[13px]">
           <span className="flex items-center gap-2 font-medium">
             {m.label}
-            {m.deployed && <span className="rounded border border-accent/40 px-1 text-[10px] font-semibold tracking-wide text-accent uppercase">Deployed</span>}
+            {m.deployed && <span className="rounded border border-accent/40 px-1 text-[10px] font-semibold tracking-wide text-accent uppercase">Deployed in V2</span>}
           </span>
           <div className="relative h-9">
             {ticks.map((t) => <span key={t} className="absolute inset-y-0 w-px bg-border" style={{ left: `${x(t)}%` }} />)}
@@ -147,7 +147,7 @@ function Body({ data }: { data: ResultsSummary }) {
             <tbody>
               {[...models].sort((a, b) => a.total_cost - b.total_cost).map((m) => (
                 <tr key={m.key} className={cn(m.deployed && 'bg-surface-2')}>
-                  <Td className="font-medium">{m.label}{m.deployed && <span className="ml-2 text-[11px] text-accent">deployed</span>}</Td>
+                  <Td className="font-medium">{m.label}{m.deployed && <span className="ml-2 text-[11px] text-accent">deployed in V2</span>}</Td>
                   <Td className="tabular text-right font-medium">{fmt.int(m.total_cost)}</Td>
                   <Td className="tabular text-right">{m.fraud_allowed}</Td>
                   <Td className="tabular text-right">{fmt.pct(m.legit_reviewed_pct)}</Td>
@@ -265,14 +265,19 @@ function Body({ data }: { data: ResultsSummary }) {
   )
 }
 
-export default function ModelComparison() {
+// The V2 study, kept as it was. Version 3 replaced it; the Model lab page
+// shows it under its own tab, marked as superseded.
+export default function V2Study() {
   const query = useQuery({ queryKey: ['summary'], queryFn: api.summary, staleTime: Infinity })
   return (
-    <>
-      <PageHeader title="Model comparison" description="Every model under the same protocol, with intervals, seed spread and the figures the project reported before the protocol was corrected." />
+    <div className="space-y-4">
+      <Note tone="warning">
+        Superseded. This is the V2 study (October 2026): models compared on the held-out days with the V2 protocol. V3 replaced V2 after the
+        one-time held-out test on 6 November 2026. The figures are kept here unchanged as a record.
+      </Note>
       <Async query={query} rows={8}>
         {(data) => data.available ? <Body data={data} /> : <Note tone="warning">Result files are missing ({data.missing_sections?.join(', ')}). Run scripts/run_protocol.py.</Note>}
       </Async>
-    </>
+    </div>
   )
 }
