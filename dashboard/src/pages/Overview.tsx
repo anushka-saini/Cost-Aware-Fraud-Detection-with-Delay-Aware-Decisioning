@@ -20,18 +20,28 @@ const EVENT_LABEL: Record<string, string> = {
   'thresholds.propose': 'Threshold change proposed',
 }
 
-// Cost avoided on the held-out days: what blocking nothing would have cost,
-// minus what V3 cost at its thresholds. Both figures are read from
-// results/metrics.json (scripts/v3_phase3.py).
+// Cost avoided on the held-out days, against two fair alternatives: the best
+// hand-written rule (picked on days 5-10) and sending everything to review.
+// Blocking nothing is only a footnote, because no one would do that.
+// All figures are read from results/metrics.json (scripts/v3_phase3.py and
+// scripts/rule_baselines.py).
 function CostAvoided() {
   const query = useQuery({ queryKey: ['results-v3'], queryFn: api.v3, staleTime: Infinity })
-  const held = query.data?.available ? query.data.held_out : null
-  if (!held) return <Kpi label="Cost avoided vs blocking nothing" value="–" hint={query.isPending ? 'loading…' : 'held-out results not available'} />
-  const nothing = held.baselines.block_nothing
+  const data = query.data?.available ? query.data : null
+  const label = 'Cost avoided vs best rule'
+  if (!data) return <Kpi label={label} value="–" hint={query.isPending ? 'loading…' : 'held-out results not available'} />
+  const held = data.held_out
+  const v3 = held.v3.total_cost
+  const best = data.rules?.rules.find((r) => r.key === data.rules?.best_rule)
+  const everything = held.baselines.review_everything
   return (
-    <Kpi label="Cost avoided vs blocking nothing" value={<span className="text-lg">{fmt.money(nothing - held.v3.total_cost)}</span>}
-      hint={<>Held-out days {held.days[0]}–{held.days[held.days.length - 1]}: blocking nothing {fmt.money(nothing)} minus V3's {fmt.int(held.v3.total_cost)}.{' '}
-        <Link to="/models" className="text-accent hover:underline">Model lab</Link></>} />
+    <Kpi label={label} value={<span className="text-lg">{best ? fmt.int(best.days_14_16.total_cost - v3) : '–'}</span>}
+      hint={<>
+        <span className="block">vs review everything: <span className="tabular font-medium text-text">{fmt.int(everything - v3)}</span></span>
+        <span className="block">Days {held.days[0]}–{held.days[held.days.length - 1]}, V3 cost {fmt.int(v3)}{best && <>; best rule ({best.label.toLowerCase()}) {fmt.int(best.days_14_16.total_cost)}</>}.{' '}
+          <Link to="/models" className="text-accent hover:underline">Model lab</Link></span>
+        <span className="mt-1 block text-[11px] text-muted">vs blocking nothing: {fmt.money(held.baselines.block_nothing - v3)}</span>
+      </>} />
   )
 }
 
