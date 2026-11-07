@@ -7,9 +7,11 @@ import { ShapWaterfall } from '@/components/ShapWaterfall'
 import { Button, Card, CardBody, CardHeader, Table, Td, Textarea, Th } from '@/components/ui'
 import { api, type CaseDetail as Case } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
+import { useToast } from '@/lib/toast'
 import { cn, fmt, sentence } from '@/lib/utils'
 
 type Action = 'approve' | 'decline' | 'escalate'
+const DONE: Record<Action, string> = { approve: 'approved', decline: 'declined', escalate: 'escalated' }
 
 const Field = ({ label, children }: { label: string; children: ReactNode }) => (
   <div className="flex items-baseline justify-between gap-4 border-b py-1.5 last:border-0">
@@ -42,6 +44,7 @@ function ActionPanel({ data }: { data: Case }) {
   const { user } = useAuth()
   const queryClient = useQueryClient()
   const navigate = useNavigate()
+  const toast = useToast()
   const [note, setNote] = useState('')
   const [action, setAction] = useState<Action | null>(null)
   const refresh = () => {
@@ -49,8 +52,8 @@ function ActionPanel({ data }: { data: Case }) {
     queryClient.invalidateQueries({ queryKey: ['cases'] })
     queryClient.invalidateQueries({ queryKey: ['overview'] })
   }
-  const decide = useMutation({ mutationFn: (a: Action) => api.decide(data.id, a, note.trim()), onSuccess: () => { setNote(''); refresh() } })
-  const addNote = useMutation({ mutationFn: () => api.addNote(data.id, note.trim()), onSuccess: () => { setNote(''); refresh() } })
+  const decide = useMutation({ mutationFn: (a: Action) => api.decide(data.id, a, note.trim()), onSuccess: (_, a) => { toast(`Case #${data.id} ${DONE[a]}`); setNote(''); refresh() } })
+  const addNote = useMutation({ mutationFn: () => api.addNote(data.id, note.trim()), onSuccess: () => { toast('Note added'); setNote(''); refresh() } })
 
   const escalated = data.status === 'escalated'
   const actionable = data.status === 'open' || (escalated && user?.role === 'admin')
@@ -117,6 +120,12 @@ export default function CaseDetail() {
                       <CardHeader title="Anomaly score" description="Label-free autoencoder: how unlike ordinary traffic this looks" />
                       <CardBody>
                         <div className="tabular text-3xl font-semibold tracking-tight">{s.anomaly_score == null ? '–' : s.anomaly_score.toFixed(3)}</div>
+                        {s.anomaly_score == null && (
+                          <div className="mt-3 text-[13px] text-secondary">
+                            Model {s.model_version} does not use an anomaly score. Since V3, the autoencoder only feeds monitoring, where it tracks how many
+                            transactions look unusual.
+                          </div>
+                        )}
                         {s.anomaly_score != null && s.anomaly_review_threshold != null && (
                           <div className="mt-3 text-[13px] text-secondary">
                             {s.anomaly_score >= s.anomaly_review_threshold ? 'Above' : 'Below'} the top-1% line ({s.anomaly_review_threshold.toFixed(3)}).

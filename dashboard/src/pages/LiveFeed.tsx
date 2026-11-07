@@ -97,6 +97,9 @@ export default function LiveFeed() {
   const running = status === 'live' || status === 'paused' || status === 'connecting'
   const total = counts.ALLOW + counts.REVIEW + counts.BLOCK
 
+  // V3 has no anomaly detector in the scoring path (the autoencoder only feeds monitoring),
+  // so the column is shown only when the serving model sends a score.
+  const showAnomaly = rows.some((row) => row.anomaly_score != null)
   return (
     <>
       <PageHeader title="Live feed"
@@ -139,7 +142,7 @@ export default function LiveFeed() {
         ) : (
           <Table>
             <thead>
-              <tr><Th>#</Th><Th>Decision</Th><Th className="text-right">Probability</Th><Th className="text-right">Anomaly</Th><Th>Type</Th>
+              <tr><Th>#</Th><Th>Decision</Th><Th className="text-right">Probability</Th>{showAnomaly && <Th className="text-right">Anomaly</Th>}<Th>Type</Th>
                 <Th className="text-right">Amount</Th><Th>Recipient</Th><Th>When (data time)</Th><Th>Truth</Th><Th>Main reason</Th></tr>
             </thead>
             <tbody>
@@ -149,7 +152,7 @@ export default function LiveFeed() {
                   <Td className="tabular text-muted">{row.position}</Td>
                   <Td><TierBadge tier={row.tier} /></Td>
                   <Td className="tabular text-right">{fmt.probability(row.fraud_probability)}</Td>
-                  <Td className="tabular text-right text-secondary">{row.anomaly_score.toFixed(3)}</Td>
+                  {showAnomaly && <Td className="tabular text-right text-secondary">{row.anomaly_score == null ? '–' : row.anomaly_score.toFixed(3)}</Td>}
                   <Td className="text-secondary">{row.type}</Td>
                   <Td className="tabular text-right">{fmt.money(row.amount)}</Td>
                   <Td className="font-mono text-xs text-secondary">{row.name_dest}</Td>
