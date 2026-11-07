@@ -1,5 +1,7 @@
-// All requests go through the Vite proxy: /api -> the FastAPI service.
-const BASE = '/api'
+// Locally, requests go through the Vite proxy: /api -> the FastAPI service.
+// A hosted dashboard (static files, e.g. on Vercel) calls the API directly:
+// build it with VITE_API_URL=https://your-api.example.com
+const BASE = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, '') || '/api'
 const TOKEN_KEY = 'fraud.token'
 
 export type Tier = 'ALLOW' | 'REVIEW' | 'BLOCK'
@@ -7,6 +9,22 @@ export type Role = 'analyst' | 'admin'
 export type Level = 'ok' | 'warning' | 'alert' | 'unknown'
 
 export interface Session { access_token: string; username: string; role: Role }
+
+export interface DemoAccount { username: string; password: string; role: Role }
+export interface ServiceStatus {
+  status: 'ok' | 'degraded'
+  checked_at: string
+  api_version: string
+  environment: string
+  demo_mode: boolean
+  uptime_seconds: number
+  worker_pid: number
+  model: { name: string; version: string; thresholds: { t_review: number; t_block: number }; feature_count: number; train_days: number[] | null; created_at: string | null }
+  database: { ok: boolean; backend: string; latency_ms: number }
+  monitoring: { period: string; status: string; checked_at: string } | null
+  activity: { transactions_scored_last_24h: number; open_cases: number } | null
+  demo_accounts: DemoAccount[] | null
+}
 
 export interface CaseRow {
   id: number; status: 'open' | 'approved' | 'declined' | 'escalated'; amount: number; fraud_probability: number
@@ -42,7 +60,7 @@ export interface CaseDetail extends CaseRow {
 
 export interface StreamEvent {
   event: 'transaction'; position: number; assessment_id: string; transaction_id: number; fraud_probability: number
-  raw_score: number; anomaly_score: number; tier: Tier; reasons: string[]; amount: number; type: string; step: number
+  raw_score: number; anomaly_score: number | null; tier: Tier; reasons: string[]; amount: number; type: string; step: number
   name_orig: string; name_dest: string; actual_fraud: number; created_at: string
 }
 
@@ -66,6 +84,7 @@ export interface Overview {
     review_queue: number; escalated: number; oldest_open_case_seconds: number | null; override_rate: number | null
     active_model: { name: string; version: string }; drift_status: Level | 'no_reports'
   }
+  scored_by_hour: number[]
   tier_mix: ({ from: number; to: number } & Record<Tier, number>)[]
   drift_alerts: { source: string; period: string; type: string; name: string; level: Level; value: number }[]
   recent_events: AuditRow[]
@@ -189,9 +208,67 @@ const query = (params: Record<string, string | number | undefined | null>) => {
 }
 const post = <T>(path: string, body: unknown) => request<T>(path, { method: 'POST', body: JSON.stringify(body) })
 
+// Version 3 results for the Model lab page (GET /results/v3).
+export interface Ci { ci_low: number; ci_high: number; n_bootstrap: number }
+export interface Test { difference: number; ci_low: number; ci_high: number; significant: boolean; p_holm?: number; significant_after_holm?: boolean }
+export type Verdict = 'reference' | 'significantly better' | 'significantly worse' | 'comparable'
+export interface LeaderboardRow {
+  key: string; label: string; kind: string; tests_on: string
+  pr_auc: ({ pr_auc: number } & Ci) | null; roc_auc: ({ roc_auc: number } & Ci) | null
+  seed_mean: number | null; seed_std: number | null
+  day_13_pr_auc: ({ pr_auc: number } & Ci) | null; day_13_cost: number | null; day_13_fraud_allowed: number | null
+  day_13_cost_vs_v2: Test | null; vs_v3: Test | null; vs_v2: Test | null
+  verdict_vs_v3: Verdict; verdict_vs_v2: Verdict
+}
+export interface HeldOutSide {
+  pr_auc: { pr_auc: number } & Ci; roc_auc: { roc_auc: number } & Ci
+  t_review: number; t_block: number; total_cost: number; fraud_allowed: number; legit_reviewed_pct: number
+  legit_blocked: number; block_precision: number; block_recall: number
+}
+export interface HistoryRow {
+  version: string; model: string; pr_auc: number; ci_low: number; ci_high: number; total_cost: number
+  fraud_allowed: number; legit_blocked: number; honest: boolean; note: string; source: string
+}
+export interface CalibrationBin { from: number; to: number; n: number; n_fraud: number; mean_predicted: number; observed_rate: number }
+export interface V3Summary {
+  available: boolean; missing_sections?: string[]
+  v3_key: string
+  validation: { evaluated_on: string; significance_rule: string; stacking_note: string; leaderboard: LeaderboardRow[] }
+  phase2: {
+    calibration: string; isotonic_rejected_because: string | null; threshold_rule: string
+    point: Omit<HeldOutSide, 'pr_auc' | 'roc_auc'>; odds_factor_to_cliff: number; baselines: Record<string, number>
+  }
+  held_out: {
+    days: number[]; n_rows: number; n_fraud: number; decision_rule: string; verdict: string; deploy_v3: boolean
+    v3: HeldOutSide; v2: HeldOutSide; difference: { pr_auc: Test; roc_auc: Test; cost: Test }; baselines: Record<string, number>
+  }
+  history: HistoryRow[]
+  curves: null | {
+    curves_on: string; calibration_on: string; pr_note: string; roc_note: string
+    curves: Record<string, { label: string; pr: { recall: number; precision: number }[]; roc: { fpr: number; tpr: number }[] }>
+    calibration: Record<string, { label: string; bins: CalibrationBin[]; brier: number; ece: number; mean_predicted: number; base_rate: number }>
+  }
+  sources: Record<string, string>
+}
+
+// Explainability page (GET /explainability) and POST /explain.
+export interface FeatureImportance { feature: string; fraud_mean_abs: number; fraud_mean: number; legit_mean_abs: number; legit_mean: number }
+export interface Scenario {
+  id: string; title: string; rule: string; group_size: number; actual_fraud: number; expected_tier: Tier
+  transaction: { step: number; type: string; nameOrig: string; nameDest: string; amount: number
+    oldbalanceOrg: number; newbalanceOrig: number; oldbalanceDest: number; newbalanceDest: number }
+  features: Record<string, number | boolean>
+}
+export interface ExplainabilityData {
+  global: null | { _source: string; days: number[]; n_fraud: number; n_legit_sample: number; units: string; model: { name: string; version: string }; features: FeatureImportance[] }
+  scenarios: Scenario[]; scenarios_source: string | null
+}
+export type ExplainResult = Explanation & { fraud_probability: number; raw_score: number }
+
 export const api = {
   login: (username: string, password: string) => post<Session>('/auth/login', { username, password }),
   me: () => request<{ username: string; role: Role }>('/auth/me'),
+  status: () => request<ServiceStatus>('/status'),
   overview: () => request<Overview>('/overview'),
   cases: (params: { status?: string; sort?: string; q?: string; type?: string; min_amount?: number; limit?: number; offset?: number }) =>
     request<CaseList>(`/cases${query(params)}`),
@@ -206,6 +283,9 @@ export const api = {
   models: () => request<{ active: string; versions: ModelVersion[] }>('/models'),
   rollback: (version: string | null, reason: string) => post<{ active: string; from: string }>('/models/rollback', { version, reason }),
   summary: () => request<ResultsSummary>('/results/summary'),
+  v3: () => request<V3Summary>('/results/v3'),
+  explainability: () => request<ExplainabilityData>('/explainability'),
+  explain: (body: Record<string, unknown>) => post<ExplainResult>('/explain', body),
   audit: (params: { actor?: string; action?: string; entity_type?: string; q?: string; limit?: number; offset?: number }) =>
     request<{ total: number; limit: number; offset: number; actions: string[]; rows: AuditRow[] }>(`/audit${query(params)}`),
   auditCsv: async (params: { actor?: string; action?: string; q?: string }) => {
@@ -216,6 +296,11 @@ export const api = {
 }
 
 export function streamUrl(speed: number, restart: boolean) {
+  const params = query({ token: getToken() ?? '', speed, restart: restart ? 'true' : undefined })
+  if (BASE.startsWith('http')) {
+    // The API is on another host: same address, WebSocket scheme.
+    return `${BASE.replace(/^http/, 'ws')}/stream${params}`
+  }
   const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws'
-  return `${protocol}://${window.location.host}${BASE}/stream${query({ token: getToken() ?? '', speed, restart: restart ? 'true' : undefined })}`
+  return `${protocol}://${window.location.host}${BASE}/stream${params}`
 }

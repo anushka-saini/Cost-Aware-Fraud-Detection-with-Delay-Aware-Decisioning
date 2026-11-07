@@ -1,16 +1,22 @@
+import { useQuery } from '@tanstack/react-query'
 import { ShieldCheck } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { Note } from '@/components/common'
 import { Button, Card, Input, Label } from '@/components/ui'
+import { api } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 
-const DEMO = [
-  { role: 'Analyst', username: 'analyst', password: 'analyst123', can: 'works the review queue' },
-  { role: 'Admin', username: 'admin', password: 'admin123', can: 'also sees monitoring, model comparison and can propose thresholds' },
-]
+// What each role can do, shown under the demo accounts.
+const ROLE_NOTES = {
+  analyst: { title: 'Analyst', can: 'works the review queue' },
+  admin: { title: 'Admin', can: 'also sees monitoring, model comparison and can propose thresholds' },
+}
 
 export default function Login() {
   const { signIn } = useAuth()
+  // The API lists the demo accounts only when it runs in demo mode.
+  const status = useQuery({ queryKey: ['status'], queryFn: api.status, retry: false })
+  const demoAccounts = status.data?.demo_accounts ?? []
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -53,18 +59,20 @@ export default function Login() {
             <Button type="submit" variant="primary" className="w-full" disabled={busy}>{busy ? 'Signing in…' : 'Sign in'}</Button>
           </form>
         </Card>
-        <div className="mt-4 space-y-2">
-          <Note>Demo accounts. Click one to fill the form.</Note>
-          {DEMO.map((account) => (
-            <button key={account.username} type="button"
-              onClick={() => { setUsername(account.username); setPassword(account.password) }}
-              className="block w-full rounded-md border bg-surface px-3 py-2 text-left text-[13px] hover:bg-surface-2">
-              <span className="font-medium">{account.role}</span>
-              <span className="text-muted"> · {account.username} / {account.password}</span>
-              <div className="text-xs text-secondary">{account.can}</div>
-            </button>
-          ))}
-        </div>
+        {demoAccounts.length > 0 && (
+          <div className="mt-4 space-y-2">
+            <Note>Demo accounts. Click one to fill the form.</Note>
+            {demoAccounts.map((account) => (
+              <button key={account.username} type="button"
+                onClick={() => { setUsername(account.username); setPassword(account.password) }}
+                className="block w-full rounded-md border bg-surface px-3 py-2 text-left text-[13px] hover:bg-surface-2">
+                <span className="font-medium">{ROLE_NOTES[account.role].title}</span>
+                <span className="text-muted"> · {account.username} / {account.password}</span>
+                <div className="text-xs text-secondary">{ROLE_NOTES[account.role].can}</div>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
