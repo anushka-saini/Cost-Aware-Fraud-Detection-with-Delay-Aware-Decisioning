@@ -118,3 +118,18 @@
 .recharts-cartesian-grid line {
   stroke: var(--grid);
 }
+
+/* Presentation mode: everything 25% bigger so it reads from the back of a room.
+   zoom also scales screen-height boxes, so those are shrunk back to fit the window. */
+html.presentation {
+  zoom: 1.25;
+}
+html.presentation .h-screen {
+  height: 80vh;
+}
+html.presentation .min-h-screen {
+  min-height: 80vh;
+}
+html.presentation .recharts-text {
+  font-size: 13px;
+}
