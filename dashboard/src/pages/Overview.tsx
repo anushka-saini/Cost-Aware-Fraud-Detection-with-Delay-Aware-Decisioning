@@ -38,7 +38,7 @@ function CostAvoided() {
     <Kpi label={label} value={<span className="text-lg">{best ? fmt.int(best.days_14_16.total_cost - v3) : '–'}</span>}
       hint={<>
         <span className="block">vs review everything: <span className="tabular font-medium text-text">{fmt.int(everything - v3)}</span></span>
-        <span className="block">Days {held.days[0]}–{held.days[held.days.length - 1]}, V3 cost {fmt.int(v3)}{best && <>; best rule ({best.label.toLowerCase()}) {fmt.int(best.days_14_16.total_cost)}</>}.{' '}
+        <span className="block">Days {held.days[0]}–{held.days[held.days.length - 1]}: V3 {fmt.int(v3)}{best && <>, best rule {fmt.int(best.days_14_16.total_cost)}</>}.{' '}
           <Link to="/models" className="text-accent hover:underline">Model lab</Link></span>
         <span className="mt-1 block text-[11px] text-muted">vs blocking nothing: {fmt.money(held.baselines.block_nothing - v3)}</span>
       </>} />
