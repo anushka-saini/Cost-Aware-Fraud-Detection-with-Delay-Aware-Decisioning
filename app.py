@@ -8,20 +8,29 @@ A lightweight backup demo. The main interface is the React dashboard.
 Run this AFTER the FastAPI backend is already running:
     Terminal 1: uvicorn fraud.service.app:app --port 8000     (from the project root)
     Terminal 2: streamlit run app.py
+
+To use an API somewhere else, set FRAUD_API_URL (for example the Render address).
 """
 
-import streamlit as st
-import requests
-import plotly.graph_objects as go
+import json
+import os
+from pathlib import Path
+
 import pandas as pd
-import random
+import plotly.graph_objects as go
+import requests
+import streamlit as st
 
 # ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
-API_URL = "http://localhost:8000/score"
-CONFIRM_URL = "http://localhost:8000/confirm-decision"
+# 127.0.0.1 rather than localhost: on Windows "localhost" tries IPv6 first,
+# which adds about two seconds to every request.
+API_BASE = os.environ.get("FRAUD_API_URL", "http://127.0.0.1:8000").rstrip("/")
+API_URL = f"{API_BASE}/score"
+CONFIRM_URL = f"{API_BASE}/confirm-decision"
 DEMO_SAMPLE_PATH = "demo_sample.csv"
+SCENARIOS_PATH = Path("api/data/scenarios.json")
 
 
 @st.cache_data
@@ -41,77 +50,36 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------------------------
-# Preset scenarios — pulled directly from the actual held-out dataset,
-# verified against the trained model's real predictions. Using genuine
-# transactions here (not hand-built synthetic ones) avoids the instability
-# seen when testing artificial out-of-distribution feature combinations.
+# Preset scenarios: the same five real held-out transactions as the
+# dashboard's Explainability page, picked by fixed rules in
+# scripts/v3_explainability.py (two of them are the model's mistakes or
+# near-mistakes, on purpose).
 # ---------------------------------------------------------------------------
-PRESETS = {
-    "✅ Legit transaction": {
-        "amount": 76431.17,
-        "type": "CASH_OUT",
-        "origin_balance_error": -76431.17,
-        "destination_balance_error": 0.0,
-        "destination_balance_is_zero": False,
-        "destination_is_first_transaction": False,
-        "destination_transactions_last_24h": 1.0,
-        "destination_transactions_last_7d": 11.0,
-        "destination_avg_previous_amount": 391891.78,
-        "destination_amount_deviation": -315460.61,
-        "total_transactions": 33528,
-        "total_transaction_amount": 4693535568.26,
-        "avg_transaction_amount": 139988.53,
-    },
-    "⛔ Fraud — low amount": {
-        "amount": 48266.80,
-        "type": "TRANSFER",
-        "origin_balance_error": 0.0,
-        "destination_balance_error": 48266.80,
-        "destination_balance_is_zero": True,
-        "destination_is_first_transaction": True,
-        "destination_transactions_last_24h": 0.0,
-        "destination_transactions_last_7d": 0.0,
-        "destination_avg_previous_amount": 0.0,
-        "destination_amount_deviation": 48266.80,
-        "total_transactions": 40218,
-        "total_transaction_amount": 6596385476.64,
-        "avg_transaction_amount": 164015.75,
-    },
-    "⛔ Fraud — mid amount": {
-        "amount": 500003.56,
-        "type": "CASH_OUT",
-        "origin_balance_error": 0.0,
-        "destination_balance_error": 0.0,
-        "destination_balance_is_zero": False,
-        "destination_is_first_transaction": False,
-        "destination_transactions_last_24h": 0.0,
-        "destination_transactions_last_7d": 2.0,
-        "destination_avg_previous_amount": 47108.30,
-        "destination_amount_deviation": 452895.27,
-        # This row came from an unusually quiet hour in the real data —
-        # total_transactions=10 is a big outlier vs. the ~31,900 median.
-        # That system-level context matters to the model, so it's carried
-        # here explicitly rather than falling back to a "normal hour" default.
-        "total_transactions": 10,
-        "total_transaction_amount": 23250735.88,
-        "avg_transaction_amount": 2325073.588,
-    },
-    "⛔ Fraud — high amount": {
-        "amount": 4129482.96,
-        "type": "CASH_OUT",
-        "origin_balance_error": 0.0,
-        "destination_balance_error": 0.0,
-        "destination_balance_is_zero": False,
-        "destination_is_first_transaction": False,
-        "destination_transactions_last_24h": 1.0,
-        "destination_transactions_last_7d": 9.0,
-        "destination_avg_previous_amount": 222913.55,
-        "destination_amount_deviation": 3906569.41,
-        "total_transactions": 26927,
-        "total_transaction_amount": 5172213957.19,
-        "avg_transaction_amount": 192082.81,
-    },
-}
+def load_presets():
+    if not SCENARIOS_PATH.is_file():
+        return {}
+    presets = {}
+    for scenario in json.loads(SCENARIOS_PATH.read_text(encoding="utf-8"))["scenarios"]:
+        f = scenario["features"]
+        presets[scenario["title"]] = {
+            "amount": float(f["amount"]),
+            "type": scenario["transaction"]["type"],
+            "origin_balance_error": float(f["origin_balance_error"]),
+            "destination_balance_error": float(f["destination_balance_error"]),
+            "destination_balance_is_zero": bool(f["destination_balance_is_zero"]),
+            "destination_is_first_transaction": bool(f["destination_is_first_transaction"]),
+            "destination_transactions_last_24h": float(f["destination_transactions_last_24h"]),
+            "destination_transactions_last_7d": float(f["destination_transactions_last_7d"]),
+            "destination_avg_previous_amount": float(f["destination_avg_previous_amount"]),
+            "destination_amount_deviation": float(f["destination_amount_deviation"]),
+            "step": int(scenario["transaction"]["step"]),
+            "actual_fraud": int(scenario["actual_fraud"]),
+            "rule": scenario["rule"],
+        }
+    return presets
+
+
+PRESETS = load_presets()
 
 DEFAULTS = {
     "amount": 5000.0,
@@ -124,12 +92,7 @@ DEFAULTS = {
     "destination_transactions_last_7d": 0.0,
     "destination_avg_previous_amount": 0.0,
     "destination_amount_deviation": 0.0,
-    # System-level features — not shown in the form, but carried through so
-    # presets can override them with real values. Manual entries use the API's
-    # own median defaults by simply not sending these keys at all.
-    "total_transactions": None,
-    "total_transaction_amount": None,
-    "avg_transaction_amount": None,
+    "step": None,         # manual entries use the current hour
 }
 
 # Initialize session state with defaults on first load
@@ -145,7 +108,7 @@ if "decision_made" not in st.session_state:
 
 def apply_preset(preset_name):
     st.session_state.form_values = PRESETS[preset_name].copy()
-    st.session_state.ground_truth = 1 if "Fraud" in preset_name else 0
+    st.session_state.ground_truth = PRESETS[preset_name]["actual_fraud"]
 
 
 def apply_random_row():
@@ -240,20 +203,24 @@ st.markdown(
 # Preset buttons — real, verified transactions for a safe live demo
 # ---------------------------------------------------------------------------
 st.markdown("#### Quick Scenarios")
-st.caption("Real transactions from the held-out evaluation set — verified against the model.")
+st.caption("Real transactions from the held-out days (14-16), each picked by a fixed rule. "
+           "Two are cases the model gets wrong or nearly wrong.")
 
-preset_cols = st.columns(5)
-for i, name in enumerate(PRESETS.keys()):
-    with preset_cols[i]:
-        if st.button(name, use_container_width=True):
-            apply_preset(name)
-            st.rerun()
+buttons = [*PRESETS.keys(), "🎲 Random Real Transaction"]
+for row_start in range(0, len(buttons), 3):
+    columns = st.columns(3)
+    for column, name in zip(columns, buttons[row_start:row_start + 3], strict=False):  # last row may be short
+        with column:
+            if name in PRESETS:
+                if st.button(name, use_container_width=True, help=f"Picked as {PRESETS[name]['rule']}"):
+                    apply_preset(name)
+                    st.rerun()
+            elif st.button(name, use_container_width=True, disabled=demo_df is None):
+                apply_random_row()
+                st.rerun()
 
-with preset_cols[4]:
-    random_disabled = demo_df is None
-    if st.button("🎲 Random Real Transaction", use_container_width=True, disabled=random_disabled):
-        apply_random_row()
-        st.rerun()
+if not PRESETS:
+    st.warning(f"`{SCENARIOS_PATH}` not found. Run `python scripts/v3_explainability.py` to create the scenarios.")
 
 if demo_df is None:
     st.warning(
@@ -360,7 +327,7 @@ if submitted:
         st.session_state.decision_made = None
     except requests.exceptions.ConnectionError:
         st.error(
-            "Could not reach the API. Make sure the FastAPI backend is running:\n\n"
+            f"Could not reach the API at {API_BASE}. Make sure the FastAPI backend is running:\n\n"
             "`uvicorn fraud.service.app:app --port 8000` (run from the project root)"
         )
     except requests.exceptions.RequestException as e:
@@ -384,18 +351,22 @@ if result is not None:
     st.markdown(f"""
     <div class="decision-banner {css_class}">
         <p class="decision-label">{icon} {tier}</p>
-        <p class="decision-sub">Fraud probability: {prob:.4%}</p>
+        <p class="decision-sub">Fraud probability: {prob:.4%} · model {result["model"]["version"]}</p>
     </div>
     """, unsafe_allow_html=True)
 
     if st.session_state.ground_truth is not None:
         was_fraud = st.session_state.ground_truth == 1
-        model_flagged = tier in ("REVIEW", "BLOCK")
-        correct = (was_fraud and model_flagged) or (not was_fraud and tier == "ALLOW")
-        if correct:
-            st.success("✅ Prediction matches ground truth.")
+        if was_fraud and tier == "ALLOW":
+            st.error("⚠️ This was fraud and the model allowed it: a miss.")
+        elif was_fraud:
+            st.success(f"✅ This was fraud and the model chose {tier}.")
+        elif tier == "ALLOW":
+            st.success("✅ Legitimate, and the model allowed it.")
+        elif tier == "REVIEW":
+            st.warning("Legitimate, but sent to review: a false alarm that costs one review.")
         else:
-            st.error("⚠️ Prediction did NOT match ground truth — model missed this one.")
+            st.error("⚠️ Legitimate, but blocked: a wrongful block.")
 
     # --- Pre-transaction confirmation flow ---
     # Mirrors how real payment authorization works: the system advises,
