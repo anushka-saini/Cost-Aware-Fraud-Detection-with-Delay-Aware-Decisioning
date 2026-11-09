@@ -31,7 +31,7 @@ from fraud.labels import Label, LabelStore, last_fully_labelled_day, usable_labe
 from fraud.models import make_lgbm
 from fraud.protocol import FINAL_SEEDS, calibrate_and_threshold
 from fraud.registry import load_bundle, save_bundle
-from fraud.results import _jsonable
+from fraud.results import _jsonable, record
 from fraud.serving import Scorer
 
 VALIDATION_DAYS = 3
@@ -58,6 +58,7 @@ def apply_feedback(frame, labels, as_of_step: int, maturity_days: float) -> dict
     """
     usable = usable_labels(labels, as_of_step, maturity_days)
     changed = 0
+    found = len(labels)
     for transaction_id, label in usable.items():
         try:
             index = int(transaction_id)
@@ -66,7 +67,21 @@ def apply_feedback(frame, labels, as_of_step: int, maturity_days: float) -> dict
         if index in frame.index and frame.at[index, TARGET] != label.is_fraud:
             frame.at[index, TARGET] = label.is_fraud
             changed += 1
-    return {"matured_feedback_labels": len(usable), "labels_changed": changed}
+    return {"feedback_labels_found": found, "matured_feedback_labels": len(usable), "labels_changed": changed}
+
+
+def challenger_recipe(champion_bundle) -> tuple:
+    """How to build the challenger: the champion's own model settings, retrained on newer days.
+
+    V3 stores its tuned LightGBM settings and seeds; V2 stored only a class weight
+    on top of the default settings.
+    """
+    protocol = champion_bundle["protocol"]
+    if "hyperparameters" in protocol:
+        params = dict(protocol["hyperparameters"])
+        return (lambda seed: make_lgbm(seed, **params)), list(protocol.get("seeds", FINAL_SEEDS))
+    weight = next(iter(protocol["weight"].values()))
+    return (lambda seed: make_lgbm(seed, scale_pos_weight=weight)), FINAL_SEEDS
 
 
 def main():
@@ -82,7 +97,7 @@ def main():
     champion_bundle = load_bundle(MODEL_NAME)
     champion = Scorer(champion_bundle)
     features = [c for c in champion.feature_columns]
-    weight = next(iter(champion_bundle["protocol"]["weight"].values()))
+    make_model, seeds = challenger_recipe(champion_bundle)
 
     last_day = last_fully_labelled_day(args.as_of_day, args.maturity_days)
     first_day = DENSE_DAYS[0]
@@ -97,7 +112,7 @@ def main():
 
     X_train, y_train = get_days(frame, train_days, features)
     X_val, y_val = get_days(frame, validation_days, features)
-    models = [make_lgbm(seed, scale_pos_weight=weight).fit(X_train, y_train) for seed in FINAL_SEEDS]
+    models = [make_model(seed).fit(X_train, y_train) for seed in seeds]
     challenger_raw = np.mean([m.predict_proba(X_val)[:, 1] for m in models], axis=0)
     champion_raw = champion.raw_score(X_val[champion.base_columns])
 
@@ -143,6 +158,12 @@ def main():
     history = json.loads(log_path.read_text(encoding="utf-8")) if log_path.exists() else []
     history.append(_jsonable(entry))
     log_path.write_text(json.dumps(history, indent=2), encoding="utf-8")
+    # The latest decision also goes to metrics.json, where the Model lab reads it.
+    record("retraining_gate", {"latest": entry, "runs_in_log": len(history),
+                               "gate_rule": "the challenger replaces the serving model only if its PR-AUC on the "
+                                            "most recent labelled days is significantly higher (paired bootstrap, "
+                                            "95% interval above zero), and only when run with --promote"},
+           "scripts/retrain.py")
     print(json.dumps(_jsonable(entry), indent=2))
 
 

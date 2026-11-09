@@ -39,5 +39,49 @@
     "decision": "promote",
     "reason": "challenger significantly better on the most recent labelled days",
     "registered_version": null
+  },
+  {
+    "run_at": "2026-11-07T18:42:09+00:00",
+    "as_of_day": 16,
+    "label_maturity_days": 2.0,
+    "last_fully_labelled_day": 13,
+    "train_days": [
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "validation_days": [
+      11,
+      12,
+      13
+    ],
+    "feedback": {
+      "feedback_labels_found": 5,
+      "matured_feedback_labels": 0,
+      "labels_changed": 0
+    },
+    "n_train_rows": 2539948,
+    "n_train_fraud": 1577,
+    "champion": {
+      "name": "fraud_scorer",
+      "version": "v3",
+      "trained_through_day": 7,
+      "validation_pr_auc": 0.8820381836607004
+    },
+    "challenger": {
+      "validation_pr_auc": 0.8826683748901114,
+      "calibration": "platt",
+      "t_review": 0.0002061464169747994,
+      "t_block": 0.735
+    },
+    "pr_auc_difference": 0.0006301912294109924,
+    "ci_low": -0.002280461611232079,
+    "ci_high": 0.003946913880553129,
+    "decision": "keep",
+    "reason": "challenger not significantly better on the most recent labelled days",
+    "registered_version": null
   }
 ]
