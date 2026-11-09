@@ -55012,5 +55012,650 @@
         "legit_mean": -4.9228764582883324e-05
       }
     ]
+  },
+  "rule_baselines": {
+    "_source": "scripts/rule_baselines.py",
+    "_generated_at": "2026-11-07T17:52:52+00:00",
+    "_git_hash": "74ce239a17a18954dcb4e970b27ca21d5ad3c9be",
+    "design_days": [
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "scored_days": {
+      "days_11_13": [
+        11,
+        12,
+        13
+      ],
+      "days_14_16": [
+        14,
+        15,
+        16
+      ]
+    },
+    "how_rules_were_made": "designed on days 5-10 only; days 11-13 and 14-16 are scored for the leaderboard and not used for any choice",
+    "tier_rule": "BLOCK when more than 80% of a rule's hits on days 5-10 are fraud, otherwise REVIEW (a block costs 5 per legitimate hit, a review 1 per hit)",
+    "cut_off_search": {
+      "cut_off": 228093.63,
+      "engine_cost_on_design_days": 546382.8300000001,
+      "candidates_tried": 100,
+      "candidate_rule": "every percentile 0-99 of TRANSFER and CASH_OUT amounts on days 5-10"
+    },
+    "costs": {
+      "fraud_allowed": "its amount",
+      "wrongful_block": 5.0,
+      "review": 1.0
+    },
+    "rules": [
+      {
+        "key": "paysim_flag",
+        "label": "PaySim's own flag (isFlaggedFraud)",
+        "description": "the simulator's built-in flag",
+        "tier": "BLOCK",
+        "design_days": {
+          "n_rows": 2539948,
+          "n_fraud": 1577,
+          "recall": 0.0012682308180088776,
+          "precision": 1.0,
+          "total_cost": 2292809670.92,
+          "fraud_allowed": 1575,
+          "fraud_allowed_amount": 2292809670.92,
+          "review_rate": 0.0,
+          "block_rate": 7.874176951654128e-07,
+          "legit_blocked": 0,
+          "legit_reviewed_pct": 0.0
+        },
+        "days_11_13": {
+          "n_rows": 1176235,
+          "n_fraud": 786,
+          "recall": 0.001272264631043257,
+          "precision": 1.0,
+          "total_cost": 1125468844.32,
+          "fraud_allowed": 785,
+          "fraud_allowed_amount": 1125468844.32,
+          "review_rate": 0.0,
+          "block_rate": 8.5017024659188e-07,
+          "legit_blocked": 0,
+          "legit_reviewed_pct": 0.0
+        },
+        "days_14_16": {
+          "n_rows": 1202642,
+          "n_fraud": 822,
+          "recall": 0.0012165450121654502,
+          "precision": 1.0,
+          "total_cost": 1357626202.58,
+          "fraud_allowed": 821,
+          "fraud_allowed_amount": 1357626202.58,
+          "review_rate": 0.0,
+          "block_rate": 8.315026416838927e-07,
+          "legit_blocked": 0,
+          "legit_reviewed_pct": 0.0
+        }
+      },
+      {
+        "key": "empties_account",
+        "label": "Transfer or cash-out of the whole balance",
+        "description": "a TRANSFER or CASH_OUT whose amount equals the sender's whole balance (to the cent, balance above 0)",
+        "tier": "BLOCK",
+        "design_days": {
+          "n_rows": 2539948,
+          "n_fraud": 1577,
+          "recall": 0.9822447685478757,
+          "precision": 1.0,
+          "total_cost": 210989142.78,
+          "fraud_allowed": 28,
+          "fraud_allowed_amount": 210989142.78,
+          "review_rate": 0.0,
+          "block_rate": 0.0006098550049056122,
+          "legit_blocked": 0,
+          "legit_reviewed_pct": 0.0
+        },
+        "days_11_13": {
+          "n_rows": 1176235,
+          "n_fraud": 786,
+          "recall": 0.9834605597964376,
+          "precision": 1.0,
+          "total_cost": 120000000.0,
+          "fraud_allowed": 13,
+          "fraud_allowed_amount": 120000000.0,
+          "review_rate": 0.0,
+          "block_rate": 0.0006571816006155233,
+          "legit_blocked": 0,
+          "legit_reviewed_pct": 0.0
+        },
+        "days_14_16": {
+          "n_rows": 1202642,
+          "n_fraud": 822,
+          "recall": 0.9768856447688564,
+          "precision": 1.0,
+          "total_cost": 180000000.0,
+          "fraud_allowed": 19,
+          "fraud_allowed_amount": 180000000.0,
+          "review_rate": 0.0,
+          "block_rate": 0.0006676966212721658,
+          "legit_blocked": 0,
+          "legit_reviewed_pct": 0.0
+        }
+      },
+      {
+        "key": "large_amount",
+        "label": "Large transfer or cash-out",
+        "description": "a TRANSFER or CASH_OUT of at least the cut-off amount",
+        "tier": "REVIEW",
+        "design_days": {
+          "n_rows": 2539948,
+          "n_fraud": 1577,
+          "recall": 0.6512365250475587,
+          "precision": 0.002490288601898148,
+          "total_cost": 52882521.19,
+          "fraud_allowed": 550,
+          "fraud_allowed_amount": 52470119.19,
+          "review_rate": 0.1623663161608033,
+          "block_rate": 0.0,
+          "legit_blocked": 0,
+          "legit_reviewed_pct": 0.16206259841449497
+        },
+        "days_11_13": {
+          "n_rows": 1176235,
+          "n_fraud": 786,
+          "recall": 0.6374045801526718,
+          "precision": 0.002653334675006223,
+          "total_cost": 27056713.36,
+          "fraud_allowed": 285,
+          "fraud_allowed_amount": 26867894.36,
+          "review_rate": 0.1605282957912322,
+          "block_rate": 0.0,
+          "legit_blocked": 0,
+          "legit_reviewed_pct": 0.1602094178479883
+        },
+        "days_14_16": {
+          "n_rows": 1202642,
+          "n_fraud": 822,
+          "recall": 0.6411192214111923,
+          "precision": 0.002672630639402791,
+          "total_cost": 28322059.2,
+          "fraud_allowed": 295,
+          "fraud_allowed_amount": 28124875.2,
+          "review_rate": 0.16395901689779668,
+          "block_rate": 0.0,
+          "legit_blocked": 0,
+          "legit_reviewed_pct": 0.16363265713667605
+        }
+      },
+      {
+        "key": "rule_engine",
+        "label": "Rule engine (all three rules)",
+        "description": "the flag and the whole-balance rule with their tier, then the large-amount rule; each transaction gets the highest tier any rule gives",
+        "tier": "highest of the three",
+        "design_days": {
+          "n_rows": 2539948,
+          "n_fraud": 1577,
+          "recall": 0.9974635383639823,
+          "precision": 0.0038091963152745625,
+          "total_cost": 546382.8300000001,
+          "fraud_allowed": 4,
+          "fraud_allowed_amount": 134983.83000000002,
+          "review_rate": 0.16197142618667784,
+          "block_rate": 0.0006098550049056122,
+          "legit_blocked": 0,
+          "legit_reviewed_pct": 0.16206259841449497
+        },
+        "days_11_13": {
+          "n_rows": 1176235,
+          "n_fraud": 786,
+          "recall": 0.9987277353689568,
+          "precision": 0.004151176871863482,
+          "total_cost": 188330.0,
+          "fraud_allowed": 1,
+          "fraud_allowed_amount": 0.0,
+          "review_rate": 0.16011256254064876,
+          "block_rate": 0.0006571816006155233,
+          "legit_blocked": 0,
+          "legit_reviewed_pct": 0.1602094178479883
+        },
+        "days_14_16": {
+          "n_rows": 1202642,
+          "n_fraud": 822,
+          "recall": 0.9987834549878345,
+          "precision": 0.004157425130900658,
+          "total_cost": 196675.0,
+          "fraud_allowed": 1,
+          "fraud_allowed_amount": 0.0,
+          "review_rate": 0.1635357820531796,
+          "block_rate": 0.0006676966212721658,
+          "legit_blocked": 0,
+          "legit_reviewed_pct": 0.16363265713667605
+        }
+      }
+    ],
+    "best_rule": "rule_engine",
+    "best_rule_chosen_by": "lowest total cost on days 5-10",
+    "v3": {
+      "days_11_13": {
+        "n_rows": 1176235,
+        "n_fraud": 786,
+        "recall": 1.0,
+        "precision": 0.02373905164602839,
+        "total_cost": 32519.0,
+        "fraud_allowed": 0,
+        "fraud_allowed_amount": 0.0,
+        "review_rate": 0.02762968284398951,
+        "block_rate": 0.0005194540206676387,
+        "legit_blocked": 4,
+        "legit_reviewed_pct": 0.027495876043962773,
+        "note": "in-sample for V3: its calibration and thresholds were chosen on these days",
+        "source": "scripts/v3_phase2.py"
+      },
+      "days_14_16": {
+        "n_rows": 1202642,
+        "n_fraud": 822,
+        "recall": 1.0,
+        "precision": 0.024751580849141825,
+        "total_cost": 32586.0,
+        "fraud_allowed": 0,
+        "fraud_allowed_amount": 0.0,
+        "review_rate": 0.027082872542286068,
+        "block_rate": 0.0005313301880360074,
+        "legit_blocked": 3,
+        "legit_reviewed_pct": 0.026946630943069677,
+        "note": "the one-time held-out test",
+        "source": "scripts/v3_phase3.py"
+      }
+    },
+    "caveat": "the whole-balance rule uses the same sender-balance bookkeeping that V3 depends on most (see the balance-feature check), so its strength is a feature of the simulator"
+  },
+  "v3_breakdown": {
+    "_source": "scripts/v3_breakdown.py",
+    "_generated_at": "2026-11-07T18:08:48+00:00",
+    "_git_hash": "74ce239a17a18954dcb4e970b27ca21d5ad3c9be",
+    "model": {
+      "name": "fraud_scorer",
+      "version": "v3",
+      "t_review": 0.00031622776601683794,
+      "t_block": 0.71
+    },
+    "days": [
+      14,
+      15,
+      16
+    ],
+    "n_rows": 1202642,
+    "n_fraud": 822,
+    "what_this_is": "a description of the existing held-out result, split into groups; nothing is tuned",
+    "check": "totals match results/metrics.json v3_held_out exactly",
+    "quartiles_of": "all held-out transaction amounts",
+    "measures": {
+      "recall": "share of fraud sent to review or blocked",
+      "block_recall": "share of fraud blocked straight away",
+      "review_rate": "share of all transactions in the group sent to review",
+      "block_rate": "share of all transactions in the group blocked"
+    },
+    "by_type": [
+      {
+        "group": "CASH_IN",
+        "n_rows": 265721,
+        "n_fraud": 0,
+        "recall": null,
+        "block_recall": null,
+        "fraud_allowed": 0,
+        "review_rate": 0.00013548044753707836,
+        "block_rate": 0.0,
+        "legit_blocked": 0
+      },
+      {
+        "group": "CASH_OUT",
+        "n_rows": 423925,
+        "n_fraud": 411,
+        "recall": 1.0,
+        "block_recall": 0.5523114355231143,
+        "fraud_allowed": 0,
+        "review_rate": 0.07040396296514714,
+        "block_rate": 0.0005425487999056437,
+        "legit_blocked": 3
+      },
+      {
+        "group": "DEBIT",
+        "n_rows": 8563,
+        "n_fraud": 0,
+        "recall": null,
+        "block_recall": null,
+        "fraud_allowed": 0,
+        "review_rate": 0.08630152983767371,
+        "block_rate": 0.0,
+        "legit_blocked": 0
+      },
+      {
+        "group": "PAYMENT",
+        "n_rows": 403483,
+        "n_fraud": 0,
+        "recall": null,
+        "block_recall": null,
+        "fraud_allowed": 0,
+        "review_rate": 8.67446707791902e-05,
+        "block_rate": 0.0,
+        "legit_blocked": 0
+      },
+      {
+        "group": "TRANSFER",
+        "n_rows": 100950,
+        "n_fraud": 411,
+        "recall": 1.0,
+        "block_recall": 0.9951338199513382,
+        "fraud_allowed": 0,
+        "review_rate": 0.01896978702327885,
+        "block_rate": 0.004051510648836057,
+        "legit_blocked": 0
+      }
+    ],
+    "by_amount_quartile": [
+      {
+        "group": "Q1",
+        "n_rows": 300661,
+        "n_fraud": 31,
+        "recall": 1.0,
+        "block_recall": 0.4838709677419355,
+        "fraud_allowed": 0,
+        "review_rate": 0.027067028979481874,
+        "block_rate": 4.9890075533574355e-05,
+        "legit_blocked": 0,
+        "amount_from": 0.0,
+        "amount_to": 15419.5625
+      },
+      {
+        "group": "Q2",
+        "n_rows": 300660,
+        "n_fraud": 98,
+        "recall": 1.0,
+        "block_recall": 0.5918367346938775,
+        "fraud_allowed": 0,
+        "review_rate": 0.04314508082219118,
+        "block_rate": 0.000192908933679239,
+        "legit_blocked": 0,
+        "amount_from": 15419.5625,
+        "amount_to": 75926.155
+      },
+      {
+        "group": "Q3",
+        "n_rows": 300660,
+        "n_fraud": 164,
+        "recall": 1.0,
+        "block_recall": 0.6036585365853658,
+        "fraud_allowed": 0,
+        "review_rate": 0.02863367258697532,
+        "block_rate": 0.0003326016097917914,
+        "legit_blocked": 1,
+        "amount_from": 75926.155,
+        "amount_to": 210891.2125
+      },
+      {
+        "group": "Q4",
+        "n_rows": 300661,
+        "n_fraud": 529,
+        "recall": 1.0,
+        "block_recall": 0.8771266540642723,
+        "fraud_allowed": 0,
+        "review_rate": 0.00948576636145027,
+        "block_rate": 0.0015499183465763767,
+        "legit_blocked": 2,
+        "amount_from": 210891.2125,
+        "amount_to": 19953778.06
+      }
+    ]
+  },
+  "v3_latency": {
+    "_source": "scripts/benchmark_api.py",
+    "_generated_at": "2026-11-07T18:37:35+00:00",
+    "_git_hash": "6cdf8e2aa9876080bc4bb3ced82ad43d537e67eb",
+    "endpoint": "POST /score/raw",
+    "model": {
+      "name": "fraud_scorer",
+      "version": "v3"
+    },
+    "what_a_request_does": "feature-store lookup, online features, 5-model ensemble, calibration, tiering, SHAP reasons when flagged, database writes",
+    "runs": {
+      "1_worker_sqlite": {
+        "setup": {
+          "server": "uvicorn, 1 worker",
+          "database": "sqlite, fresh, seeded with the demo recipient history",
+          "machine": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel",
+          "cpu_count": 12,
+          "python": "3.12.9",
+          "power": "plugged in",
+          "note": "the client runs on the same laptop as the server and shares its CPU"
+        },
+        "sequential": {
+          "all": {
+            "n": 600,
+            "p50_ms": 20.151299999270122,
+            "p95_ms": 35.30407000580453,
+            "p99_ms": 49.41907000174978,
+            "mean_ms": 22.052435166721505,
+            "max_ms": 74.5664999994915
+          },
+          "allowed_no_shap": {
+            "n": 584,
+            "p50_ms": 20.033650002005743,
+            "p95_ms": 33.19101499982935,
+            "p99_ms": 44.99120699947518,
+            "mean_ms": 21.665042123321943,
+            "max_ms": 74.5664999994915
+          },
+          "flagged_with_shap": {
+            "n": 16,
+            "p50_ms": 35.371200003282866,
+            "p95_ms": 51.43072500140988,
+            "p99_ms": 56.27062500061584,
+            "mean_ms": 36.192281250805536,
+            "max_ms": 57.480600000417326
+          }
+        },
+        "concurrent": {
+          "clients": 8,
+          "n": 800,
+          "p50_ms": 87.97309999499703,
+          "p95_ms": 135.58600999785995,
+          "p99_ms": 180.22528300120027,
+          "mean_ms": 92.25398687492998,
+          "max_ms": 208.69970000057947,
+          "requests_per_second": 79.31722385314927
+        }
+      },
+      "1_worker_postgresql": {
+        "setup": {
+          "server": "uvicorn, 1 worker",
+          "database": "postgresql, fresh, seeded with the demo recipient history",
+          "machine": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel",
+          "cpu_count": 12,
+          "python": "3.12.9",
+          "power": "plugged in",
+          "note": "the client runs on the same laptop as the server and shares its CPU"
+        },
+        "sequential": {
+          "all": {
+            "n": 600,
+            "p50_ms": 24.507300000550458,
+            "p95_ms": 45.02297999679285,
+            "p99_ms": 78.43363000487442,
+            "mean_ms": 26.028966833509912,
+            "max_ms": 102.49889999977313
+          },
+          "allowed_no_shap": {
+            "n": 584,
+            "p50_ms": 24.425799998425646,
+            "p95_ms": 42.90581499808471,
+            "p99_ms": 55.05949200145537,
+            "mean_ms": 25.404923116632883,
+            "max_ms": 102.49889999977313
+          },
+          "flagged_with_shap": {
+            "n": 16,
+            "p50_ms": 45.07679999733227,
+            "p95_ms": 84.04387499467703,
+            "p99_ms": 84.61525499733398,
+            "mean_ms": 48.80656249952153,
+            "max_ms": 84.75809999799822
+          }
+        },
+        "concurrent": {
+          "clients": 8,
+          "n": 800,
+          "p50_ms": 142.9274500005704,
+          "p95_ms": 224.22162999973804,
+          "p99_ms": 283.88263499946333,
+          "mean_ms": 150.70330112499505,
+          "max_ms": 421.0441000032006,
+          "requests_per_second": 50.8260746021944
+        }
+      },
+      "2_workers_postgresql": {
+        "setup": {
+          "server": "uvicorn, 2 workers",
+          "database": "postgresql, fresh, seeded with the demo recipient history",
+          "machine": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel",
+          "cpu_count": 12,
+          "python": "3.12.9",
+          "power": "plugged in",
+          "note": "the client runs on the same laptop as the server and shares its CPU"
+        },
+        "sequential": {
+          "all": {
+            "n": 600,
+            "p50_ms": 15.01424999878509,
+            "p95_ms": 25.37149499985389,
+            "p99_ms": 32.5893729992822,
+            "mean_ms": 16.597699166668463,
+            "max_ms": 41.79600000497885
+          },
+          "allowed_no_shap": {
+            "n": 585,
+            "p50_ms": 14.972799996030517,
+            "p95_ms": 24.103560001822185,
+            "p99_ms": 30.73157600098056,
+            "mean_ms": 16.316540341893447,
+            "max_ms": 41.79600000497885
+          },
+          "flagged_with_shap": {
+            "n": 15,
+            "p50_ms": 26.11610000167275,
+            "p95_ms": 37.86586999631254,
+            "p99_ms": 39.328533993975725,
+            "mean_ms": 27.562893332894117,
+            "max_ms": 39.69419999339152
+          }
+        },
+        "concurrent": {
+          "clients": 8,
+          "n": 800,
+          "p50_ms": 81.76100000127917,
+          "p95_ms": 118.2979749974038,
+          "p99_ms": 166.25456399910036,
+          "mean_ms": 79.96795299995028,
+          "max_ms": 209.679599996889,
+          "requests_per_second": 79.59967255084926
+        }
+      },
+      "4_workers_postgresql": {
+        "setup": {
+          "server": "uvicorn, 4 workers",
+          "database": "postgresql, fresh, seeded with the demo recipient history",
+          "machine": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel",
+          "cpu_count": 12,
+          "python": "3.12.9",
+          "power": "plugged in",
+          "note": "the client runs on the same laptop as the server and shares its CPU"
+        },
+        "sequential": {
+          "all": {
+            "n": 600,
+            "p50_ms": 19.00825000484474,
+            "p95_ms": 33.600370004205615,
+            "p99_ms": 48.05600599742318,
+            "mean_ms": 20.545263166713994,
+            "max_ms": 128.5169000038877
+          },
+          "allowed_no_shap": {
+            "n": 587,
+            "p50_ms": 18.889699997089338,
+            "p95_ms": 31.642370004556064,
+            "p99_ms": 43.220541997288784,
+            "mean_ms": 20.233356558840846,
+            "max_ms": 128.5169000038877
+          },
+          "flagged_with_shap": {
+            "n": 13,
+            "p50_ms": 33.70710000308463,
+            "p95_ms": 51.850099996954654,
+            "p99_ms": 56.4343399964855,
+            "mean_ms": 34.62904615298612,
+            "max_ms": 57.580399996368214
+          }
+        },
+        "concurrent": {
+          "clients": 8,
+          "n": 800,
+          "p50_ms": 104.88429999895743,
+          "p95_ms": 157.3430749998806,
+          "p99_ms": 196.77913900115522,
+          "mean_ms": 103.84983962500883,
+          "max_ms": 232.61920000368264,
+          "requests_per_second": 62.374952838710826
+        }
+      }
+    }
+  },
+  "retraining_gate": {
+    "_source": "scripts/retrain.py",
+    "_generated_at": "2026-11-07T18:42:10+00:00",
+    "_git_hash": "6cdf8e2aa9876080bc4bb3ced82ad43d537e67eb",
+    "latest": {
+      "run_at": "2026-11-07T18:42:09+00:00",
+      "as_of_day": 16,
+      "label_maturity_days": 2.0,
+      "last_fully_labelled_day": 13,
+      "train_days": [
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "validation_days": [
+        11,
+        12,
+        13
+      ],
+      "feedback": {
+        "feedback_labels_found": 5,
+        "matured_feedback_labels": 0,
+        "labels_changed": 0
+      },
+      "n_train_rows": 2539948,
+      "n_train_fraud": 1577,
+      "champion": {
+        "name": "fraud_scorer",
+        "version": "v3",
+        "trained_through_day": 7,
+        "validation_pr_auc": 0.8820381836607004
+      },
+      "challenger": {
+        "validation_pr_auc": 0.8826683748901114,
+        "calibration": "platt",
+        "t_review": 0.0002061464169747994,
+        "t_block": 0.735
+      },
+      "pr_auc_difference": 0.0006301912294109924,
+      "ci_low": -0.002280461611232079,
+      "ci_high": 0.003946913880553129,
+      "decision": "keep",
+      "reason": "challenger not significantly better on the most recent labelled days",
+      "registered_version": null
+    },
+    "runs_in_log": 2,
+    "gate_rule": "the challenger replaces the serving model only if its PR-AUC on the most recent labelled days is significantly higher (paired bootstrap, 95% interval above zero), and only when run with --promote"
   }
 }
